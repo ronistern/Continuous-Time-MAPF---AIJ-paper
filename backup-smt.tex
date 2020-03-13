@@ -1,0 +1,142 @@
+
+\subsubsection{Finding a Makespan Optimal Solution}
+
+
+
+In the general step, we verify constructed solution with respect to collisions. If there is no collision we return a valid solution; otherwise collisions are resolved. Assume that a collision occurred between agents $i$ and $j$ while agent $i$ traversed edge $(u_i,v_i)$ during $[t_i,t'_i]$ and agent $j$ traversed edge $(u_j,v_j)$ during $[t_j,t'_j]$ \konstantin{why the intervals are open on the right side. It contradicts with our definition of an action} \pavel{intervals should be closed as we discussed}. Similarly as in CCBS we calculate unsafe interval $[t_i,t_i^u]$ for agent $i$  and $[t_j,t_j^u]$ for agent $j$. Possible resolution of the collision is that one or the other agent waits \konstantin{and what if the conflict is between move and *wait* action? One can not wait to avoid waiting.} \pavel{wait action is a degenerated edge traversal} until the unsafe interval passes which needs to be reflected by introducing new decision variables corresponding to end-times of unsafe intervals.
+
+We note that the case when one agent waits, say agent $i$, and the other agent collides with it, say agent $j$, is also covered since we can model waiting as degenerated traversal of edge $(u_i, u_i)$ during $[t_i,t'_i]$. In this case however, agent $i$ cannot do anything to avert the collision; the collision can be resolved only on the side of agent $j$.
+
+
+\begin{algorithm}[t]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{generate-RDD ($\mathcal{G}=(V,E)$, $\source$, $\target$, $conflicts$, $\mu_{max}$)}{end} \NRICL{
+    \For {each $i \in {1,2,...k}$}{
+        $X^i \gets \emptyset$\\
+        $E^i \gets \emptyset$\\    
+        $\textsc{Open} \gets \emptyset$ \\   
+        insert $(\source(i),0)$ into $\textsc{Open}$\\
+        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
+        \While {$\textsc{Open} \neq \emptyset$} {
+                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
+                remove-Min$_{t}(\textsc{Open}$) \\
+                \If {$t \leq \mu_{max}$}{
+    	            \For {each $v$ such that $\{u,v\} \in E$}{
+          		             $\Delta t \gets dist(u,v) / \mathit{speed}(a)$ \\
+                 		insert $(v,t+\Delta t)$ into $\textsc{Open}$\\            
+                 		
+    				$X^i \gets X^i \cup \{  (v,t+\Delta t) \}$ \\             		 		
+    				$E^i \gets E^i \cup \{  [(u,t);(v,t+\Delta t)] \}$ \\             		 						
+                			\For {each $(i, (u, v), [t_i,t_i^u]) \in conflicts$}{
+                				\If {$t \geq t_i$ {\bf and} $t \leq t_i^u$}{
+                 				insert $(u,t_i^u)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t_i^u) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t_i^u)] \}$ \\
+                 	    }
+    	            }
+                }
+            }
+        }
+    }
+    \Return ${(X^i,E^i)}_{i=1}^k$\\
+} 
+\caption{Generation of decision variables in the SMT-based algorithm for \mapfr solving.} \label{alg-DEC-gen}
+\end{footnotesize}
+\end{algorithm}
+
+
+
+We show below a constraint stating that if agent $a_i$ appears in vertex $u$ at time $t$ then it has to leave through exactly one edge connected to $u$ (waiting included).
+
+\begin{equation}
+   {  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
+   }
+   \label{eq-1}
+\end{equation}
+
+\begin{equation}
+   {  \sum_{(v,t')\:|\:[(u,t);(v,t')] \in E^i }{\mathcal{E}_{u,v}^{t,t'}{(i)} \leq 1}
+   }
+   \label{eq-2}
+\end{equation}
+
+We also need to add constraints establishing the correspondence between vertex and edge decision variables. That is, once an agent enters a directed edge (in RDD) it has to leave it at its end point. The following constraint ensures this property:
+
+\begin{equation}
+   {  \mathcal{E}_{u,v}^{t,t'}(i) \Rightarrow \mathcal{X}_v^{t'}(i)
+   }
+   \label{eq-3}
+\end{equation}
+
+All such local constraints can be expressed as clauses (disjuctions of literals). Since all constraints need to be satisfied we altogether have their conjunction eventually resulting in a formula in {\em conjuctive normal form} (CNF). Notice that we did not add any constraint forbidding collisions between agents. These constraints are added on demand.
+
+\subsection{Eliminating Branching in CBS by Disjunctive Refinements}
+
+The SMT-based algorithm itself is divided into two procedures: SMT-CBS$_R$ representing the main loop and SMT-CBS-Fixed$_R$ solving the input \mapfr instance for a fixed maximum makespan $\mu$. The major difference from the original CBS is that there is no branching at the high-level in SMT-CBS$_R$ to resolve collisions - the technique that has been originally suggested for the standard MAPF \cite{DBLP:conf/ijcai/Surynek19} - instead collisions are eliminated through refining the encoding by disjunctive constraints. The difference from the original CBS is also that SMT-CBS$_R$ does not follow the A*-style search but instead it increases the value of the objective and test the existence of a solution for the given value.
+
+Procedure {\em encode} build formula $\mathcal{F}(\mu)$ over decision variables generated using the aforementioned RDD generation procedure. The encoding is inspired by the MDD-SAT approach but ignores collisions between agents. That is, $\mathcal{F}(\mu)$ constitutes an {\em incomplete model} for a given input instance: the input instance is solvable within makespan $\mu$ then $\mathcal{F}(\mu)$ is satisfiable \footnote{A complete model would establish the equivalence between solvability of the \mapfr instance and satisfiability of the formula.}.
+
+Conflicts are resolved by adding disjunctive constraints (line 14 in Algorithm \ref{alg-SMTCBS-low}). Consider for example a collision on two edges between agents $i$ and $j$ as follows: $i$ traversed $(u_i,v_i)$ during $[t_i,t'_i]$ and $j$ traversed $(u_j,v_j)$ during $[t_j,t'_j]$. These two movements correspond to decision variables $\mathcal{E}_{u_i,v_j}^{t_i,t'_i}(i)$ and $\mathcal{E}_{u_j,v_j}^{t_j,t'_j}(j)$ hence elimination of the collision caused by these two movements can be expressed as the following disjunction: $\neg \mathcal{E}_{u_i,v_i}^{t_i,t'_i}(i) \vee \neg \mathcal{E}_{u_j,v_j}^{t_j,t'_j}(j)$.
+
+Moreover we need to generate new decision variables corresponding to unsafe intervals derived from the collision for agent $i$ and $j$ respectively (lines 15-16). Unsafe intervals are stored as a pair into the set of conflicts which is then used to generate new RDD (line 18). New RDD then results in generating new decision variables corresponding to end-times of discovered unsafe intervals. 
+
+The set of pairs of conflicts is iteratively collected during the entire execution of the algorithm whenever a collision is detected hence in subsequent iterations of the algorithm previously discovered disjunctive refinements can be restored by the {\em encode} procedure from the set of conflicts.
+
+At the level of propositional formula there is no information about the semantics of a conflict happening in the continuous space; we only have information in the form of disjunctive refinements. The disjunctive refinements are propagated at the propositional level from $\mathit{DECIDE}_{\mathit{MAPF}_R}$ that verifies solutions of incomplete propositional models.
+
+\begin{algorithm}[h]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{SMT-CBS$_R$ ($\mathcal{G}=(V,E)$, \source, \target)}{end} \NRICL{
+    $conflicts \gets \emptyset$\\
+    $\Pi \gets$ $\{\pi_i$ a shortest temporal plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
+    $\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
+    \While {$\mathit{TRUE}$}{
+         $(\Pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$_R$($\mathcal{G}$, $\source$, $\target$, $conflicts$, $\mu$)\\
+        \If {$\Pi \neq$ UNSAT}{
+        	\Return $\Pi$\\
+        }
+        $\mu \gets \mu_{next}$\\
+    }
+}
+ \caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
+\end{footnotesize}
+\end{algorithm}
+
+Algorithm \ref{alg-SMTCBS-high} shows the main loop of SMT-CBS$^\mathcal{R}$. The algorithm checks if there is a solution for given \mapfr $\Sigma_\mathcal{R}$ of makespan $\mu$. The algorithm starts at the lower bound for $\mu$ that is obtained as the duration of the longest temporal plan from individual temporal plans ignoring other agents (lines 3-4).
+
+Then $\mu$ is iteratively increased in the main loop (lines 5-9). The algorithm relies on the fact that the solvability of \mapfr w.r.t. cumulative objective like the makespan behaves as a non decreasing monotonic function. Hence trying increasing makespans eventually leads to finding the optimal makespan provided we do not skip any relevant makespan $\mu$. The next makespan to try will then be obtained by taking the current makespan plus the smallest duration of the continuing movement (line 20 of Algorithm \ref{alg-SMTCBS-low}). The iterative scheme for trying larger makespans follows MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16}.
+
+\begin{algorithm}[h]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{SMT-CBS-Fixed$_R$($\mathcal{G}=(V,E)$, \source, \target, $conflicts$, $\mu$)}{end} \NRICL{
+	    $\textsc{Rdd} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
+	    $\mathcal{F}(\mu) \gets$ encode($\textsc{Rdd}$, $\mathcal{G}$, \source, \target, $conflicts$ ,$\mu$)\\
+	    \While {$\mathit{TRUE}$}{
+	        $assignment \gets$ consult-SAT-Solver$(\mathcal{F}(\mu))$\\
+	        \If {$assignment \neq \mathit{UNSAT}$}{
+	            $\Pi \gets$ extract-Solution$(assignment)$\\
+	            $collisions \gets$ validate-Plans($\Pi$) $\;\;\;\;$ /* $\mathit{DECIDE}_{\mathit{MAPF}_R}$ */\\
+                   \If {$collisions = \emptyset$}{
+                      \Return $(\Pi, \emptyset, \mathit{UNDEF})$\\
+                   }
+                      \For{each $\tuple{a_i,t_i,a_j,t_j} \in collisions$}{                     
+                      {\bf let} $a_i=\tuple{(u_i,v_i), [t_i,t'_i]}$\\
+                      {\bf let} $a_j=\tuple{(u_j,v_j), [t_j,t'_j]}$\\                                            
+                      
+                      $\mathcal{F}(\mu) \gets \mathcal{F}(\mu) \cup \{\neg \mathcal{E}_{u_i,v_i}^{t_i,t'_i} \vee \neg \mathcal{E}_{u_j,v_j}^{t_j,t'_j}$\}\\
+                      
+ 			   $[t_i,t_i^u) \gets$  unsafe-Interval$(\tuple{i,(u_i,v_i\},[t_i,t'_i]}, \tuple{j,(u_j,v_j),[t_j,t'_j]})$\\                 
+ 			   $[t_j,t_j^u) \gets$  unsafe-Interval$(\tuple{j,(u_j,v_j),[t_j,t'_j]}, \tuple{i,(u_i,v_i\},[t_i,t'_i]})$\\                  			   
+                   	   
+                      $conflicts \gets conflicts \cup \{\tuple{i,(u_i,v_i),[t_i,t_i^u)},\tuple{j,(u_j,v_j),[t_j,t_j^u)}\}$\\                   
+                   }                  
+	    		$\textsc{Var} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
+	    		$\mathcal{F}(\mu) \gets$ encode($\mathcal{F}(\mu)$, $\textsc{RDD}$, $\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\                   
+               }
+         }
+	   $\mu_{next} \gets$ min$\{ t\;|\; (u,t) \in \textsc{Rdd} \wedge t > \mu)\}$ \\               
+         \Return {($\mathit{UNSAT}$, $conflicts$, $\mu_{next}$)}\\
+}
+\caption{Low-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-low}
+\end{footnotesize}
+\end{algorithm}

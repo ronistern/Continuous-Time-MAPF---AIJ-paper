@@ -1,0 +1,6 @@
+
+The above observation \konstantin{which observation?} inspired us to the idea to rephrase CCBS in terms of SMT, the technique initially described in \cite{DBLP:conf/socs/Surynek19}. $T$ will be represented by a theory with axioms describing movement rules of MAPF$_R$ \konstantin{maybe add an example here}; a theory we will denote $T_{\mathit{MAPF}_R}$.
+
+A plan validation procedure \konstantin{btw, we didn't elaborate on this part of CCBS before - may be we should?} \pavel{yes, some CCBS code should be there so that we can refer from here to plan validation procedure} known from CBS will act as $\mathit{DECIDE}_{\mathit{MAPF}_R}$ and will report back a set of conflicts found in the current solution. The propositional part working with the skeleton will be taken from existing propositional encodings of the standard MAPF such as the MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16} provided that constraints forbidding conflicts between agents will be omitted (at the beginning). In other words, we only preserve constraints ensuring that propositional assignments form proper plans for agents but each agent is treated as if it is alone in the instance (in other words we only forbid agents to jump at the beginning).
+
+

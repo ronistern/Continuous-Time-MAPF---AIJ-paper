@@ -1,0 +1,44 @@
+
+By definition, of $t^u_j$:
+\begin{multline}
+    \forall t\in[t_i,t^u_i): \inconflict( i,j, (a_i,t), (a_j, t_j))  \\
+    \rightarrow 
+        \exists t'\in (t_i,t_i+{a_i}_D)\cap (t_j,t_j+{a_j}_D): 
+        \iscollision(i,j,{a_i}_\varphi(t-t_i), 
+                            {a_j}_\varphi(t-t_j))
+                            
+                            
+                            
+\label{eq:inconflict}    
+    \Rightarrow \inconflict(i,j, (a_i,t_i), (a_j, t'_j))
+\end{multline}
+
+\begin{equation}
+\exists t\in (t_i,t_i+{a_i}_D)\cap (t_j,t_j+{a_j}_D): 
+    \iscollision(i,j,{a_i}_\varphi(t-t_i), 
+                        {a_j}_\varphi(t-t_j))
+\label{eq:inconflict}
+\end{equation}
+
+$\inconflict \Big(i,j, (a_i,t_i), (a_j,t_j)\Big)$
+
+
+
+By definition of $t'_i$ and $t'_j$: 
+\begin{multline}
+    \tuple{i,j, a_i, t'_i, t'_j} \text{~is not a conflict}
+\end{multline}
+ \[ \tuple{a_i, t_i+\Delta_i, a_j,  t_j+\Delta_j} \text{~is not a conflict} \]
+ 
+ 
+ By definition of $\Delta_i$ and $\Delta_j$: 
+ \[ \tuple{a_i, t_i+\Delta_i, a_j,  t_j+\Delta_j} \text{~is not a conflict} \] 
+ 
+ Therefore, $\Delta_i<\Delta_j$.  
+ 
+ Similarly, by definition of $t^u_i$: 
+ 
+ \begin{align*}     \forall t\in[t_i,t^u_i): & \tuple{a_i,t, a_j, t_j} \text{~is a conflict.} \\     \forall t\in[t_i+\Delta_i,t^u_i): & \tuple{a_i,t, a_j, t_j+\Delta_i} \text{~is a conflict.}  \end{align*}
+Therefore, by definition of 
+$\Delta_i$ and $\Delta_j$ we have that $\Delta_j<\Delta_i$, which leads to a contradiction. 
+\end{proof}

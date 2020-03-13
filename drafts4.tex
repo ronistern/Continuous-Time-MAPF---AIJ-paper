@@ -1,0 +1,57 @@
+
+% Theory
+In our SMT encoding of \mapfr, the theory $T$ defines the agents' motions. 
+The propositional skeleton for this theory is based on MDD-SAT. 
+The \decidet procedure is basically the conflict detection part of \ccbs (line~\ref{line:findconflicts} in Algorithm~\ref{alg:ccbs}), which is based on Definition~\ref{def:ccbs-conflict} and the \inconflict method. 
+The constraints added to the propositional skeleton to resolve a detected conflict are the corresponding \ccbs constraints (line~\ref{line:ccbsconstraints} in Algorithm~\ref{alg:ccbs}). 
+
+%. The plan validation procedure 
+We denote this \mapfr-specific theory, propositional skeleton, and \decidet implementation as $T_{\textit{MAPFR}}$, 
+$P_{\textit{MAPFR}}$, 
+and $\decidet_{\textit{MAPFR}}$, respectively, and explain them and the overall process in more details below.  
+
+
+\konstantin{btw, we didn't elaborate on this part of CCBS before - may be we should?} \pavel{yes, some CCBS code should be there so that we can refer from here to plan validation procedure}\roni{Fixed.} 
+
+
+
+%known from CBS will act as $\mathit{DECIDE}_{\mathit{MAPF}_R}$ and will report back a set of conflicts found in the current solution. 
+
+
+%will be taken from existing propositional encodings of the standard MAPF such as the MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16} provided that constraints forbidding conflicts between agents will be omitted (at the beginning). In other words, we only preserve constraints ensuring that propositional assignments form proper plans for agents but each agent is treated as if it is alone in the instance (in other words we only forbid agents to jump at the beginning).\roni{I did not understand this part}
+%A plan validation procedure \konstantin{btw, we didn't elaborate on this part of CCBS before - may be we should?} \pavel{yes, some CCBS code should be there so that we can refer from here to plan validation procedure} known from CBS will act as $\mathit{DECIDE}_{\mathit{MAPF}_R}$ and will report back a set of conflicts found in the current solution. 
+%Next, we describe  as well as in the work of Surynek on SMT-based solvers for \mapf~\cite{DBLP:conf/socs/Surynek19, surynek2019lazy}. \roni{Pavel, perhaps it is worthwhile to add here or in the related work section text on how this work relates to your works cited here. Is it (1) that here we present the same algorithm but in a more elaborated way or (2) here we present a different algorithm. }
+
+
+
+% Decide T
+%A plan validation procedure \konstantin{btw, we didn't elaborate on this part of CCBS before - may be we should?} \pavel{yes, some CCBS code should be there so that we can refer from here to plan validation procedure} known from CBS will act as $\mathit{DECIDE}_{\mathit{MAPF}_R}$ and will report back a set of conflicts found in the current solution. The propositional part working with the skeleton will be taken from existing propositional encodings of the standard MAPF such as the MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16} provided that constraints forbidding conflicts between agents will be omitted (at the beginning). In other words, we only preserve constraints ensuring that propositional assignments form proper plans for agents but each agent is treated as if it is alone in the instance (in other words we only forbid agents to jump at the beginning).
+
+
+%as problem solving in {\em satisfiability modulo theories} (SMT) \cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. \konstantin{I didn't get how is CCBS and SMT 'similar' from the below paragraph :)}The basic use of SMT divides a satisfiability problem in some complex logic theory $T$ into an abstract propositional part that keeps the Boolean structure of the decision problem and a simplified decision procedure $\mathit{DECIDE_T}$ that decides fragment of $T$ restricted on {\em conjunctive formulae}. A general $T$-formula $\Gamma$ being decided for satisfiability is transformed to a {\em propositional skeleton} by replacing its atoms with propositional variables. The standard SAT-solving procedure then decides what variables should be assigned $\mathit{TRUE}$ in order to satisfy the skeleton - these variables tells what atoms hold in $\Gamma$. $\mathit{DECIDE_T}$ then checks if the conjunction of atoms assigned $\mathit{TRUE}$ is valid with respect to axioms of $T$. If so then satisfying assignment is returned and we are finished. Otherwise a conflict from $\mathit{DECIDE_T}$ (often called a {\em lemma}) is reported back to the SAT solver and the skeleton is extended with new constraints resolving the conflict. In more general cases, not only new constraints are added to resolve a conflict but also new variables i.e. atoms can be added to $\Gamma$.
+
+\subsubsection{Theory for \mapfr}
+For a given \mapfr problem $\tuple{\mathcal{G}, \mathcal{M}, \source, \target, \coord, \mathcal{A}}$, the corresponding theory is a set of axioms that define agents motions. 
+This is captured in $\mathcal{A}$ and the collision detection and conflict detection functions (\iscollision and \inconflict). 
+\konstantin{maybe add an example here}\roni{Yes, I think this is needed here. Pavel, can you help?}
+
+
+
+\subsubsection{Propositional Skeleton for \mapfr}
+
+%Our propositional skeleton is based on MDD-SAT, which is a state of the art propositional encodings of classical \mapf~\cite{DBLP:conf/ecai/SurynekFSB16}. MDD-SAT defines a Boolean variable $\mathcal{X}_{v}^{t}(a_i)$ for every discrete time step $t$, agent $i$, and vertex $v$ the agent may occupy at time $t$, and a decision variable $\mathcal{E}_{u,v}^{t}(a_i)$ for every time $t$, agent $i$, and edge $(u,v)$ the agent may traverse at time $t$. 
+%uses the following decision variables $\mathcal{X}_{v}^{t}(a_i)$ and $\mathcal{E}_{u,v}^{t}(a_i)$ for discrete time-steps $t \in \{0,1,2, ...\}$ describing occurrence of agent $a_i$ in $v$ or the traversal of edge $\{u,v\}$ by $a_i$ at time-step $t$. \mapf movement rules are encoded on top of these variables as simple local constraints.
+
+
+%This encoding cannot be used directly for \mapfr, since A significant difficulty in MAPF$_R$ is that we need decision variables with respect to continuous time. Fortunately we do not need a variable for any possible time but only for important moments derived from CCBS conflict elimination constraints.
+
+The propositional skeleton is created initially in a way similar to how \ccbs creates its root \ct node. For each agent, we run a single-agent search search algorithm to find the shortest path between that agent's start and goal locations. 
+Then, we create a propositional skeleton by defining decision variables for every vertex/edge $v/(u,v)$, agent $i$, and time interval during which the agents visited $v$/ traversed the edge $(u,v)$. 
+
+\roni{Then what? Up to here 10.2.2020}
+
+\subsubsection{\decidet for \mapfr}
+
+
+%Decision Variable Generation}roni: trying to keep the same terminology
+

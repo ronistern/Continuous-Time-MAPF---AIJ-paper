@@ -1,0 +1,46 @@
+
+% Conflicts 
+As in classical \mapf, we define a single-agent plan for an agent $i$ to be a sequence of actions $\pi_i=(a_1,\ldots, a_n)$ 
+such that executing it moves agent $i$ from $\source(i)$ to $\target(i)$. 
+Let ${\pi_i}_D$ be the duration of the plan, i.e., the sum of the durations of its constituent actions: \begin{equation}
+    {\pi_i}_D=\sum_{a\in\pi_i} {a_i}_D
+\end{equation}
+
+Let ${\pi_i}_\varphi$ be the motion function that defines where agent $i$ is at any time point throughout the execution of $\pi_i$. This motion function is defined by aggregating the motion function of $\pi_i$'s constituent actions:
+\begin{equation}
+    {\pi_i}_\varphi(t)=
+    \begin{cases}
+        {a_1}_\varphi(t)  & t\leq {a_1}_D \\
+        {a_2}_\varphi(t-{a_1}_D)  & {a_1}_D<t\leq {a_2}_D \\
+        \cdots & \cdots  \\
+        {a_j}_\varphi(t-\sum_{l=1}^{j-1}{a_l}_D)  & \sum_{l=1}^{j-1}{a_l}_D)<t\leq \sum_{l=1}^{j}{a_l}_D) \\
+        \cdots & \cdots  \\
+        {a_n}_\varphi(t-\sum_{j=1}^{n-1}{a_j}_D)  & \sum_{j=1}^{n-1}{a_j}_D)<t\leq {\pi_i}_D \\
+    \end{cases}
+\end{equation}
+
+
+A \emph{conflict} between two single-agent plans is naturally defined as the case where if they agents execute their respective plans starting at the same time then there exists a point in time for which the \emph{shapes} of the agents overlap. 
+To detect this overlap, we assume a \emph{collision-detection} method $\isconflict:\{1,\ldots,k\}\times \{1,\ldots,k\}
+\times \mathcal{M}\times \mathcal{M}
+\rightarrow \{\true,\false\}$ 
+is available where \isconflict($i,j,m_i,m_j$)=$\true$ iff 
+when agents $i$ and $j$ occupy locations $m_i$ and $m_j$, respectively, then their shapes overlap. 
+%the shapes of agents $i$ and $j$ overlap if $i$ is at $m_i$ and $j$ is at $m_j$ at the same time. 
+%\konstantin{Why there is a 'conflict' in the name of 'collision' detection function. I suggest renaming to InCollision}\roni{I changed the isconflict macro so that it outputs iscollision as you suggested.}
+%\konstantin{Why do mention time? InCollision does not dependent on time according to the definition}
+%\roni{Fixed}
+
+
+
+
+For example, if the agents are disk-shaped with a radius of $r$, then conflict occurs between two single-agent plans if there exists a point in time for which the distance between the coordinates associated with the agents following these plans are less than $2r$ distance apart. 
+That is, in this setting, 
+\begin{equation}
+\isconflict(i,j, m_i,m_j)=
+\begin{cases}
+\true & ||m_i-m_j||_2\leq 2r \\
+\false & \text{Otherwise}
+\end{cases}
+\end{equation}
+Note that our problem definition and the algorithms we propose later are not restricted to disk-shaped agents and this particular type of \isconflict implementation. 

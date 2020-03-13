@@ -1,0 +1,35 @@
+
+\begin{algorithm}[h]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{SMT-CBS-Fixed$_R$($\mathcal{G}=(V,E)$, \source, \target, $conflicts$, $\mu$)}{end} \NRICL{
+	    $\textsc{Rdd} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
+	    $\mathcal{F}(\mu) \gets$ encode($\textsc{Rdd}$, $\mathcal{G}$, \source, \target, $conflicts$ ,$\mu$)\\
+	    \While {$\mathit{TRUE}$}{
+	        $assignment \gets$ consult-SAT-Solver$(\mathcal{F}(\mu))$\\
+	        \If {$assignment \neq \mathit{UNSAT}$}{
+	            $\Pi \gets$ extract-Solution$(assignment)$\\
+	            $collisions \gets$ validate-Plans($\Pi$) $\;\;\;\;$ /* $\mathit{DECIDE}_{\mathit{MAPF}_R}$ */\\
+                   \If {$collisions = \emptyset$}{
+                      \Return $(\Pi, \emptyset, \mathit{UNDEF})$\\
+                   }
+                      \For{each $\tuple{a_i,t_i,a_j,t_j} \in collisions$}{                     
+                      {\bf let} $a_i=\tuple{(u_i,v_i), [t_i,t'_i]}$\\
+                      {\bf let} $a_j=\tuple{(u_j,v_j), [t_j,t'_j]}$\\                                            
+                      
+                      $\mathcal{F}(\mu) \gets \mathcal{F}(\mu) \cup \{\neg \mathcal{E}_{u_i,v_i}^{t_i,t'_i} \vee \neg \mathcal{E}_{u_j,v_j}^{t_j,t'_j}$\}\\
+                      
+ 			   $[t_i,t_i^u) \gets$  unsafe-Interval$(\tuple{i,(u_i,v_i\},[t_i,t'_i]}, \tuple{j,(u_j,v_j),[t_j,t'_j]})$\\                 
+ 			   $[t_j,t_j^u) \gets$  unsafe-Interval$(\tuple{j,(u_j,v_j),[t_j,t'_j]}, \tuple{i,(u_i,v_i\},[t_i,t'_i]})$\\                  			   
+                   	   
+                      $conflicts \gets conflicts \cup \{\tuple{i,(u_i,v_i),[t_i,t_i^u)},\tuple{j,(u_j,v_j),[t_j,t_j^u)}\}$\\                   
+                   }                  
+	    		$\textsc{Var} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
+	    		$\mathcal{F}(\mu) \gets$ encode($\mathcal{F}(\mu)$, $\textsc{RDD}$, $\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\                   
+               }
+         }
+	   $\mu_{next} \gets$ min$\{ t\;|\; (u,t) \in \textsc{Rdd} \wedge t > \mu)\}$ \\               
+         \Return {($\mathit{UNSAT}$, $conflicts$, $\mu_{next}$)}\\
+}
+\caption{Low-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-low}
+\end{footnotesize}
+\end{algorithm}

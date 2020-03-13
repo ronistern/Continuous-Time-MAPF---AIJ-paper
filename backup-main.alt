@@ -1,0 +1,1267 @@
+\documentclass[review]{elsarticle}
+
+\usepackage{lineno,hyperref}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{url}
+\usepackage[usenames]{color}
+
+\usepackage{bbm}
+\usepackage[usenames]{color}
+\usepackage{wrapfig}
+\usepackage{booktabs}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{graphicx}
+
+\usepackage[usenames]{color}
+
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+
+
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+
+\newcommand{\tuple}[1]{\ensuremath{\left \langle #1 \right \rangle }}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{color, colortbl}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+
+
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{xspace}
+\newcommand{\commentout}[1]{ }
+
+\newcommand{\history}{past-conflicts\xspace}
+
+
+
+%
+% Add comments in the text
+%
+\newboolean{showcomments}
+\setboolean{showcomments}{true}
+%\setboolean{showcomments}{false}
+
+\ifthenelse{\boolean{showcomments}}
+  {\newcommand{\nb}[3]{
+  {\color{#2}\small\fbox{\bfseries\sffamily\scriptsize#1}}
+  {\color{#2}\sffamily\small$\triangleright~$\textit{\small #3}$~\triangleleft$}
+  }
+  }
+  {\newcommand{\nb}[3]{}
+  }
+
+\newcommand\konstantin[1]{\nb{\textbf{Konstantin:}}{red}{#1}}
+\newcommand\anton[1]{\nb{\textbf{Anton:}}{cyan}{#1}}
+\newcommand\roni[1]{\nb{\textbf{Roni:}}{green}{#1}}
+\newcommand\pavel[1]{\nb{\textbf{Pavel:}}{blue}{#1}}
+
+
+
+
+
+%\usepackage[smaller]{acronym}
+\usepackage{acronym}
+\acrodef{SOC}{sum of costs}
+\acrodef{SIPP}{Safe interval path planning}
+\acrodef{CBS}{Conflict-based search}
+\acrodef{CCBS}{Continuous-time conflict-based search}
+\acrodef{MAPF}{Multi-Agent Pathfinding}
+\acrodef{ICTS}{Increasing Cost Tree Search}
+\acrodef{MCCBS}{Multi-Constraint CBS}
+\acrodef{CT}{Constraint Tree}
+
+
+\newcommand{\ccbs}{\ac{CCBS}\xspace}
+\newcommand{\ct}{\ac{CT}\xspace}
+\newcommand{\sipp}{\ac{SIPP}\xspace}
+\newcommand{\astar}{A$^*$\xspace}
+%\newcommand{\mapfr}{MAPF$_R$\xspace}
+\newcommand{\mapfr}{\ac{MAPF}$_R$\xspace}
+\newcommand{\mapf}{\ac{MAPF}\xspace}
+\newcommand{\const}{\textit{constraints}\xspace}
+\newcommand{\safe}{\textit{Safe}\xspace}
+
+\newcommand{\coord}{\textit{coord}\xspace}
+
+
+\newcommand{\shortcite}{\cite}
+
+\modulolinenumbers[5]
+
+\journal{Artificial Intelligence Journal}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Elsevier bibliography styles
+%%%%%%%%%%%%%%%%%%%%%%%
+%% To change the style, put a % in front of the second line of the current style and
+%% remove the % from the second line of the style you would like to use.
+%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Numbered
+%\bibliographystyle{model1-num-names}
+
+%% Numbered without titles
+%\bibliographystyle{model1a-num-names}
+
+%% Harvard
+%\bibliographystyle{model2-names.bst}\biboptions{authoryear}
+
+%% Vancouver numbered
+%\usepackage{numcompress}\bibliographystyle{model3-num-names}
+
+%% Vancouver name/year
+%\usepackage{numcompress}\bibliographystyle{model4-names}\biboptions{authoryear}
+
+%% APA style
+%\bibliographystyle{model5-names}\biboptions{authoryear}
+
+%% AMA style
+%\usepackage{numcompress}\bibliographystyle{model6-num-names}
+
+%% `Elsevier LaTeX' style
+\bibliographystyle{elsarticle-num}
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{frontmatter}
+
+%\title{Conflict-Based Search with Continuous Time and Space}
+\title{Multi-Agent Pathfinding with Continuous Time and Euclidean Space (maybe remove the last 3 words?)}
+%\title{Multi-Agent Pathfinding with Continuous Time}
+
+%\tnotetext[mytitlenote]{Fully documented templates are available in the elsarticle package on \href{http://www.ctan.org/tex-archive/macros/latex/contrib/elsarticle}{CTAN}.}
+
+%% Group authors per affiliation:
+\author{US}
+\address{The Department of Software and Information Systems Engineering\\
+Ben Gurion University of the Negev}
+
+%\author{Elsevier\fnref{myfootnote}}
+%\address{Radarweg 29, Amsterdam}
+%\fntext[myfootnote]{Since 1880.}
+
+%% or include affiliations in footnotes:
+%\author[mymainaddress,mysecondaryaddress]{Elsevier Inc}
+%\ead[url]{www.elsevier.com}
+
+%\author[mysecondaryaddress]{Global Customer Service\corref{mycorrespondingauthor}}
+%\cortext[mycorrespondingauthor]{Corresponding author}
+%\ead{support@elsevier.com}
+
+%\address[mymainaddress]{1600 John F Kennedy Boulevard, Philadelphia}
+%\address[mysecondaryaddress]{360 Park Avenue South, New York}
+
+
+\begin{abstract}
+%\meir{In the light of the fact that this paper tells the whole story, I propose another abstract (based on AAAI):\\
+tbd 
+\end{abstract}
+
+\begin{keyword}
+%\texttt{elsarticle.cls}\sep \LaTeX\sep Elsevier \sep template
+Artificial Intelligence\sep Model-based diagnosis\sep Troubleshooting
+%\MSC[2010] 00-01\sep  99-00
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+
+
+\section{Introduction}
+TODO: Roni
+
+% COPY AND PASTE FROM WORKSHOP PAPER
+
+
+% What is MAPF
+\ac{MAPF} is the problem of finding paths for multiple agents such that every agent reaches its goal and the agents do not collide. \ac{MAPF} has topical applications in warehouse management~\cite{wurman2008coordinating}, airport towing~\cite{morris2016planning}, autonomous vehicles, robotics~\cite{veloso2015cobots}, and digital entertainment~\cite{ma2017feasibility}. 
+While finding a solution to \ac{MAPF} can be done in polynomial time~\cite{kornhauser1984coordinating}, 
+solving \ac{MAPF} optimally is NP Hard under several common assumptions~\cite{surynek2010optimization,yu2013structure}.
+
+
+% Prior work assumptions: unit-cost, discrete time, agents without any shape
+Nevertheless, AI researchers in the past years have made substantial progress in finding optimal solutions to a growing number of scenarios and for over a hundred agents~\cite{sharon2015conflict,sharon2013increasing,wagner2015subdimensional,standley2010finding,felner2018adding,ICTAIpicat,yu2013structure}. 
+However, %While it seems that research on \ac{MAPF} has reached its maturity, 
+most prior work assumed that 
+(1) time is discretized into time steps, 
+(2) the duration of every action is one time step, 
+and (3) in every time step each agent occupies exactly a single location. These simplifying assumptions limit the applicability of \mapf algorithm in real-world applications. In fact, most prior work performed empirical evaluation only on 4-connected grids. 
+
+
+% Our contribution: 
+%In this work, 
+We propose \ccbs, a \ac{MAPF} algorithm that does not rely on any of these assumptions and is sound, complete, and optimal. \ccbs is based on a customized version of \ac{SIPP}~\cite{phillips2011sipp}, a continuous-time single-agent pathfinding algorithm, and an adaptation of \ac{CBS}~\cite{sharon2015conflict}, a state-of-the-art multi-agent pathfinding algorithm. %We call the resulting algorithm \ac{CCBS}, and analyze it theoretically. 
+
+%and provides provably optimal solutions. This algorithm is based on a novel combination of \ac{SIPP}~\cite{phillips2011sipp}, a continuous-time single-agent pathfinding algorithm, and \ac{CBS}~\cite{sharon2015conflict}, a state-of-the-art multi-agent pathfinding algorithm. We call the resulting algorithm \ac{CCBS}, and analyze it theoretically. 
+
+%We analyze \ac{CCBS}, discuss its pros and cons
+
+% Results
+\ac{CCBS} relies on the ability to accurately compute collisions between agents and to compute the \emph{safe intervals} of each agent, that is, the minimal time an agent can start to move over an edge without colliding with a different agent. Collision detection and safe-interval computations are not easy to compute. In our experiments, we used a closed-loop formulae for collision detection and a discretization-based approach for safe-interval computations in our experiments. The results show that \ac{CCBS} is feasible and outputs lower cost solutions compared to previously proposed algorithms. However, since \ac{CCBS} considers agents' geometry and continuous time, it can be slower than grid-based solutions, introducing a natural plan cost versus planning time tradeoff. %, discretizes time, and considers a smallest set of actions. For the same reasons, \ac{CCBS} finds significantly better solutions in  practice. 
+
+
+\begin{table}[t]
+\begin{minipage}{\columnwidth} % so footnote will appear
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\multicolumn{1}{c}{}                                           & \multicolumn{3}{c}{Actions} & Agent     &      &       \\ \midrule
+\multicolumn{1}{c}{}                                           & N.U.         & Cont.         & Ang. & Vol. & Opt. & Dist. \\ \midrule
+CBS-CL\footnote{~\citeauthor{walker2017using}~\shortcite{walker2017using}.}      & \cmark    & \xmark    & \xmark    & \xmark    & \xmark    & \xmark     \\
+M*\footnote{~\citeauthor{wagner2015subdimensional}~\shortcite{wagner2015subdimensional}.} & \cmark            & \xmark             & \cmark    & \xmark    & \cmark    & \xmark     \\
+E-ICTS\footnote{~\citeauthor{walker2018extended}~\shortcite{walker2018extended}.} & \cmark            & \xmark             & \cmark    & \cmark    & \cmark    & \xmark     \\
+MCCBS\footnote{~\citeauthor{li2019multi}~\shortcite{li2019multi}.}                                                          & \xmark            & \xmark             & \xmark    & \cmark    & \cmark    & \xmark     \\
+POST-MAPF\footnote{~\citeauthor{ma2017multiAgent}~\shortcite{ma2017multiAgent}.}                                                      & \cmark            & \cmark             & \cmark    & \cmark    & \xmark    & \xmark     \\
+\begin{tabular}[c]{@{}r@{}}
+ORCA, ALAN,\\ and dRRT*\footnote{~\citeauthor{snape2011hybrid}~\shortcite{snape2011hybrid}, ~\citeauthor{godoy2018alan}~\shortcite{godoy2018alan}, ~\citeauthor{dobson2017scalable}~\shortcite{dobson2017scalable}.}\end{tabular} & \cmark            & \cmark             & \cmark    & \cmark    & \xmark    & \cmark     \\
+AA-SIPP($m$)\footnote{~\citeauthor{yakovlev2017anyAngle}~\shortcite{yakovlev2017anyAngle}.}                                                        & \cmark            & \cmark             & \cmark    & \cmark    & \xmark    & \xmark     \\
+
+TP-SIPPwRT\footnote{~\citeauthor{LiuAAMAS19}~\shortcite{LiuAAMAS19}.}                                                        & \cmark            & \cmark             & \cmark    & \cmark    & \xmark    & \xmark     \\
+\rowcolor{LightCyan}
+CCBS                                                           & \cmark            & \cmark             & \cmark    & \cmark    & \cmark    & \xmark     \\
+
+ \bottomrule
+\end{tabular}
+}
+\end{minipage}
+\vspace{-0.3cm}
+\caption{Overview: \ac{MAPF} research beyond the basic setting.}
+\label{tab:related-work}
+\vspace{-0.3cm}
+\end{table}
+
+%Since \ac{CCBS} considers agents' geometric shape and  continuous time, the cost of collision detection in \ac{CCBS} is significantly higher than in \ac{CBS}. To mitigate this, we propose a history-based heuristic, that attempts to avoid some collision detection checks by guessing which pair of agents are likely to have a conflict. We discuss the relation between this heuristic and the concept of cardinal conflicts~\cite{boyarski2015icbs}, and propose a simple hybrid heuristic that combines these methods and works well.  
+
+% A bit of related work
+We are not the first to study \ac{MAPF} beyond its basic setting. %~\cite{walker2018extended,li2019multi}. 
+However, to the best of our knowledge, \ac{CCBS} is the first \ac{MAPF} algorithm that can handle non-unit actions duration, continuous time, non-grid domains, agents with a volume, and is still optimal and complete. 
+%Indeed, several recent works adapted existing \ac{MAPF} algorithms such as \ac{ICTS}~\cite{sharon2013increasing}  and \ac{CBS}~\cite{sharon2015conflict}  to richer \ac{MAPF} settings~\cite{walker2018extended,li2019multi}. 
+Table~\ref{tab:related-work} provides an overview of how prior work on \ac{MAPF} relate to \ac{CCBS}. A more detailed discussion is given later in the related work section. 
+%However, none provides the optimality guarantees of \ccbs for continuous time.
+
+% END COPY AND PASTE
+
+
+A preliminary version of this work was published in a conference~\cite{us}. 
+This journal paper extends that work significantly in the following ways:
+\begin{itemize}
+    \item We show a different form of constraints to impose to resolve conflicts that generalizes the constraints used in the conference paper. \textbf{Konstantin: not really}
+    \item We add experiments on agents of different size ??
+    \item We provide a formal proof of the algorithm's completeness and optimality.
+    \item ??? We provide a detailed explanation of the running example to illustrate the high-level ideas behind the algorithm ???
+    \item We propose another approach to conflicts' management, which leads to a better results in practice 
+    \item ??We provide a bounded-suboptimal version??
+    \item We provide a comprehensive set of experiments on roadmaps, which was just briefly mentioned in the conference paper.
+    \item For the experiments on the disk-shaped agents we use another mechanism to compute the so-called unsafe intervals (leading to the precise computation of them).
+    
+\end{itemize}
+
+
+\section{Background}
+%TODO: Roni
+%What is needed to explain our approach
+
+%Classical MAPF
+
+A \emph{classical MAPF} problem~\cite{stern2019mapf} with $k$ agents is defined by 
+a tuple $\langle G, s, t\rangle$ 
+where $G=(V,E)$ is an undirected graph, 
+$s:[1,\ldots,k]\rightarrow V$ maps an agent to a source vertex, 
+and $t:[1,\ldots,k]\rightarrow V$ maps an agent to a target vertex. 
+% Time and actions
+Time is discretized into time steps. 
+For every time step $t$, each agent occupies one of the graph vertices, referred to as the \emph{location} of that agent at time $t$. In every time step an agent can choose to either \emph{wait} in its location 
+or \emph{move} to one of the vertices adjacent to it. 
+Formally, an action in classical MAPF is a function $a: V\rightarrow V$ 
+such that $a(v)=v'$ means the agent current location is $v$ and its location in the next time step is $v'$. 
+
+
+% A solution to a MAPF problem
+A sequence of actions $\pi=(a_1,\ldots,a_n)$ 
+is a single-agent plan for agent $i$ 
+if $a_n(a_{n-1}(\cdots(a_1(s(i)))\cdots))=t(i)$, i.e., if it leads the agent from its source to its target. 
+We denote by $\pi_i[x]$ the location of agent $i$ after executing the first $x$ actions in $\pi$, starting from the agent's source $s(i)$. A \textbf{solution} to a classical MAPF problem is a set of $k$ single-agent plans, one for each agent.  
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{types-of-conflicts.pdf}
+    \caption{An illustration from~\cite{stern2019mapf} of an edge conflict (a), a vertex conflict (b), a following conflict (c), a cycle conflict (d), and a swapping conflict (e).}
+    \label{fig:types-of-conflicts}
+\end{figure}
+
+% Conflicts and a valid solution in classical MAPF
+A solution to a classical MAPF problem is \emph{valid} if its constituent single-agent plans do not \emph{conflicts}. 
+An edge conflict between two single-agent plans occurs when the two corresponding agents are planned to perform the same action at the same location in the same time step. 
+A vertex conflict occurs when two agents are planned to occupy the same location in the same time. 
+A swapping conflict occurs when two agent are planned to swap locations in the same time step. 
+Figure~\ref{fig:types-of-conflicts} illustrates these conflicts as well as other types of conflict that we do not consider in this work. See Stern et al.~\cite{stern2019mapf} for a deeper and more formal discussion of these conflicts. 
+
+
+
+
+% Action cost and objective functions in classical MAPF
+In classical MAPF, the every action incurs unit cost, 
+and thus the cost of a single-agent plan is its length. 
+The \emph{makespan} and \emph{sum of costs} (SOC) of a solution to a MAPF problem is the maximum and summation, respectively, over its constituent single-agent plans, respectively. Some MAPF algorithms are guaranteed to return a solution with minimal SOC, while others guarantee makespan optimality. 
+
+
+\roni{Maybe have here also some background on algorithms?}
+
+
+\roni{Below I describe almost word-to-word the models used by Thayne and Liron. Let's discuss this next time we talk}
+% MAPFR
+Walker et al.~\cite{walker2018extended} are, to the best of our knowledge, the first to extend the definition of \mapf to consider non-unit edge costs. 
+They introduced the \mapfr problem, which is different from classical \mapf in the following ways. 
+In \mapfr, every edge $e=(v,v')$ in the underlying graph $G$ is associated with a positive weight $w(e)\in \mathbb{R}_{>0}$ that represents the duration it takes an agent to move from $v$ to $v'$. 
+Every location $v\in V$ is associated with a unique coordinate in a metric space, denoted $\coord(v)$. 
+An agent is a circle with a non-zero volume. 
+When the location of an agent is $v$, it means the center of the agent is located at $\coord(v)$. 
+When an agent moves along an edge $(v,v')$, it means
+its center moves along a straight line from $\coord(v)$ to $\coord(v')$ in a constant velocity motion. 
+There is a conflict between two single-agent plans iff the volumes of ``one or more agents overlap at the same instant in time''~\cite{walker2018extended}. This can be detection by using standard collision detection techniques~\cite{helpHere}. 
+
+% Limitation of MAPFR
+Walker et al.~\cite{walker2018extended} proposed the Extended Increasing Cost Tree Search (E-ICTS) algorithm for finding bounded-suboptimal solutions to \mapfr problems. 
+However, the definition of \mapfr does not specify the duration of wait actions. In their implementation, wait actions had a fixed small duration, which E-ICTS accepts as a parameter. 
+
+% Multi-agent motion planning
+Cohen et al.~\cite{cohen} proposed a relevant extension of classical \mapf that they called \emph{multi-agent motion planning} (MAMP). In MAMP, each agent is associated with a graph $G_i=(V_i,E_i)$. 
+A vertex in $V_i$ represents a possible \emph{state} of agent $i$, where a state of an agent represents its location as well as other relevant features such as orientation and steering angle. 
+An edge $e_i=(v,v')\in E_i$ represents a kinodymaically feasible motion of agent $i$ from state $v$ to state $v'$, 
+and the weight of an edge is the duration of performing this motion.
+%Importantly, the sets of cells associates with states of different agents may intersect, thereby indicating a potential conflict. 
+The agents in MAMP move in an \emph{environment} represented by a list of cells $\mathcal{C}$. 
+Every state $v\in V_i$ of an agent $i$ is associated with a set of cells in $\mathcal{C}$, representing the cells occupied by that agent when in state $v$. 
+Every edge $e_i=(v,v')\in E_i$ is associated with a multiset of cells in $\mathcal{C}$. 
+Each cell in this multiset is associated with a time interval indicating the time interval in which this cell is occupied when agent $i$ moves from $v$ to $v'$.
+
+% Limitation of MAMP
+Cohen et al.~\cite{cohen2019optimal} proposed an optimal and a bounded-suboptimal algorithm for solving MAMP problems, based on Conflict-Based Search (CBS)~\cite{sharon2015conflict}. Their algorithm, called CBS-CT, is designed to consider continuous time. However, it relies on the discretizes representation of the environment into a set of cells ($\mathcal{C}$). 
+
+\roni{I created a duplicate of the text that followed the above definitions, which follow my MAPF Variants paper terminology, and my understanding of our problem as a \mapfr problem. }
+\section{Version \#B}
+
+\section{End of Version \#B}
+\section{Problem Definition \#A}
+
+
+%5TODO: Konstantin
+Typically the \ac{MAPF} problem is formulated as a graph search problem, i.e. all agents are confined to the graph $G=(V, E)$, which vertices correspond to the locations in the environment and the edges -- to the feasible transitions between the locations. The time is discretized into the timesteps and it is assumed that at each time step an agent can either wait at the vertex or move from this vertex to some of its neighbors, following a certain edge. The path for an agent is formally a mapping from the timesteps to the graph vertices: $\pi = T \rightarrow V$, where $T=[0, 1, 2, ...]$, s.t. each two consecutive timesteps are mapped either to the same vertex (the agent is waiting) or to the two adjacent vertices (the agent is moving). Because the time is discretized an agent can be though of as teleporting from one vertex to the other (or to the same vertex, in case of the wait action).
+
+In case only one agent is present in the environment (on the graph), each its path is feasible, i.e. no collision occurs while agent is following it. This is due to the assumption that each edge resembles a collision-free transition between the neighboring vertices. In the multi-agent setting, obviously, collisions might occur between two (or more) agents' paths and one need to define them appropriately. In \cite{} the most common definitions of the conflicts for time-discretized graph-based MAPF are given: vertex conflict, edge conflict, following conflict, cycle conflict and swapping conflict. It is important to note that all of them are tied to the exact discrete timestep and to the graph edge or vertex. E.g. a swapping conflict occurs if there exist a timestep $t$: $\pi_1(t)=\pi_2(t+1)$ and $\pi_2(t)=\pi_1(t+1)$.
+
+%\textbf{K: Maybe a picture from SoCS'19 paper showing all classical conflicts here?}\roni{Done}
+
+Having the notion of the individual path and the conflict the (time-discretized) MAPF problem can be stated as the problem of finding a set of individual paths (from predefined start locations to the predefined goal locations) such that each pair of them is conflict-free. The objective is, commonly, to minimize either the \textit{makespan}, i.e. the time when the last agent reaches its goal\footnote{by saying ``reach the goal'' we mean that the agent comes to the goal vertex and does not move out of it in any further timestep.}, or the \textit{sum-of-costs}, i.e. the sum of timesteps each agent has spent on reaching its goal across all the agents. It is known that solving MAPF optimally under both objectives is NP-hard \cite{}.
+
+%Having defined the time-discretized graph-based MAPF an important question is how well it relates to the problems one might come over in practice, e.g. in robotics domain when a group of mobile robots have to safely navigate in the shared environment. More precisely, what are the intrinsic limitation assumptions of the problem statement and how they can be generalized.
+
+The first such assumption is that all the agents are somewhat homogeneous so that they all can be confined to the \textit{same} graph. This implies that in real-world they should have (roughly) the same size and shape otherwise some transitions, defined as the graph edges, might be feasible for the smaller agents and lead to the collisions with the static obstacles for the larger agents. Agents also should adhere to the same kinematics/dynamics constraints to perform vertex to vertex transitions in the same manner, so the assumption that there exist a single edge between the pair of adjacent graph vertices holds true.
+
+In case one wants to solve multi-agent pathfinding problem for $n$ heterogeneous agents, $n$ different graphs should be introduced (each one encapsulating the valid transition model for the particular agent) and the notion of the conflict(s) should be redefined. Please note, that it is also possible to partially solve heterogeneous MAPF without constructing $n$ different graphs. For example, in \cite{} the post-processing of the single-graph MAPF solutions was proposed to take the non-uniform kinematic constraints of the agents into account. In \cite{} MAPF for the agents of different shapes and sizes is solved and the solution is post-processed to become executable by the robots exhibiting complex dynamics. In \cite{} agents of different sizes confined to the same graph are assumed. In \cite{} agents of different sizes translating with different speeds are considered. Still, the most generic approach to tackle $n$ heterogeneous agents is introducing separate graphs for them, see the work \cite{} for example.\roni{This is good stuff, will use it in the related work part}
+
+The second intrinsic assumption is that the agents are able to accomplish any move represented by a graph edge within 1 timestep. This means that, either the graph edges represent the transitions of the same length so that the uniform agents (see assumption 1) following them accomplish the move in the same time (equal to 1 timestep); or the graph edges can be of different lengths but the agents have an embedded mechanism of choosing the correct velocity/acceleration profile to perform a move within 1 timestep. 4-connected grids are the most suitable models aligned with the discussed assumption. No wonder, the majority of the priory introduced MAPF planners were evaluated on them. The planners that go beyond this setting and can work on the graphs with the edges of non-uniform duration are also known ???????????????????
+
+The third assumption is that the wait action is not fractionable and the minimal duration of the wait action is 1 timestep. Allowing the wait actions of arbitrary duration is challenging as in this case there exists a continuum of wait-actions in each graph vertex. This poses a problem if one wants to apply a conventional heuristic search algorithm that relies on generating (or at least enumerating) all the successors of any search state. Luckily, there exist a technique that can be adopted to reason about the actions of arbitrary duration -- Safe Interval Path Planning (SIPP) \cite{}. It has already been used in the MAPF domain \cite{}, but only within a prioritized approach, that is known to be incomplete in general. 
+\roni{TODO for me; fix context}
+In this work we aim at lifting all three assumptions simultaneously. To do so we, first, state the continuous time MAPF problem when all agents are confined to the same graph; present an optimal algorithm of solving it; show how the latter can be applied to the heterogeneous MAPF statement, when the agents are operating on the different graphs. \roni{I think all the above (now connected) should go to the intro, and perhaps in a briefer way.}
+
+\textbf{Konstantin. And only now goes the problem statement}
+
+The problem we are considering is the MAPF in Euclidean space with continuous time (MAPF-E-CT). We assume that $n$ agents with volumes are confined to a graph $G=(V,E)$, in which every node represents a point $(x, y)$ and an edge represents a straight-line segment connecting two distinct points. There are no limitations on where in the Euclidean space the vertices are located, thus the length of an edge is arbitrary in general. The timeline is continuous and unbounded: $T=[0, +\infty)$.
+
+To simplify further exposition we assume all agents (i) to be of the same shape and size, i.e. open disks, (ii) to move with the same (constant) speed with inertial effects neglected, i.e. agents start and stop moving instantaneously. Note that the \ccbs algorithm we propose in this work is not limited to these assumptions and can be generalized as described \textbf{in some further section of the paper}.
+
+The action set for an agent consists of the \textit{wait}-action, i.e. waiting arbitrary amount of time at the vertex, and the \textit{move}-action, i.e. translation from one vertex to the other following the edge. Unlike numerous works on MAPF we are not assuming agents to teleport from one vertex to the other when performing a move. Instead we assume that an agent continuously moves in Euclidean space from one point to the other. Duration of a move is translation speed times the length of the edge. Duration of the wait action can be any positive real number. 
+
+\textbf{Konstantin: some words about relation of our problem to MAPFR ???}
+
+% What is a solution, what is the sum of costs
+A \emph{plan} for an agent $i$ is a sequence of actions $\pi_i$ such that if $i$ executes this sequence then it will reach its goal. We assume that the agents stay at their goal locations and do not disappear after reaching them. Two plans $\pi_i$ and $\pi_j$ are said to be collision-free if the agents never collide when following them. In case of the open-disk shaped agents it means that the distance between the centers of those disks is never less than $2r$ (it might be equal to $2r$, though).
+
+A set of plans, one for each agent, is called a \emph{joint plan}. 
+A solution to a MAPF-E-CT is a joint plan such that any pair of individual plans comprising it is collision-free. Having a solution, all agents may start executing their respective plans at the same time to reach their goal locations without colliding with each other. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\columnwidth]{example_cropped.pdf}
+    \caption{Our running example: a MAPF-E-CT problem with 3 agents.}
+    \label{fig:example}
+\end{figure}
+
+Figure \ref{fig:example} shows an example of the problem. Small circles with the letters inside them denote graph vertices, e.g. vertex $A$ corresponds to a point with the coordinates $(1, 5)$, straight line segments between vertices depict edges, e.g. vertex $C$ is reachable from $H$ by following the segment that starts at $(3, 1)$ and ends at $(6,5)$. Agents are depicted as colored circles. Initially green agent occupies vertex $A$, red agent -- vertex $E$ and blue agent -- vertex $G$. Their respective goals are $I$ (green agent), $J$ (red agent), $D$ (blue agent).
+
+
+In this work we focus on finding cost-optimal solutions. 
+To define cost-optimality of a MAPF-E-CT solution, we first define the \emph{cost} of a plan $\pi_i$ to be the sum of the durations of its constituent actions. 
+Several forms of solution cost-optimality have been discussed in \ac{MAPF} research. Most notable are \emph{makespan} and \emph{\ac{SOC}}, where the makespan is the max over the costs of the constituent plans and \ac{SOC} is their sum. The problem we address in this work is to find a solution to a given problem 
+that is optimal w.r.t its \ac{SOC}, that is, no other solution has a lower \ac{SOC}. 
+
+%As said before, typically, stating the MAPF problem begins with introducing the graph and constraints related to how agents are allowed to move on that graph. On the contrary, we wish to describe how agents and their moves are modeled in non-constrained environment (i.e. in 2D or 3D) and only then introduce a graph discretization of the problem.
+
+%Consider a group of $n$ homogeneous agents operating in the shared environment which is a closed subset of the Euclidean 2-dimensional or 3-dimensional space, e.g. a bounded rectangle $W \in \mathbb{R}^2$. Without the loss of generality we will assume 2D workspace further in the paper. The environment is composed of the free space and the obstacles: $W = W_{free} + W_{obs}$. All agents have the same shape and size and each agent is characterized by its position $\textbf{p}=(x, y)$. An agent can move from one location to the other following an arbitrary shaped curve (line segment in the simplest case) connecting the move's endpoints.
+
+%We assume that the two collision detection functions are given:
+%\begin{itemize}
+%    \item the one that detects collision w.r.t. static obstacles:
+    
+%    $col_{st}: W \rightarrow \{true, false\}$;
+%    \item the one that detects inter-agent collisions:
+    
+%    $col_{ia}: W \times W \rightarrow {true, false}$.
+%\end{itemize}
+
+%In the simplest case, e.g. when the circular agents are considered, $col_{st}$ returns true if the distance between the position of an agent and the closest point in $W_{free}$ is less than the agent's radius; and $col_{ia}$ returns true if the distance between the positions of two agents is less than the sum of their radii.
+
+%The path for an agent $i$ is defined as the mapping of the timeline to the workspace: $\pi: T \rightarrow W$, where $T=[0, + \infty)$.
+
+%This definition of the path is the ``most unconstrained one'' as no limitations are imposed on how the agent might move, i.e. all sorts of acceleration/decelleartion are allowed, instantaneous direction changes are allowed, no constraints are imposed on the curvature of the path etc. Practice-wise this assumption never holds as only certain types of moves can be performed by the agents due to kinematic/dynamic constraints. Thus it is natural to introduce a notion of action and to constrain a path to be composed only of the actions in a certain order. Formally, action is, like a path, a mapping from time moments to workspace: $a: [t_b, t_e) \rightarrow W$, where $t_b, t_e \in T$ and $t_e<t_b$. And the path can now be defined as a sequence of actions: $\pi = \langle a_1, a_2, ..., a_k\rangle$, s.t. $t_e(a_j)=t_b(a_{j+1}$ and $a_j(t_e)=a_{j+1}(t_b)$. The conditions insure that the consecutive actions are well-aligned in time-space, i.e. the next action starts immediately after the previous one and in the same location of the workspace.
+
+
+%We are considering cooperative pathfinding for non-point translating non-rotating agents in 2D workspaces. we consider all agents (1) to be of the same shape and size, i.e. open disks, (2) to move with the same (constant) speed, and (3) to be constrained to the same roadmap of the environment, i.e. there is a single graph $G=(V, E)$ whose vertices correspond to the locations agents can occupy (and wait in them) and edges correspond to straight-line trajectories the agents traverse when moving from one location to the other. Inertial effects are neglected and agents start/stop moving instantaneously. Duration of a move is translation speed times the length of the edge. Duration of the wait action can be any positive real number. 
+%Prior work referred to this setting as \mapfr~\cite{walker2018extended}.
+%Having that said, the problem we are considering is analogous to the one introduced by Walker et al.~\shortcite{walker2018extended} and dubbed \mapfr.
+
+%Note that the \ccbs algorithm we propose in this work is not limited to assumptions (1), (2), and (3) described above, e.g., it can handle agents moving with different speeds, using different roadmaps, and having complex shapes and sizes. We make these assumptions only to simplify exposition. % provided with the appropriate collision detection procedure. It’s also extensible for 3D environments.Assumptions \textit{i}, \textit{ii}, and \textit{iii}For the sake of simplicity \konstantin{i think we need to say the following somewhere: may be here in text, may be in the footnote, maybe in the next section}Please note that the algorithm we are about to propose is not limited to \textit{i}), \textit{ii}) and \textit{iii}) assumptions, e.g. it can handle open-disk agents moving with different speeds and each of them using its own roadmap of the environment. Moreover it can be used for agents with different (complex) shapes and sizes provided with the appropriate collision detection procedure. It’s also extensible for 3D environments.
+
+%The set of vertices $V$ represents a set of locations that the agents can occupy. We assume that any two agents, when standing still, can occupy any two vertices in the graph without colliding, i.e. their bodies will not overlap. For graphs based on grids and disk-shaped agents, this means the radius of every agent is less than or equal to half of the cell size.
+%\begin{figure}
+%\centering
+%    \centering
+%    \includegraphics[width=0.75\columnwidth]{RegularGraph.png}
+%    \caption{}
+%    \label{fig:reggrapph}
+%\end{figure}
+% Agents' actions
+%When an agent is at a location $v\in V$, it can either  perform a \emph{move} action or a \emph{wait} action. 
+%A move action moves the agent along an edge $(v,v')\in E$, and a wait action means the agents stays in $v$. 
+%Every action has a \emph{duration}. The duration of a move action is the weight of the edge the agent is traversing. The duration of a wait action can be any positive real value. Thus, every agent has an infinite number of wait moves in every location. 
+ 
+%\roni{I am missing more about the geometric prospective of the domain.  	That is, instead of a graph, the domain is actually represented by some terrain,  	and the graph is just set on that terrain. Probably there's such a definition in prior work on any-angle stuff.}
+
+
+
+
+
+% END OF COPY AND PASTE FROM WORKSHOP PAPER
+
+
+\subsection{Action execution in continuous time and space}
+\textbf{K: This section might be of some value (but not sure)}
+
+The distinctive feature of the considered problem statement is that the agents execute the actions of their plans in continuous time and space. By saying so we mean that for every agent $i$ and its plan $\pi_i$, and for every moment $t \in T=[0, +\infty)$ there exist a distinct $(x, y)$ location on the edge (or vertex) of the graph that is occupied by $i$ at $t$. In other words we are not blocking the edge entirely for the time the agent is traversing it.
+
+Consider an example depicted on Figure \ref{fig:example} and assume the plan for the blue agent is $G \rightarrow H \rightarrow C \rightarrow D$ without any waits. Then, assuming that the moving speed equals 1, the agent will start traversing the edge $H \rightarrow C$ at time 2 and at time moment, say, $3.3$ it will be at the $(XXXX, YYY)$. This means that other agents, e.g. the red one, can be at this time moment anywhere on the edge $F \rightarrow I$ (the edge is not blocked), as the distance between the center of the blue agent and any point on the edge $F \rightarrow I$ is greater that $2r=2*0.5=1$.
+
+\textbf{K: Maye some picture here showing (by the arrow) the position of the blue agent at time 3.3}
+
+\section{Conflict-Based Search with Continuous Time and Space}
+TODO: Roni
+
+% COPY AND PASTE FROM WORKSHOP PAPER
+In this section, we introduce \ccbs. 
+%Since \ccbs is based on the \ac{CBS} algorithm, 
+We first provide relevant background on \ac{CBS}. 
+
+
+\subsection{Conflict Based Search (CBS)}
+TODO: Roni
+
+
+\ac{CBS}~\cite{sharon2015conflict} is a complete and optimal \ac{MAPF}
+solver,  designed for standard \ac{MAPF}, i.e., where time is discretized and all actions have the same duration. 
+It solves a given \ac{MAPF} problem by finding plans for each agent separately, detecting \emph{conflicts} between these plans, and resolving them by replanning for the individual agents subject to specific \emph{constraints}. % CBS conflicts
+The typical \ac{CBS} implementation considers two types of conflicts: a vertex conflict and an edge conflict. A vertex conflict between plans $\pi_i$ and $\pi_j$ is defined by a tuple $\tuple{i,j,v,t}$ and means that according to these plans agents $i$ and $j$ plan to occupy $v$ at the same time $t$. 
+An edge conflict is defined similarly by a tuple $\tuple{i,j,e,t}$, 
+and means that according to $\pi_i$ and $\pi_j$ both agents plan to traverse the edge $e\in E$ at the same time, from opposite directions. 
+
+
+% CBS constraints
+A \ac{CBS} vertex-constraint is defined by a tuple $\tuple{i,v,t}$ and means that agent $i$ is prohibited from occupying vertex $v$ at $t$. 
+A \ac{CBS} edge-constraint is defined similarly by a tuple $\tuple{i,e,t}$, where $e\in E$. To guarantee completeness and optimality, \ac{CBS} runs two search algorithms: a low-level search algorithm that finds paths for individual agents subject to a given set of constraints, and a high-level search algorithm that chooses which constraints to add. 
+
+\subsubsection{\ac{CBS}: Low-Level Search}
+The low-level search in \ac{CBS} can be any pathfinding algorithm that can find an optimal plan for an agent 
+that is consistent with a given set of \ac{CBS} constraints. To adapt single-agent pathfinding algorithms such as \astar{} to consider \ac{CBS} constraints, 
+the search space must also consider the time dimension since a \ac{CBS} constraint $\tuple{i,v,t}$ 
+blocks location $v$ only at a specific time $t$. 
+For \ac{MAPF} problems, where time is discretized, this means that a state in this single-agent search space is a pair $(v,t)$, representing that the agent is in location $v$ at time $t$. Expanding such a state generates states 
+of the form $(v',t+1)$, where $v'$ is either equal to $v$, representing a wait action, 
+or equal to one of the locations adjacent to $v$. States generated by actions that violate the given set of \ac{CBS} constraints, are pruned. Running \astar{} on this search space will return the lowest-cost path to the agent's goal that is consistent with the given set of \ac{CBS} constraints, as required. This adaptation of textbook \astar{} is very simple, and indeed most papers on \ac{CBS} do not report it and just say that the low-level search of \ac{CBS} is \astar{}. 
+%\footnote{\textbf{K: Again "A*" is missing. May be we also should say here that enhanced version of A* are also widely used, i.e. the ones that avoid expanding surplus nodes etc. Or I'm not right here?}}. \roni{I'm not sure thus some else did something more fancy than astar}
+
+\subsubsection{\ac{CBS}: High-Level Search}
+The high-level search algorithm in \ac{CBS} works on a \ct, which is a binary tree, in which each node represents a set of \ac{CBS} constraints imposed on the agents and 
+a joint plan consistent with these \ac{CBS} constraints. For a \ct node $N$, we denote its constraints and joint plan by $N.\const$ and $N.\Pi$, respectively. 
+A \ct node $N$ is generated by first setting its constraints ($N.\const$) and then 
+computing $N.\Pi$ by running the low-level solver, which finds a plan for each agent subject to the constraints relevant to it in $N.\const$. If the joint plan $N.\Pi$ does not contain any conflict, then $N$ is a goal. Else, one of the \ac{CBS} conflicts $\tuple{i,j,x,t}$ (where $x$ is either a vertex or an edge) in $N.\Pi$ is chosen and two new \ct nodes are generated $N_i$ and $N_j$. Both nodes have the same set of constraints as $N$, plus a new constraint, added to resolve the conflict: $N_i$ adds the constraint $\tuple{i,x,t}$
+and $N_j$ adds the constraint $\tuple{j,x,t}$. \ac{CBS} searches the \ct in a best-first manner, expanding in every iteration the \ct node $N$ with the lowest-cost joint plan. % with the lowest cost.   
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+\subsection{SIPP}
+TODO: Konstantin
+
+\subsection{From CBS to CCBS}
+TODO: Roni
+
+% START COPY AND PASTE FROM WORKSHOP PAPER
+
+\subsection{From \ac{CBS} to \ccbs}
+
+\ccbs follows the \ac{CBS} framework. %: it has a low-level search algorithm that finds plans for individual agents, and a high-level search algorithm that imposes constraints on the low-level search.
+The main differences between \ccbs and \ac{CBS} are:
+\begin{itemize}
+    \item To detect conflicts, \ccbs uses a geometry-aware collision detection mechanism.
+    \item To resolve conflicts, \ccbs uses a geometry-aware unsafe-interval detection mechanism.
+    %\item Conflict detection in \ac{CBS}, being trivial, is considered to be part of the algorithm, while conflict detection in \ccbs is considered to be performed by the auxiliary procedure that takes the agents shapes, sizes, kinematics etc. into account. In the considered case of translating disks \ccbs relies on a geometry-aware collision detection procedure.   \roni{This is a too-long discussion at this point.}
+    \item \ccbs adds constraints over pairs of actions and time ranges, instead of location-time pairs.
+    \item For the low-level search, \ccbs uses a version of \sipp adapted to handle \ccbs constraints. %its unique form of constraints. %a pathfinding algorithm is used that considers continuous time and agents' shape. 
+    
+%    Instead of imposing constraints over location-time pairs, \ccbs imposes    collision detection mechanism. 
+%    \item To resolve conflicts, \ccbs imposes constraints over action-time pairs instead of location-time pairs.
+\end{itemize}
+\noindent Next, we explain these differences in details. 
+
+
+
+\subsubsection{Conflict Detection in \ccbs}
+% KONSTANTIN LOOK HERE
+%Since actions in standard \ac{CBS} implementation have unit duration, identifying conflicts is relatively straightforward: iterate over every time step $t$ and check if there is a vertex (or an edge) that more than one agent is planning to occupy in time $t$. By contrast, in \ccbs actions can have any duration and thus iterating over time steps in meaningless. 
+
+% KONSTANTIN LOOK HERE
+In \ccbs, agents can have any geometric shape 
+and agents' actions can have any duration. 
+When agents have geometric shape, conflicts can occur also between agents traversing different edges, as well as vertex-edge conflicts, which occurs when an agent moving along an edge collides with an agent waiting at a vertex~\cite{li2019multi}. 
+Thus, a \ccbs conflict is defined as conflicts between \emph{actions}. Formally, a \ccbs conflict is a tuple $\tuple{a_i, t_i, a_j, t_j}$, representing that if agent $i$ executes $a_i$ at time $t_i$ 
+and agent $j$ executes $a_j$ at time $t_j$ then they will collide.
+
+Collision detection for arbitrary-shaped moving objects is a non-trivial problem extensively studied in computer graphics, computational geometry and robotics~\cite{jimenez20013d}. For the setting used in our experiments, there is a fast closed-loop collision detection mechanism~\cite{guy2015}. %  considered case of translating circular agents we chose one of the best-known collision detection procedures as described later in Section 4.
+In general, \ccbs as a MAPF algorithm is agnostic to the exact collision detection procedure used. %which should be chosen appropriately taking into account agents shapes and assumptions on kinematics and dynamics. For the considered case of translating circular agents we chose one of the best-known collision detection procedures as described later in Section 4.
+
+%Collision detection for arbitrary-shaped moving objects is a standalone, non-trivial problem extensively studied in computer graphics, computational geometry and robotics. \ccbs as a MAPF algorithm is agnostic to the exact collision detection procedure which should be chosen appropriately taking into account agents shapes and assumptions on kinematics and dynamics. For the considered case of translating circular agents we chose one of the best-known collision detection procedures as described later in Section 4.
+
+
+
+%[[Roni: they already did this in MCCBS, so we can't claim novelty on this]]
+%\begin{definition}[\ccbs Conflict] A \ccbs conflict w.r.t. a pair of plans $\pi_i$ and $\pi_j$ is defined by a tuple $\tuple{a_i, t_i, a_j, t_j}$,  representing that if agent $i$ executes $a_i$ at time $t_i$  and agent $j$ executes $a_j$ at time $t_j$ then they will collide.  \label{def:ccbs-conflict} \end{definition}
+
+%\roni{Maybe to add that Li et al. also defined a vertex conflict, but it is subsumed by only looking at action conflicts}
+%This means that agents may conflict even if they do not occupy the same vertex/edge at the same time. For example, consider the graph depicted in Figure~\ref{fig:conflict}. Agents $i$ and $j$ occupy locations $A$ and $C$. If at the same time $i$ moves along the edge $AD$  and $j$ moves along the edge $CB$, then a collision will occur. Such a ``criss-cross'' conflict is not considered in standard \ac{CBS}.
+
+%Since actions in standard \ac{CBS} implementation have unit duration, identifying conflicts is relatively straightforward: iterate over every time step $t$ and check if there is a vertex (or an edge) that more than one agent is planning to occupy in time $t$. By contrast, in \ccbs actions can have any duration and thus iterating over time steps in meaningless. 
+
+% KONSTANTIN LOOK HERE
+%Also, \ccbs considers the shape agents. This means that agents may conflict even if they do not occupy the same vertex/edge at the same time. For example, consider the graph depicted in Figure~\ref{fig:conflict}. Agents $i$ and $j$ occupy locations $A$ and $C$. If at the same time $i$ moves along the edge $AD$  and $j$ moves along the edge $CB$, then a collision will occur. Such a ``criss-cross'' conflict is not considered in standard \ac{CBS}.  
+
+
+%. There are standard methods to do this by  analyzing the geometric properties of the agents' movement and shape~\cite{guy2015}. %, while others apply  techniques based on time discretization~\cite{todo}.\roni{@Konstantin: maybe you can fill some references for the above?}  
+%\ccbs is agnostic to the particular collision detection mechanism that is used. 
+%\begin{figure}
+%    \centering
+%    \includegraphics[width=0.6\columnwidth]{criss-cross.PNG}
+%    \caption{An example of a conflict between different edges.}
+%    \label{fig:conflict}
+%\end{figure}
+%\subsubsection{Imposing Constraints to Resolve Conflicts in \ccbs}
+\subsubsection{Resolving Conflicts in \ccbs}
+
+%[[Roni: can squeeze this paragraph to gain space, if needed]]
+% Unsafe intervals
+The high-level search in \ccbs runs a best-first search like  regular \ac{CBS}, selecting in every iteration a leaf node $N$ in the \ct that has the joint plan with the smallest cost. 
+The collision detection mechanism checks if $N$ is a goal node. 
+If not, the high-level search expands $N$ by choosing one of the \ccbs conflicts 
+$\tuple{a_i, t_i, a_j, t_j}$ detected in $N.\Pi$ and generating two new \ct nodes, $N_i$ and $N_j$. To compute the constraints to add to $N_i$ and $N_j$, \ccbs computes 
+for each action its \emph{unsafe intervals} w.r.t the other action. 
+The unsafe interval of action $a_i$ w.r.t. action $a_j$ is 
+the maximal time interval starting from $t_i$ in which 
+performing $a_i$ will create a collision with performing $a_j$ at time $t_j$. 
+\ccbs adds to $N_i$ the constraint that agent $i$ cannot perform $a_i$ in its unsafe interval w.r.t to $a_j$, and adds to $N_j$ the constraint that agent $j$ cannot perform $a_j$ in its unsafe interval w.r.t to $a_i$. 
+
+% Example
+For example, assume that we are running \ccbs and the high-level search chooses to expand a 
+\ct node in which agent $i$ plans to move along edge $e_i$ at time 5,
+agent $j$ plans to move along edge $e_j$ at time 5.5, 
+and there is a conflict between these actions, 
+i.e., $\tuple{e_i,5, e_j, 5.5}$ is a conflict. 
+Assume that the duration required to traverse $e_i$ and to traverse $e_j$ is the same. Therefore, the unsafe interval of agent $j$ is smaller than that of agent $i$, because agent $i$ starts earlier and their respective move actions have the same duration. For our example, assume that the unsafe interval for $i$ is $[5,8)$ and for $j$ is $[5.5, 7.5)$.  \ccbs will generate two new \ct nodes: one with the additional constraint $\tuple{i, e_i, [5,8)}$ the other with the additional constraint 
+$\tuple{j, e_j, [5.5,7.5)}$. 
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+\subsubsection{\sipp for the \ccbs Low-Level}
+
+TODO: Konstantin
+ 
+% START COPY AND PASTE FROM WORKSHOP PAPER
+
+%A main challenges when implementing the low-level search of \ccbs is that time is continuous, and thus adding the time dimension results in a continuous search space. That is, the number of wait actions in every location is infinite. To resolve this, we use the \sipp algorithm~\cite{phillips2011sipp} as the low-level search algorithm. 
+%\ac{SIPP} is an algorithm for single-agent path finding with dynamic moving obstacles. The core idea of SIPP is to identify collision-free time intervals for every location $v\in V$. Using time intervals instead of specific time points allows using a discrete search algorithm.
+%\ac{SIPP} is an algorithm for single-agent path finding with dynamic moving obstacles. The core idea of SIPP is to identify collision-free time intervals for every location $v\in V$. Using time intervals instead of specific time points allows using a discrete search algorithm.
+%Specifically, 
+The low-level solver of \ccbs is based on \sipp, which is a single-agent pathfinding 
+algorithm designed to handle continuous time and moving obstacles. 
+\sipp computes for every location $v\in V$ a set of \emph{safe intervals}, 
+where a safe interval is a maximal contiguous time interval in which an agent can 
+stay or arrive at $v$ without colliding with a moving obstacle. A safe interval is \emph{maximal} in the sense that extending it to either direction yields a collision. The key observation in \sipp is that the number of safe intervals is finite and often small. To find a plan, \sipp runs an \astar{}-based algorithm, searching in the space of (location, safe interval) pairs. 
+%The output of \ac{SIPP} is a plan, i.e., a sequence of actions, that move the agent from its initial location to its goal. 
+\sipp is complete and returns time-minimal solutions. 
+
+
+%\sipp has already been used in the context of \mapf~\cite{yakovlev2017anyAngle}, but in the context of prioritized planning, that is, without guarnateeing optimality or completeness. 
+
+To adapt \sipp to be used as a low-level solver of \ccbs, we modify it so actions that violate the constraints are prohibited. 
+Let $\tuple{i, a_i, [t_i, t^u_i)}$ be a \ccbs constraint imposed over agent $i$. To adapt \sipp to plan for agent $i$ subject to this constraint, we distinguish between two cases: where $a_i$ is a move action and where $a_i$ is a wait action. 
+
+\noindent \textbf{Move actions.} 
+Let $v$ and $v'$ be the target and destination of $a_i$. 
+If the agent arrives to $v$ in the time range $[t_i, t^u_i)$ then we forbid it from directly moving to $v'$, and add an action that represents waiting at $v$ until $t^u_i$ and then moving to $v'$. 
+
+\noindent \textbf{Wait actions.} 
+Let $v$ be the vertex in which the agent is waiting in $a_i$. We forbid the agent from waiting at $v$ in the range $[t_i, t^u_i)$ by splitting the safe intervals of $v$ accordingly. For example, if $v$ is associated with a single safe interval: $[0,\infty)$, 
+then splitting it to two intervals $[0, t_i)$ and $[t^u_i,\infty)$. 
+
+
+\subsection{Theoretical Properties}
+
+%TODO: Roni
+
+
+Next, we prove that \ccbs is sound, complete, and optimal. Our analysis is based on the notion of a \emph{sound} pair of constraints, defined by Atzmon et al.~\shortcite{atzmon2018robust}. 
+\begin{definition}[Sound Pair of Constraints]
+For a given \mapfr problem, a pair of constraints is sound iff in every optimal solution it holds that at least one of these constraints hold. 
+\end{definition}
+
+\begin{lemma}
+For any \ccbs conflict $\tuple{a_i, t_i, a_j, t_j}$ 
+and corresponding unsafe intervals $[t_i,t^u_i)$
+and $[t_j,t^u_j)$
+the pair of \ccbs constraints 
+$\tuple{i,a_i,[t_i,t^u_i)}$ and
+$\tuple{j,a_j,[t_j,t^u_j)}$ 
+is a sound pair of constraints.
+\label{lem:sound}
+\end{lemma}
+\begin{proof}
+
+By contradiction, assume that there exists $\Delta_i\in(0, t^u_i-t_i]$ 
+and $\Delta_j\in(0, t^u_j-t_j]$ 
+such that perform $a_i$ at $t_i+\Delta_i$
+and $a_j$ at $t_j+\Delta_j$ does not create a conflict. That is, $\tuple{a_i, t_i+\Delta_i, a_j, t_j+\Delta_j}$ is not a conflict. % (Def.~\ref{def:ccbs-conflict}).  
+
+By definition, of $t^u_j$:
+\begin{align*}
+    \forall t\in[t_j,t^u_j): & \tuple{a_i,t_i, a_j, t} \text{~is a conflict.} \\
+    \forall t\in[t_j+\Delta_j,t^u_j): & \tuple{a_i,t_i+\Delta_j, a_j, t} \text{~is a conflict.} 
+\end{align*}
+By definition of $\Delta_i$ and $\Delta_j$: \[ \tuple{a_i, t_i+\Delta_i, a_j,  t_j+\Delta_j} \text{~is not a conflict}
+\]
+Therefore, $\Delta_i<\Delta_j$. 
+Similarly, by definition of $t^u_i$:
+\begin{align*}
+    \forall t\in[t_i,t^u_i): & \tuple{a_i,t, a_j, t_j} \text{~is a conflict.} \\
+    \forall t\in[t_i+\Delta_i,t^u_i): & \tuple{a_i,t, a_j, t_j+\Delta_i} \text{~is a conflict.} 
+\end{align*}
+Therefore, by definition of 
+$\Delta_i$ and $\Delta_j$ we have that $\Delta_j<\Delta_i$, which leads to a contradiction. 
+\end{proof}
+
+
+\begin{theorem}
+\ccbs sound, complete, and is guaranteed to return an optimal solution. 
+\label{the:optimal}
+\end{theorem}
+The proof of Theorem~\ref{the:optimal} relies on Lemma~\ref{lem:sound} and directly follows Atzmon et al.'s~\shortcite{atzmon2018robust} proof for $k$-robust \ac{CBS}. 
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+
+
+\section{Conflict and Unsafe Interval Detection Methods}
+TODO: Roni?
+
+% STASRT COPY AND PASTE FROM WORKSHOP PAPER
+
+The analysis above relies on having accurate collision detection and unsafe interval detection mechanisms. That is, the collision detection mechanism detects a collision iff one really exists, and the unsafe interval detection mechanism returns the maximal unsafe interval for every given pair of actions. 
+However, constructing such accurate mechanisms is not trivial. %When the timing of $a_i$ and $a_j$ is clear from context, we omit $t_i$ and $t_j$ and define a conflict as a pair $\tuple{a_i, a_j}$. 
+There are various ways to detect collisions between agents with volume in a continuous space, including closed-loop geometric computations as well as sampling-based approaches. See Jim{\'e}nez et al.~\shortcite{jimenez20013d} for an overview and \cite{tang2014fast} for an example of particular collision detection procedure. For the constant velocity disk-shaped agents we used in our experiments, there exists a closed-loop accurate collision detection mechanism described in \cite{guy2015}. 
+
+%, which we have used in our experiments. 
+%\ccbs is agnostic to the particular collision detection mechanism it uses, but we will assume it is accurate, that is, it detects a collision iff one really exists. 
+
+% Computing unsafe intervals
+Computing the unsafe interval of an action w.r.t to another action also requires analyzing the kinematics and geometry of the agents. 
+%As in the collision detection, \ccbs is agnostic to how the unsafe intervals are computed. 
+However, unlike collision detection, which has been studied for many years and can be computed with a closed-loop formulas in some settings, to the best of our knowledge no such closed loop formula are known for computing the unsafe intervals. 
+%\konstantin{this is a very strong claim. may be we re-phase it somehow with the sense that we were not able to find such formula in literature}\roni{Done}
+A general method for computing unsafe intervals is to apply the collision detection mechanism multiple time, starting from $t_i$ and incrementing by some small $\Delta>0$ until the collision detection mechanism reports that the unsafe interval is done. This approach is limited in that the resulting unsafe interval may be larger than the real unsafe interval. 
+
+%We discuss later the implications of using this approximate unsafe interval detection mechanism. [[Roni: now sure where we want this paragraph]] 
+%Let $t_{j,1}$ and $t_{j,2}$ denote the corresponding time points for agent $j$ and action $a_j$. \ccbs adds the constraint $\tuple{i,a_i,[t_{i,1},t_{i,2})}$ to $N_i$$\tuple{j,a_j,[t_{j,1},t_{j,2})}$ to $N_j$. 
+
+
+\subsection{Conflict Detection and Selection Heuristics}
+As noted above, conflict detection in \ccbs is more complex than in regular \ac{CBS}. Indeed, in our experiments we observed that conflict detection took a significant portion of time. To speedup the conflict detection, we only checked conflicts between actions that overlap in time and may overlap geometrically. 
+In addition, we implemented two heuristics for speeding up the detection process. We emphasize that these heuristics do not compromise our guarantee for soundness, completeness, and optimality. 
+
+
+The first heuristic we used, which we refer to as the \emph{\history heuristic}, keeps track of the number of times conflicts have been found between agents $i$ and $j$, for every pair of agents $(i,j)$.  Then, it checks first for conflicts between pair of agents with a high number of past conflicts. Then, when a conflict is found the search for conflicts is immediately halted. That found conflict is then stored in the CT node, and if that CT node will be expanded then it will generate CT nodes that are aimed to resolve this conflict. This implements the intuition that pairs of agents that have conflicted in the past are more likely to also conflict in the future.
+
+
+We have found this heuristic to be very effective in practice for reducing the time allocated for conflict detection. 
+Using this heuristic, however, has some limitations. Prior work has established that to intelligently choosing which conflict to resolve when expanding a CT node can have a huge impact on the size of the CT and on the overall runtime~\cite{boyarski2015icbs}. Specifically, Boyarski et al.~\shortcite{boyarski2015icbs} introduced the notion of \emph{cardinal conflicts}, 
+which are conflict that any way to resolve them will result in increasing the \ac{SOC}. \emph{Semi-cardinal conflicts} are conflicts that resolving them by replanning for one of the involved agents will increases the solution cost, but replanning for the other involved agents do not increase solution cost. 
+
+For \ac{CBS}, choosing to resolve first cardinal conflicts, and then semi-cardinals, yielded significant speedups~\cite{boyarski2015icbs}.  However, to detect cardinal and semi-cardinal conflicts, one needs to identify all conflicts, while the advantage of the heuristic is that we can halt the search for conflicts before identifying all conflicts. 
+
+
+ To this end, we proposed a second hybrid heuristic approach. Initially, we detect all conflicts and choose only cardinal conflicts. However, if a node $N$ does not contain any cardinal or semi-cardinal conflict, then for all nodes in the CT subtree beneath it we switch to use the \history heuristic. This hybrid approach worked well in our experiments, but fully exploring this tradeoff between fast conflict detection and smart conflict selection is a topic for future work.
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+\section{SMT-Based Approach for MAPF with Continuous Time}
+TODO: Pavel
+A close look at CBS reveals that it operates similarly as problem solving in {\em satisfiability modulo theories} (SMT) \cite{DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. The basic use of SMT divides a satisfiability problem in some complex theory $T$ into an abstract propositional part that keeps the Boolean structure of the decision problem and a simplified decision procedure $\mathit{DECIDE_T}$ that decides fragment of $T$ restricted on {\em conjunctive formulae}. A general $T$-formula $\Gamma$ being decided for satisfiability is transformed to a {\em propositional skeleton} by replacing its atoms with propositional variables. The standard SAT-solving procedure then decides what variables  should be assigned $\mathit{TRUE}$ in order to satisfy the skeleton - these variables tells what atoms hold in $\Gamma$. $\mathit{DECIDE_T}$ then checks if the conjunction of atoms assigned $\mathit{TRUE}$ is valid with respect to axioms of $T$. If so then satisfying assignment is returned and we are finished. Otherwise a conflict from $\mathit{DECIDE_T}$ (often called a {\em lemma}) is reported back to the SAT solver and the skeleton is extended with new constraints resolving the conflict. More generally not only new constraints are added to resolve a conflict but also new variables i.e. atoms can be added to $\Gamma$.
+
+The above observation inspired us to the idea to rephrase CBS$^\mathcal{R}$ in terms of SMT. $T$ will be represented by a theory with axioms describing movement rules of MAPF$^\mathcal{R}$; a theory we will denote $T_{\mathit{MAPF}^\mathcal{R}}$ \footnote{The formal details of the theory $T_{\mathit{MAPF}^\mathcal{R}}$ are not relevant from the algorithmic point of view. Nevertheless let us note that the signature of $T_{\mathit{MAPF}^\mathcal{R}}$ consists of non-logical symbols describing agents' positions at a time such as $at(a,u,t)$ - agent $a$ at vertex $u$ at time $t$.}.
+
+A plan validation procedure known from CBS will act as $\mathit{DECIDE}_{\mathit{MAPF}^\mathcal{R}}$ and will report back a set of conflicts found in the current solution. The propositional part working with the skeleton will be taken from existing propositional encodings of the standard MAPF such as the MDD-SAT \cite{SurynekFSB16} provided that constraints forbidding conflicts between agents will be omitted (at the beginning). In other words, we only preserve constraints ensuring that propositional assignments form proper paths for agents but each agent is treated as if it is alone in the instance.
+
+\subsection{Decision Variable Generation}
+
+MDD-SAT introduces decision variables $\mathcal{X}_{v}^{t}(a_i)$ and $\mathcal{E}_{u,v}^{t}(a_i)$ for discrete time-steps $t \in \{0,1,2, ...\}$ describing occurrence of agent $a_i$ in $v$ or the traversal of edge $\{u,v\}$ by $a_i$ at time-step $t$. We refer the reader to \cite{SurynekFSB16} for the details of how to encode constraints of top of these variables. As an example we show here a constraint stating that if agent $a_i$ appears in vertex $u$ at time step $t$ then it has to leave through exactly one edge connected to $u$ or wait in $u$.
+
+\begin{equation}
+   {  \mathcal{X}_u^t(a_i) \Rightarrow \bigvee_{v\;|\;\{u,v\} \in E}{\mathcal{E}^t_{u,v}(a_i)} \vee \mathcal{E}^t_{u,u}(a_i),
+   }
+   \label{eq-1}
+\end{equation}
+\begin{equation}
+   {  \sum_{v\:|\:\{u,v\} \in E }{\mathcal{E}_{u,v}^t{(a_i)} + \mathcal{E}^t_{u,u}(a_i) \leq 1}
+   }
+   \label{eq-2}
+\end{equation}
+
+Vertex collisions expressed for example by the following constraint are omitted. The constraint says that in vertex $v$ and time step $t$ there is at most one agent.
+
+\begin{equation}
+    {\sum_{a_i \in A \:|\:v \in V}{\mathcal{X}^t_v(a_i)} \leq 1
+    }
+    \label{eq-3}
+\end{equation}
+
+A significant difficulty in MAPF$^\mathcal{R}$ is that we need decision variables with respect to continuous time. Fortunately we do not need a variable for any possible time but only for important moments.
+
+If for example the duration of a conflict in neighbor $v$ of $u$ is $[t_0,t_+)$ and agent $a_i$ residing in $u$ at $t \geq t_0$ wants to enter $v$ then the earliest time $a_i$ can do so is $t_+$ since before it would conflict in $v$ (according to the above definition of collisions). On the other hand if $a_i$ does not want to waste time (let us note that we search for a makespan optimal solution), then waiting longer than $t_+$ is not desirable. Hence we only need to introduce decision variable $\mathcal{E}_{u,v}^{t_+}(a_i)$ to reflect the situation.
+
+\begin{algorithm}[t]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{generate-Decisions ($\Sigma^\mathcal{R}=(G=(V,E), A, \alpha_0, \alpha_+, \rho)$, $a_i$, $conflicts$, $\mu_{max}$)}{end} \NRICL{
+    $\textsc{Var} \gets \emptyset$\\
+    \For {each $a \in A$}{
+    $\textsc{Open} \gets \emptyset$ \\   
+    insert $(\alpha_0(a),0)$ into $\textsc{Open}$\\
+    $\textsc{Var} \gets \textsc{Var} \cup \{  \mathcal{X}_{\alpha_0(a)}^{t_0}(a) \}$\\
+    \While {$\textsc{Open} \neq \emptyset$} {
+            $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
+            remove-Min$_{t}(\textsc{Open}$) \\
+            \If {$t \leq \mu_{max}$}{
+	            \For {each $v$ such that $\{u,v\} \in E$}{
+      		             $\Delta t \gets dist(u,v) / v_a$ \\
+             		insert $(v,t+\Delta t)$ into $\textsc{Open}$\\             		
+				$\textsc{Var} \gets \textsc{Var} \cup \{ \mathcal{E}_{u,v}^{t}(a), \mathcal{X}_{v}^{t+\Delta t}(a) \}$ \\
+	            	}
+      		      \For {each $v$ such that $\{u,v\} \in E \cup \{u,u\}$}{
+            			\For {each $(a, \{u,v\}, [t_0,t_+)) \in conflicts$}{
+            				\If {$t_+ > t$}{
+             				insert $(u,t_+)$ into $\textsc{Open}$\\
+						$\textsc{Var} \gets \textsc{Var} \cup \{  \mathcal{X}_{u}^{t_+}(a) \}$ \\
+             			}
+	            		}
+      		      	}
+		}
+	  }
+    }
+    \Return $\textsc{Var}$\\
+} \caption{Generation of decision variables in the SMT-based algorithm for MAPF$^\mathcal{R}$ solving} \label{alg-DEC-gen}
+\end{footnotesize}
+\end{algorithm}
+
+Generally when having a set of conflicts we need to generate decision variables representing occurrence of agents in vertices and edges of the graph at important moments with respect to the set of conflicts. The process of decision variable generation is formally described as Algorithm \ref{alg-DEC-gen}. It performs breadth-first search (BFS) on $G$ using two types of actions: {\em edge traversals} and {\em waiting}. The edge traversal is the standard operation from BFS. Waiting is performed for every relevant period of time with respect to the end-times in the set of conflicts of neighboring vertices.
+
+As a result each conflict during variable generation through BFS is treated as both present and absent which in effect generates all possible important moments.
+
+Procedure generate-Decision generates decision variables that correspond to actions started on or before specified limit $\mu_{max}$. For example variables corresponding to edge traversal started at $t < \mu_{max}$ and finished as $t' > \mu_{max}$ are included (line 10). Variables corresponding to times greater than $\mu_{max}$ enable determining what should be the next relevant makespan limit to test (see the high-level algorithm for details). Assume having a decision node corresponding to vertex $u$ at time $t$ at hand. The procedure first adds decision variables corresponding to edge traversals from $u$ to neighbors denoted $v$ (lines 11-14). Then all possible relevant waiting actions in $u$ with respect to its neighbors $v$ are generated. Notice that waiting with respect to conflicts in $u$ are treated as well.
+
+\subsection{Eliminating Branching in CBS by Disjunctive Refinements}
+
+The SMT-based algorithm itself is divided into two procedures: SMT-CBS$^\mathcal{R}$ representing the main loop and SMT-CBS-Fixed$^\mathcal{R}$ solving the input MAPF$^\mathcal{R}$ for a fixed maximum makespan $\mu$. The major difference from the standard CBS is that there is no branching at the high-level. The set of conflicts is iteratively collected during the entire execution of the algorithm whenever a collision is detected.
+
+Procedures {\em encode-Basic} and {\em augment-Basic} build formula $\mathcal{F}(\mu)$ over decision variables generated using the aforementioned procedure. The encoding is inspired by the MDD-SAT approach but ignores collisions between agents. That is, $\mathcal{F}(\mu)$ constitutes an {\em incomplete model} for a given input $\Sigma^\mathcal{R}$: $\Sigma^\mathcal{R}$ is solvable within makespan $\mu$ then $\mathcal{F}(\mu)$ is satisfiable.
+
+Conflicts are resolved by adding disjunctive constraints (lines 13-15 in Algorithm \ref{alg-SMTCBS-low}). The collision is avoided in the same way as in the original CBS that is one of the colliding agent does not perform the action leading to the collision. Consider for example a collision on two edges between agents $a_i$ and $a_j$ as follows: $a_i$ traversed $\{u,v\}$ during $[t_0,t_+)$ and $a_j$ traversed $\{u',v'\}$ during $[t'_0,t'_+)$.
+
+%These two movements correspond to decision variables $\mathcal{E}_{u,v}^{t_0}(a_i)$ and $\mathcal{E}_{u',v'}^{t_0'}(a_j)$ hence elimination of the collision caused by these two movements can be expressed as the following disjunction: $\neg \mathcal{E}_{u,v}^{t_0}(a_i) \vee \neg \mathcal{E}_{u',v'}^{t'_0}(a_j)$. At level of the propositional formula there is no information about the semantics of a conflict happening in the continuous space; we only have information in the form of above disjunctive refinements. The disjunctive refinements are propagated at the propositional level from $\mathit{DECIDE}_{\mathit{MAPF}^\mathcal{R}}$ that verifies solutions of incomplete propositional models.
+
+%The set of pairs of collected disjunctive conflicts is propagated across entire execution of the algorithm (line 16 in Algorithm \ref{alg-SMTCBS-low}).
+
+\begin{algorithm}[h]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{SMT-CBS$^\mathcal{R}$ ($\Sigma^\mathcal{R}=(G=(V,E), A, \alpha_0, \alpha_+, \rho)$)}{end} \NRICL{
+    $conflicts \gets \emptyset$\\
+    $\pi \gets$ $\{\pi^*(a_i)$ a shortest temporal plan from $\alpha_0(a_i)$ to $\alpha_+(a_i)\;|\;i = 1,2,...,k\}$ \\
+    $\mu \gets \max_{i=1}^k{\mu(\pi(a_i))}$ \\
+    \While {$\mathit{TRUE}$}{
+         $(\pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$^\mathcal{R}$($\Sigma^\mathcal{R}$, $conflicts$, $\mu$)\\
+        \If {$\pi \neq$ UNSAT}{
+        	\Return $\pi$\\
+        }
+        $\mu \gets \mu_{next}$\\
+    }
+}
+ \caption{High-level of the SMT-based MAPF$^\mathcal{R}$ solving} \label{alg-SMTCBS-high}
+\end{footnotesize}
+\end{algorithm}
+
+Algorithm \ref{alg-SMTCBS-high} shows the main loop of SMT-CBS$^\mathcal{R}$. The algorithm checks if there is a solution for given MAPF$^\mathcal{R}$ $\Sigma^\mathcal{R}$ of makespan $\mu$. The algorithm starts at the lower bound for $\mu$ that is obtained as the duration of the longest temporal plan from individual temporal plans ignoring other agents (lines 3-4).
+
+Then $\mu$ is iteratively increased in the main loop (lines 5-9). The algorithm relies on the fact that the solvability of MAPF$^\mathcal{R}$ w.r.t. cumulative objective like the makespan behaves as a non decreasing monotonic function. Hence trying increasing makespans eventually leads to finding the optimal makespan provided we do not skip any relevant makespan $\mu$. The next makespan to try will then be obtained by taking the current makespan plus the smallest duration of the continuing movement (line 19 of Algorithm \ref{alg-SMTCBS-low}). The iterative scheme for trying larger makespans follows MDD-SAT \cite{SurynekFSB16}.
+
+\section{Experimental Results}
+TODO: Anton
+
+% START COPY AND PASTE FROM WORKSHOP PAPER
+
+
+
+% Setting: we took grid-based setting
+We conducted experiments on grids, where agents can move from the center of one grid cell 
+to the center of another grid cell. 
+The size of every cell is $1\times 1$, and 
+the shape of every agent is a an open disk which radius equals $\sqrt{2}/4$. This specific value was chosen to allow comparison with \ac{CBS}, since it is the maximal radius that allows agents to safely perform moves in which agents follow each other.
+%\footnote{In particular, this is the largest agent radius that allows the following pair of actions: agent $i$ goes up from cell $X$ to cell $Y$, and at the same time agent $j$ moves to $X$ from the right. While such train-like movements are not allowed by some \ac{MAPF} variants, they are assumed to be valid in most in research on \ac{CBS}.}
+
+
+\begin{figure}
+\centering
+    \centering
+    \includegraphics[width=0.75\columnwidth]{2k-neighborhood.png}
+%    \includegraphics[width=0.75\columnwidth]{k-neighborhood.png}
+\vspace{-0.15cm}
+    \caption{Illustration of the $2^k$ neighborhood for $k=2,3,4,$ and $5$.}
+    \label{fig:2k}
+    \vspace{-0.4cm}
+\end{figure}
+
+% The 2^k neighborhood
+To allow non-unit edge costs, we allowed agents to move in a single move action to every cell located in their $2^k$ neighborhood, where $k$ is a parameter~\cite{rivera2017grid}. Moving from one cell to the other is only allowed if the agent can move safely to the target cell without colliding with other agents or obstacles, where the geometry of the agents and obstacles are considered. The cost of a move corresponds to the Euclidean distance between the grid cells centers.  Figure~\ref{fig:2k} illustrates such a $2^k$ neighborhood. Increasing $k$ means a search space with higher branching factor, but also allows finding lower cost paths. 
+%\roni{Maybe this is vague?} 
+%As a heuristics, we pre-computed the all-pairs shortest-path distance between every pair of locations in the map, which is a perfect heuristic for single agent search. \roni{Removed for space constraints}
+
+
+\subsection{Open Grids}
+% First setup: open 10x10 grids, varying values of $k$
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+\begin{table}
+\centering
+\resizebox{0.8\columnwidth}{!}{
+\begin{tabular}{@{}c|cccc|cccc@{}}
+\toprule
+   & \multicolumn{4}{|c}{\ac{SOC}}   & \multicolumn{4}{|c}{Success Rate} \\ \midrule
+$k$ & 2     & 3    & 4    & 5    & 2    & 3    & 4    & 5    \\ \midrule
+4      & 25.7  & 21.2 & 20.4 & 20.3 & 1.00 & 1.00 & 0.97 & 0.95 \\
+%5      & 31.7  & 26.2 & 25.3 & 25.1 & 0.99 & 1.00 & 0.92 & 0.90 \\
+6      & 38.2  & 31.6 & 30.5 & 30.2 & 0.99 & 1.00 & 0.88 & 0.83 \\
+%7      & 43.8  & 36.2 & 35.0 & 34.7 & 0.98 & 0.98 & 0.84 & 0.70 \\
+8      & 49.2  & 40.7 & 39.3 & 39.0 & 0.98 & 0.97 & 0.74 & 0.57 \\
+%9      & 55.0  & 45.5 & 43.9 & 43.5 & 0.98 & 0.97 & 0.61 & 0.50 \\
+10     & 61.0  & 50.5 & 48.8 & 48.4 & 0.95 & 0.94 & 0.54 & 0.42 \\
+%11     & 68.7  & 56.8 & 54.9 & -  & 0.95 & 0.88 & 0.43 & - \\
+12     & 78.0  & 64.7 & -  & -  & 0.94 & 0.86 & - & - \\
+%13     & 84.6  & 70.2 & -  & -  & 0.92 & 0.76 & - & - \\
+14     & 90.8  & 75.3 & -  & -  & 0.88 & 0.64 & - & -  \\
+%15     & 97.1  & 80.7 & -  & -  & 0.82 & 0.58 & -  & -  \\
+16     & 102.4 & 85.2 & -  & -  & 0.76 & 0.53 & -  & -  \\
+%17     & 108.3 & 90.4 & -  & -  & 0.71 & 0.42 & -  & -  \\
+18     & 118.7 & -  & -  & -  & 0.62 & - & -  & -  \\
+%19     & 125.5 & -  & -  & -  & 0.56 & -  & -  & -  \\
+20     & 131.7 & -  & -  & -  & 0.46 & -  & -  & - \\\bottomrule
+\end{tabular}
+}
+\caption{Results for \ccbs on $10\times 10$ open grid.}% for $k=2, 3, 4$, and $5$}
+\label{tab:10x10}
+\vspace{-0.3cm}
+\end{table}
+
+\commentout{
+\begin{table}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{@{}c|cccc|cccc@{}}
+\toprule
+   & \multicolumn{4}{|c}{\ac{SOC}}   & \multicolumn{4}{|c}{Success Rate} \\ \midrule
+$k$ & 2     & 3    & 4    & 5    & 2    & 3    & 4    & 5    \\ \midrule
+4      & 25.7  & 21.2 & 20.4 & 20.3 & 1.00 & 1.00 & 0.97 & 0.95 \\
+5      & 31.7  & 26.2 & 25.3 & 25.1 & 0.99 & 1.00 & 0.92 & 0.90 \\
+6      & 38.2  & 31.6 & 30.5 & 30.2 & 0.99 & 1.00 & 0.88 & 0.83 \\
+7      & 43.8  & 36.2 & 35.0 & 34.7 & 0.98 & 0.98 & 0.84 & 0.70 \\
+8      & 49.2  & 40.7 & 39.3 & 39.0 & 0.98 & 0.97 & 0.74 & 0.57 \\
+9      & 55.0  & 45.5 & 43.9 & 43.5 & 0.98 & 0.97 & 0.61 & 0.50 \\
+10     & 61.0  & 50.5 & 48.8 & 48.4 & 0.95 & 0.94 & 0.54 & 0.42 \\
+11     & 68.7  & 56.8 & 54.9 & -  & 0.95 & 0.88 & 0.43 & 0.31 \\
+12     & 78.0  & 64.7 & -  & -  & 0.94 & 0.86 & 0.32 & 0.24 \\
+13     & 84.6  & 70.2 & -  & -  & 0.92 & 0.76 & 0.22 & 0.15 \\
+14     & 90.8  & 75.3 & -  & -  & 0.88 & 0.64 & 0.18 & -  \\
+15     & 97.1  & 80.7 & -  & -  & 0.82 & 0.58 & -  & -  \\
+16     & 102.4 & 85.2 & -  & -  & 0.76 & 0.53 & -  & -  \\
+17     & 108.3 & 90.4 & -  & -  & 0.71 & 0.42 & -  & -  \\
+18     & 118.7 & -  & -  & -  & 0.62 & 0.32 & -  & -  \\
+19     & 125.5 & -  & -  & -  & 0.56 & -  & -  & -  \\
+20     & 131.7 & -  & -  & -  & 0.46 & -  & -  & - \\\bottomrule
+\end{tabular}
+}
+\caption{Results for \ccbs on $10\times 10$ open grid.}% for $k=2, 3, 4$, and $5$}
+\label{tab:10x10}
+\end{table}
+}
+
+For the first set of experiments we used a
+$10\times 10$ open grid, placing agents' start and goal locations randomly. We run experiments with 4, 5, $\ldots, 20$ agents. For every number of agents we created 250 different problems. 
+Each problem was solved with \ccbs with $k=2, 3, 4$, and $5$. 
+%\roni{TODO: Add supp.} 
+An animation of a solution found by \ccbs for a problem with 13 agents and different values of $k$ can be seen in \url{https://tinyurl.com/ccbs-example}.
+%The file \texttt{CCBS.mp4} in the supplementary material shows an animation of the solution found by \ccbs for a problem with 13 agents and different values of $k$. 
+Table~\ref{tab:10x10} shows the results of this set of experiments. 
+ Every row shows results for a different number of agents, 
+as indicated on the left-most column. 
+The four right-most columns show the success rate, i.e., the ratio of problems solved by the \ccbs under a timeout of 60 %\roni{Anton what was the timeout?} 
+seconds, out of a total of 250 problems. 
+Data points marked by ``-'' indicate settings where the success rate was lower than 0.4. The next four columns show the average \ac{SOC}, 
+averaged over the problems solved by all \ccbs instances that had a success rate larger than 0.4. 
+
+%\roni{Was this the cutoff?} \textbf{K: Actually the cut-off was "lower than 50\%", but Anton continued running the experiments when it was not super time-consuming. That is why we have some extra data points.}
+
+The results show that increasing $k$ yields solutions with lower \ac{SOC}, as expected. 
+The absolute difference in \ac{SOC} when moving from $k=2$ to $k=3$ is the largest, and it grows as we add more agents. For example, for problems with 14 agents, moving from $k=2$ to $k=3$ yields an improvement of 15.5 \ac{SOC}, 
+and for problems with 16 agents the gain of moving to $k=3$ is 17.2 \ac{SOC}. Increasing $k$ further exhibits a diminishing return effect, where the largest average \ac{SOC} gain when moving from $k=4$ to $k=5$ is at 0.5. 
+%\roni{Maybe bla a bit on why this is, although I think it is obvious.} 
+
+
+
+Increasing $k$, however, has also the effect of increasing the branching factor, which in turns means that path-finding becomes harder. Indeed, the success rate of $k=5$ is significantly lower compared to $k=4$. An exception to this is the transition from $k=2$ to $k=3$, where we observed a slight advantage in success rate for $k=3$ for problems with a small number of agents. For example, with 6 agents the success rate of $k=2$ is 0.99 while it is 1.00 for $k=3$. An explanation for this is that increasing $k$ also means that plans for each agent can be shorter, which helps to speedup the search. Thus, increasing $k$ introduces a tradeoff w.r.t. the problem-solving difficulty: the resulting search space for the low-level search is shallower but wider. For denser problems, i.e., with more agents, $k=2$ is again better in terms of success rate, as more involved paths must be found by the low-level search. 
+
+\commentout{
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{soc-gain.PNG}
+    \caption{10$\times$10 open grid, gain of using \ccbs over  \ac{CBS}.}
+    \label{fig:soc-gain}
+\end{figure}
+Figure~\ref{fig:soc-gain} shows the tradeoff of increasing $k$ by showing the average \emph{gain}, in terms of \ac{SOC}, of using \ccbs for different values of $k$
+over \ccbs with $k=2$. The $x$-axis is the number of agents, and the $y$-axis is the gain, in percentage. We only provide data points for configurations with a success rate of at least 40\%. As can be seen, increasing $k$ increases the gain over \ac{CBS}, where for $k=4$ and $k=5$ the gain was over 20\%. Increasing $k$ also decreases the success rate, and thus the data series for larger $k$ value ``disappears'' after a smaller number of agents. 
+}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\columnwidth]{anton-example.PNG}
+    \caption{Example: \ccbs for $k=2$ finds better  solution than \ac{CBS}.}
+    \label{fig:anton-example}
+\end{figure}
+
+% Something about the standard CBS
+We also compared the performance of \ccbs with $k=2$ and a standard \ac{CBS} implementation. 
+\ac{CBS} was faster than \ccbs, as its underlying solver is \astar on a 4-connected grid, 
+detecting collisions is trivial, and it has only unit-time wait actions. However, even for $k=2$, \ccbs is able to find better solutions, i.e., solutions of lower \ac{SOC}. This is because, an agent may start to move after waiting less than a unit time step. 
+Figure~\ref{fig:anton-example} illustrates such a scenario. An animation of this example is given in \url{https://tinyurl.com/ccbs-vs-cbs2}. %file \texttt{C-CBSvsCBS.gif} in the supplementary material. % shows an animation of this example. 
+
+
+%To see this phenomenon, consider the example in Figure~\ref{fig:anton-example}. There are three agents, 1,2, and 3 in an open 2$\times$4 grid.  The left-most grid shows the initial locations of the agents,  and the right-most grid shows their goal locations. The small arrows in the agents indicate the direction each agent is about to move to.  Consider first the plan created by \ac{CBS}, which is shown on the top row of Figure~\ref{fig:anton-example}. In \ac{CBS},  every action takes unit duration. Since agent 3 cannot move upwards at time $t=0$ without colliding with agent 1, it will have to wait for time $t=1$ before starting to move.  By contrast, in \ccbs a wait action can have an arbitrary duration, and thus agent 3 can start to move upwards safely earlier than in \ac{CBS}, at time $t=0.707$. See the file \texttt{C-CBSvsCBS.gif} in the supplementary material for an animation of this example. These cases, where \ccbs with $k=2$ finds a better solution compared to standard \ac{CBS}, are not rare. However, the advantage in terms of \ac{SOC}, in all our experiments, was very small. 
+
+
+
+
+\subsection{Dragon Age Maps}
+%\begin{figure}
+%    \centering
+%    \includegraphics[width=0.5\columnwidth]{den520d.png}
+%    \caption{The \texttt{den520d} DAO map used in our experiments. \roni{Add some more figures near by to save space.}}
+%    \label{fig:dao}
+%\end{figure}
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+\begin{table}
+\centering
+\resizebox{0.7\columnwidth}{!}{
+    \begin{tabular}{@{}c|ccc|ccc@{}}
+    \toprule
+    \multicolumn{1}{l|}{} & \multicolumn{3}{c|}{\ac{SOC}} & \multicolumn{3}{c}{Success Rate} \\ \midrule
+    k                     & 2      & 3      & 4      & 2         & 3         & 4        \\ \midrule
+    10                    & 1,791  & 1,515  & 1,460  & 0.96      & 0.93      & 0.86     \\
+    15                    & 2,598  & 2,198  & 2,118  & 0.94      & 0.84      & 0.70     \\
+    20                    & 3,347  & 2,829  & 2,726  & 0.79      & 0.72      & 0.50     \\
+    25                    & 4,049  & 3,426  & 3,304  & 0.58      & 0.58      & 0.32     \\ \bottomrule
+    \end{tabular}
+}
+$\vcenter{\hbox{\includegraphics[width=0.25\columnwidth]{den520d.png}}}$
+    %\includegraphics[width=0.25\columnwidth]{den520d.png}
+
+\caption{Results for \ccbs on the \texttt{den520d} DAO map.}
+\label{tab:dao}
+\vspace{-0.3cm}
+\end{table}
+
+% Different k values DAO
+Next, we experimented with a larger grid, taken from the Dragon Age: Origin (DAO) game and made available in the \texttt{movingai} repository~\cite{sturtevant2012benchmarks}. We used the \texttt{den520d} map, shown to the right of Table~\ref{tab:dao}, which was used by prior work~\cite{sharon2015conflict}. 
+Start and goal states were chosen randomly, and we create 250 problems for every number of agents.
+%\roni{Anton: did you choose start and goal randomly, or using some other method?}Anton: yes, randomly
+\commentout{
+\begin{figure}
+    \centering
+    \includegraphics[width=\columnwidth]{runtime-dao_cropped.pdf}
+    \caption{The average runtime for the DAO map.}
+    \label{fig:dao-runtime}
+\end{figure}
+}
+Table~\ref{tab:dao} shows the results obtained for \ccbs with $k=2,3,$ and $4$, 
+in the same format as Table~\ref{tab:10x10}. The same overall trends are observed: increasing $k$ reduces the SOC and decreases the success rate. %Figure~\ref{fig:dao-runtime} shows the  average runtime required to solve the instances solved by all values of $k$. Interestingly, here we observe that $k=3$ was the fastest on average. Similar to the better success rate in the open grid experiments, we explain this by the fact that increasing $k$ also yields shorter paths to the goals, which helps decrease runtime. %This behavior corresponds to the results reported in the previous set of experiments. observed for the open gri
+
+%\roni{Maybe put here the roadmap experiments?}
+
+
+\subsection{Conflict Detection and Resolution Heuristics}
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{booktabs}
+
+\begin{table}
+\centering
+\resizebox{0.9\columnwidth}{!}
+{
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+  & &\multicolumn{1}{c}{Vanilla} & \multicolumn{1}{c}{PastConf} & \multicolumn{1}{c}{Cardinals} & \multicolumn{1}{c}{Hybrid} \\ \midrule
+
+%\multirow{3}{*}{\begin{sideways}20 agents\end{sideways}} & \multirow{3}{*}{\begin{sideways}$k$=2\end{sideways}} & Succ.     & 0.72   & 0.74 & 0.75 & 0.82\\
+\multirow{2}{*}{
+\parbox{1.5cm}{$k$=2 Agents=20}} & Success     & 0.72   & 0.74 & 0.75 & 0.82         \\
+%& Time     & 4.57   & 3.55 & 5.86 & 2.16                      \\
+& HL exp. & 765    & 712 & 453 & 452                    \\ \midrule
+\multirow{2}{*}{\parbox{1.5cm}{$k$=3 Agents=20}} & Success     & 0.67   & 0.68    & 0.75      & 0.76   \\
+%& Time     & 1.83   & 1.65    & 1.70      & 1.51   \\
+& HL exp.  & 152    & 141     & 51        & 47     \\ \midrule
+\multirow{2}{*}{\parbox{1.5cm}{$k$=4 Agents=20}} & Success     & 0.39   & 0.4    & 0.48      & 0.50   \\
+%& Time     & 4.67   & 3.84    & 3.83      & 2.71   \\
+& HL exp.  & 564    & 516     & 232       & 270     \\ \midrule
+\multirow{2}{*}{\parbox{1.5cm}{$k$=2 Agents=25}} & Success  & 0.39   & 0.43    & 0.38      & 0.53   \\
+%& Time     & 10.25  & 7.33   & 13.08    & 3.66  \\
+& HL exp. & 1762   & 1730    & 968       & 990  \\ \midrule
+\multirow{2}{*}{\parbox{1.5cm}{$k$=3 Agents=25}} & Success  & 0.44   & 0.45    & 0.60      & 0.61   \\
+%& Time     & 3.32  & 2.74   & 2.88    & 2.34  \\
+& HL exp. & 313   & 270   & 81       & 72  \\ \bottomrule
+
+\end{tabular}
+}
+\caption{Comparing conflict detection and selection methods.}
+\label{tab:heuristics}
+\end{table}
+
+%\multirow{-10}{*}{\cellcolor{yellow}\begin{sideways}TEST\end{sideways}}%
+
+In all the experiments so far we have used \ccbs with the hybrid conflict detection and selection heuristic described earlier in the paper. Here, we evaluate the benefit of using this heuristic. We compared \ccbs with this heuristic against the following: (1) Vanilla: \ccbs that chooses arbitrarily which actions to check first for conflicts, 
+(2) Cardinals: \ccbs that identifies all conflicts and chooses cardinal conflicts,   
+and (3) PastConf: \ccbs that uses the \history heuristic to choose where to search for conflicts first, and resolves the first conflict it finds.  
+
+%Table~\ref{tab:heuristics} shows results for experiments run on the \texttt{den520d} DAO map.
+Table~\ref{tab:heuristics} shows results for the \texttt{den520d} DAO map for 20 agents with $k=$ 2, 3, and 4; and 25 agents with $k$=2 and $k$=3. For every configuration we create and run \ccbs on 1,000 instances. The table shows the success rate (the row labelled ``Success'')  
+%the average runtime in seconds over instances solved by all algorithms (``Time''), 
+and the average number of high-level nodes expanded by \ccbs (``HL exp.''). The results show that the proposed hybrid heuristic 
+enjoys the complementary benefits of PastConf and Cardinals, 
+expanding as few \ct nodes as Cardinals 
+and having the highest success rate. %, expanding as few \ct nodes as Cardinals and enjoys the complementary benefits of PastConf and Cardinals: , as can be seen by its high success rate and small number of high-level expanded nodes. Thus, we used it in all our experiments. 
+
+%When comparing PastConf to Cardinals, we see that PastConf has a higher success rate but the number of high-level nodes expanded by Cardinals is smaller. This follows our motivation for the hybrid heuristic: the choice of which conflicts to resolve taken by Cardinals is important in minimizing the size of the CT, while detecting all conflicts can be too time consuming. The proposed hybrid heuristic enjoys the complementary benefits of PastConf and Cardinals, as can be seen by its high success rate and small number of high-level expanded nodes. Thus, we used it in all our experiments. 
+%its fast runtime and small number of high-level expanded nodes. Thus, we used it in all our experiments. 
+
+\subsection{Comparison to E-ICTS}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\columnwidth]{ccbsVsICTS_cropped.pdf}
+    %\includegraphics[width=0.30\columnwidth]{roadmap_cropped.pdf}
+    \caption{Success rate of \ccbs and E-ICTS in 10$\times$10 open grids.}
+    \label{fig:ccbs-vs-eicts}
+    \vspace{-0.3cm}
+\end{figure}
+
+
+Finally, we compared the performance of \ccbs and E-ICTS~\cite{walker2018extended}, a \mapfr algorithm based on the Increasing Cost Tree Search (ICTS) framework~\cite{sharon2013increasing}. Like \ccbs, E-ICTS 
+can also handle non-unit edge cost. 
+E-ICTS handles continuous time by discretizing it according to a minimal wait time parameter $\Delta$. 
+Figure~\ref{fig:ccbs-vs-eicts} shows the success rate of the two algorithms on open $10\times10$ grids with different number of agents and $k=2, 3, 4,$ and 5. 
+We thank the E-ICTS authors who made their implementation publicly available (\url{https://github.com/nathansttt/hog2}). 
+
+
+The results show that for $k=2$ and $k=3$, \ccbs works better in most cases, while E-ICTS outperforms \ccbs for $k=4$ and $k=5$. The reason for this is that as $k$ increases, more actions conflict with each other, resulting in a significantly larger \ct. Developing pruning techniques for such \ct is a topic for future work. We also compared \ccbs to ICTS over larger dragon age maps. The results where that in most cases E-ICTS solved more instances. 
+
+%In all cases, \ccbs founds a solution that is either the same or slightly better than E-ICTS. This is because  \ccbs handles continuous time directly while E-ICTS discretizes it. 
+
+Note that given an accurate unsafe interval detection mechanism, \ccbs handles continuous time directly, and thus can return better solutions than E-ICTS. However, the unsafe interval detection mechanism we implemented did, in fact, discretize time, and so the comparison to E-ICTS is valid. That being said, we note that these are different implementations and different algorithmic families, and we do not presume to infer from this set of experiments when each algorithm is better. This is an open question even for basic \mapf.  
+
+\commentout{
+\begin{figure}
+    \centering
+    \includegraphics[width=0.35\columnwidth]{roadmap_cropped.pdf}
+    \caption{The roadmap created for \texttt{den520d} DAO map.}
+    \label{fig:roadmap}
+\end{figure}
+}
+We also performed a limited set of experiments on roadmaps, to demonstrate the applicability of \ccbs beyond grid domains. 
+%We created roadmaps  based on the the \texttt{den520d} DAO map using the OMPL library (http://ompl.kavrakilab.org), which is a widely used robotics library for path planning.
+%Figure~\ref{fig:roadmap} shows a roadmap 
+We created a roadmap with 878 vertices and 14,628 edges based on the \texttt{den520d} DAO map using the OMPL library (http://ompl.kavrakilab.org). 
+%, which is a widely used robotics library for path planning. 
+We create 250 problems with 10, 15, and 20 agents. The resulting success rate was 0.89, 0.60, and 0.22, 
+and the SOC was 1,459, 2,082, and 2,688, respectively. 
+In \url{https://tinyurl.com/ccbs-roadmap2} there is an animation showing a solution found by \ccbs for a smaller roadmap. 
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+\section{Related Work}
+TODO: Roni
+
+Works related to us but not needed to explain our approach
+
+
+% START COPY AND PASTE FROM WORKSHOP PAPER
+
+
+% Some prior work
+%Several prior work considered \mapfrelax some of the simplifying assumptions made by most \ac{MAPF} research. 
+Yakovlev and Andreychuk~\shortcite{yakovlev2017anyAngle} proposed AA-SIPP($m$), an any-angle \ac{MAPF} algorithm. 
+%for agents  hat can move along in any angle they choose.  Their algorithm, called AA-SIPP($m$), 
+AA-SIPP($m$) is based on \sipp and adopts a prioritized planning approach. Ma et al.~\shortcite{ma2019lifelong} also used \sipp in a prioritized planning framework for lifelong \mapf. Both algorithms do not guarantee completeness or optimality. 
+%They too cannot guarantee optimality or completeness, and are limited to 4-connected grids.  is similar to \ccbs in that agents can wait for any desired duration. Also, AA-SIPP($m$) heavily relies on \ac{SIPP}. Unlike \ccbs, they adopted a prioritized planning approach that does not guarantee completeness or optimality.  Ma et al.~\shortcite{ma2019lifelong} used \sipp in a prioritized planning framework for lifelong \mapf. They too cannot guarantee optimality or completeness, and are limited to 4-connected grids. 
+%: agents plan sequentially, and an agent is constrained to avoid conflicting with the plans already created for other agents. Consequently, AA-SIPP($m$) 
+Li et al.~\shortcite{li2019multi} proposed \ac{MCCBS}, a \ac{CBS}-based algorithm for agents with a geometrical shape that may have different configuration spaces. However, they assumed all actions have a unit duration and did not address continuous time. %We note that adapting \ccbs to cases where the agents have different configuration spaces, requires no algorithmic changes.
+%Li et al.~\shortcite{li2019multi} proposed a \ac{CBS}-based algorithm for solving the Large-Agents \ac{MAPF} (LA-MAPF) problem. In LA-MAPF, agents have a geometrical shape, and may have different configuration spaces. Their algorithm, called \ac{MCCBS}, is also based on \ac{CBS}.  However, they assumed all actions have a unit duration and did not address continuous time. We note that adapting \ccbs to cases where the agents have different configuration spaces, requires no algorithmic changes.  
+%Walker et al.~\shortcite{walker2018extended}  adapted the \ac{ICTS} \ac{MAPF} algorithm~\cite{sharon2013increasing} to \mapfr, that is, to consider actions with non-uniform duration and agents with a geometric shape. However, their extended \ac{ICTS} does not allow agents to wait an arbitrary amount of time, and relies on discretizing the possible wait times (they called it $\delta$). By contrast, \ccbs relies on a different \ac{MAPF} framework -- \ac{CBS} -- and do not require a-priori definition of the smallest wait action. Still, \ccbs maintains optimality and completeness. 
+%In a different work, 
+Walker et al.~\shortcite{walker2017using} proposed \ac{CBS}-CL, a \ac{CBS}-based algorithm designed to handle non-unit edge costs and hierarchy of movement abstractions. \ac{CBS}-CL does not allow reasoning about continuous time and does not return provably optimal solutions. H{\"o}nig et al.~\shortcite{honig2017summary} proposed MAPF-POST, which is a post-processing step that adapts a \ac{MAPF} solution to different action durations that due to kinematic constraints. MAPF-POST does not guarantee optimality as well. 
+
+
+
+dRRT* is a sample-based \ac{MAPF} algorithm designed for continuous spaces~\cite{dobson2017scalable}. dRRT* is asymptotically complete and optimal while \ccbs is optimal and complete, and is designed to run over a discrete graph. ORCA~\cite{van2005prioritized,snape2011hybrid} 
+and ALAN~\cite{godoy2018alan} are fast and distributed \ac{MAPF} algorithms for continuous space, but they do not provide optimality or completeness guarantees. 
+
+
+
+%\roni{Verify that this is correct} \roni{TODO Roni: add a bit more references to suboptimal MAPF.}\roni{Konstantin: can you add a bit about any-angle stuff for MAPF?}
+
+
+
+Table~\ref{tab:related-work} provides an differential overview of related work on \ac{MAPF} beyond its basic setting. 
+Columns ``N.U.'',  ``Cont.'', ``Ang.'', ``Vol.'', ``Opt.'', and ``Dist.'', means support for non-uniform action durations, 
+actions with arbitrary continuous duration, 
+actions beyond the 4 cardinal moves, agents with a volume (i.e., some geometric shape), 
+returns a provably optimal solution, 
+and distributed algorithm, respectively. Rows correspond to  different algorithms or family of algorithms. %The \ccbs row is highlighted. % to the generality of \ccbs. 
+
+%Yakovlev and Andreychuk~\shortcite{yakovlev2017anyAngle} yakovlev2017anyAngle
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+\section{Discussion}
+
+\subsection{Continuous Space}
+TODO: Konstantin
+\textbf{K: I don't think we need this section anymore}
+
+
+There are many ways to define what ``continuous space'' means ....
+
+
+When an agent moves it occupies an area in some time. 
+1) All is blocked until action is done
+2) Tiles are blocked for specified discrete times
+3) Space is continuos, and time is contiuos, some words that shoudl make sense???
+
+a) Specific vertices and edges, but agents have a shape and moving along an edge
+occupies ...[[some word that means space and time are continuous in this movement, not like tiles approach]]
+
+b) Any-angle -- agent move from vertex to vertex,
+but are not confined to specific edges
+
+c) Any-position -- there are no vertices -- agents are allowed to occupy any position in some Euclidean space
+
+Configuration space search -- instead of a location, the agent has a configuration, this includes the space it occupies, but also its orientation, 
+and structure (think robotic arm)
+
+
+\section{Conclusion}
+
+% START COPY AND PASTE FROM WORKSHOP PAPER
+
+
+We proposed \ccbs, a sound, complete, and optimal \mapf algorithm that supports continuous time, actions with non-uniform duration, and agents and obstacles with a geometric shape. 
+\ccbs follows the \ac{CBS} framework, using an adapted version of \sipp as a low-level solver, and unique types of conflicts and constraints in the high-level search. 
+%We prove that \ccbs is sound, complete, and optimal. 
+To the best of our knowledge, \ccbs is the first \ac{MAPF} algorithm to provide optimality guarantees for such a broad range of \ac{MAPF} settings. 
+Our experimental results showed that \ccbs can solve actual \ac{MAPF} problems and finds better solutions than \ac{CBS}. Comparing to E-ICTS, \ccbs is sometimes faster and sometimes slower, but it always returns better solutions.  
+%However, current results were based on grid maps that are extended by considering $2^k$ neighborhoods. We chose grids as a domain to allow natural comparison with existing solvers, but \ccbs can work on arbitrary graphs. Indeed, this is a topic for future work. 
+This work also highlighted that conflict detection becomes a bottleneck when solving \mapfr problems. We suggested a hybrid heuristic for reducing this cost. Future work may apply meta-reasoning techniques to decide when and how much to invest in conflict detection throughout the search. 
+
+%TODO: MENTION Lifelong Path Planning with Kinematic Constraints for Multi-Agent Pickup and Delivery (not CBS, but uses SIPP, computes collisions geometrically, but only for 4-connected)
+
+
+
+
+
+
+
+% END COPY AND PASTE FROM WORKSHOP PAPER
+
+
+
+\subsubsection*{Acknowledgments}
+This research was partially funded by the ISF grant to Dr. Roni Stern no. 201/17. 
+
+%\bibliographystyle{theapa}
+%\noindent {\bf References.}
+\section*{Bibliography}
+\bibliography{library}
+
+
+\end{document} 

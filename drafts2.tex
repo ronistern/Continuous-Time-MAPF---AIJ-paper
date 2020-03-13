@@ -1,0 +1,72 @@
+
+
+%To highlight this we call our problem \textbf{\mapf in Euclidean space with continuous time} (\mapfect) and define it below. 
+%To simplify exposition we assume all agents (i) to be of the same shape and size, i.e. open disks, (ii) to move with the same (constant) speed with inertial effects neglected, i.e. agents start and stop moving instantaneously. Note that the algorithms we propose in this work are not limited to these assumptions and can be generalized as described in Section~\ref{sec:generalizing}. \roni{TODO: Make this section :)}\roni{I don't see why we need the fact that the agents have the same shape and size before we talk about collision detection and types of collision}
+%To simplify exposition we assume all agents to be of the same shape and size. 
+
+
+Like classical \mapfr, \mapfect is also defined with respect to a graph $G=(V,E)$, but here $G$ is a weighted graph. 
+Let $w(e)$ denote the weight of edge $e$. 
+Time is no longer discretized into time steps, but rather the timeline is continuous and unbounded: $T=[0, +\infty)$. 
+Actions in \mapfect have a duration, and thus an action in \mapfect is a function of the form $a:V\rightarrow V\times T$, 
+where $a(v)=(v',d)$ means the agent's current location is $v$ and after duration $d$ it will be in $v'$. 
+
+
+A \mapfect problem with $k$ agents is defined by a tuple 
+%$\langle G, s, t, \coord, \isconflict \rangle$,
+$\langle G, A_G, s, t, \isconflict \rangle$, 
+where $G$, $s$, and $t$ are the graph, source, and target functions from classical \mapf, 
+%$\coord$ is the function described for \mapfr for mapping a vertex to a unique coordinate in a Euclidean space, WE DONT' NEED THIS
+$A_G$ is the set of applicable actions, 
+and $\isconflict$ is a \emph{conflict detection} function of the form
+$\isconflict: A_G\times T\times A_G \times T\rightarrow \{\true, \false\}$. 
+
+
+
+There are two types of actions: move and wait. 
+For every edge $e=(v,v')$ in $G$ there is corresponding move action $a$ whose duration is $w(e)$. 
+For every vertex $v$ in $G$ and positive real number $d$ there is a corresponding wait action $a$ whose duration is $d$. 
+Let $A_G$ be the set of all possible actions in $G$. Note that $A_G$ is an infinitely large set. 
+
+
+A \mapfect problem with $k$ agents is defined by a tuple 
+%$\langle G, s, t, \coord, \isconflict \rangle$,
+$\langle G, A_G, s, t, \isconflict \rangle$, 
+where $G$, $s$, and $t$ are the graph, source, and target functions from classical \mapf, 
+%$\coord$ is the function described for \mapfr for mapping a vertex to a unique coordinate in a Euclidean space, WE DONT' NEED THIS
+$A_G$ is the set of applicable actions, 
+and $\isconflict$ is a \emph{conflict detection} function of the form
+$\isconflict: A_G\times T\times A_G \times T\rightarrow \{\true, \false\}$. 
+
+For a sequence of actions $\pi=(a_1,\ldots, a_n)$ that is a single-agent plan for agent $r$, 
+we now use the notation $\timep(\pi,r,x)$ to denote the point in time $i$ reached after executing the first $x$ actions in $\pi$ starting from $s(r)$. 
+A pair of single-agent plans $\pi=(a_1,\ldots a_n)$ and $\pi'=(a'_1,\ldots a'_{n'})$
+for a pair of agents $r$ and $r'$ is said to have a conflict if and only if there exists $x\in\{1,\ldots, n\}$
+and $x'\in\{1,\ldots, n'\}$ such that $\isconflict(a_x, \timep(\pi,r,x), a'_{x'}, \timep(\pi', r', x'))=\true$. 
+A valid solution to a \mapfect problem is a set of $k$ single-agent plans such that every pair of single-agent plans and corresponding agents do no have a conflict. 
+The \isconflict function encapsulates a collision detection that considers the agents' geometry and motion kinematics. 
+For example, for disc-shaped agents with radius $r$, one can define \isconflict to return a conflict occurs if there is a time in which the distance between the centers of the agents is less than $2r$. \roni{Maybe mroe details here on the example}
+The cost of a single-agent plan is the sum of the durations of its constituent actions, and in this work we focus on finding solutions with minimal sum of costs. 
+
+
+% Concrete example
+The definition of \mapfect is very general, because the \isconflict can encapsulate virtually any computation. 
+To show this, assume 
+we want to define 
+
+
+
+%Each agent can perform two types of actions: a \textit{wait} action and a \textit{move} action. \roni{I think this repeats the above}
+%The timeline is continuous and unbounded: $T=[0, +\infty)$.   The duration of a wait action can be any positive real number.  Unlike numerous works on MAPF, we do not assuming agents teleport from one vertex to the other when performing a move.  \roni{TODO: Maybe we can say this in a nicer way, that sounds less offensive to prior work.} Instead an agent continuously moves in Euclidean space from one point to the other. The duration of a move is the times is takes to move along the length of the edge,  and the length of an edge from $v$ to $v'$ is  the Euclidean distance between $\coord(v)$ and $\coord(v')$.  \roni{What exactly is "translation speed"? I know that for a robotics person this is super trivial.} \roni{Post-discussion: change to move, since translation excludes rotation moves} \roni{Add a conflict-detection function}
+
+%\textbf{Konstantin: some words about relation of our problem to MAPFR ???} Done. 
+
+% What is a solution, what is the sum of costs
+%Just like in classical \mapf, a solution to \mapfect is a set of \emph{single-agent plans}, one per agent.  A conflict in \mapfect occurs only between plans $\pi_i$ and $\pi_j$ in which agents occupy the same space at the same time.  In case of the open-disk shaped agents with radius $r$, a conflict occurs if there is a time in which the distance between the centers of the agents is less than $2r$. 
+%which when for an agent $i$ is a sequence of actions $\pi_i$ such that if $i$ executes this sequence then it will reach its goal. We assume that the agents stay at their goal locations and do not disappear after reaching them. Two plans $\pi_i$ and $\pi_j$ are said to be collision-free if the agents never collide when following them. 
+%A solution is \emph{valid} if it is collision free.  \roni{Maybe we need in the problem definition something about agents' sizes?}
+%A set of plans, one for each agent, is called a \emph{joint plan}. 
+%A solution to a MAPF-E-CT is a joint plan such that any pair of individual plans comprising it is collision-free. Having a solution, all agents may start executing their respective plans at the same time to reach their goal locations without colliding with each other. 
+%In this work we focus on finding solutions that are optimal with respect to their SOC, but  where the cost of a single-agent plan is the sum of durations of its constituent actions. 
+%The SOC is computed 
+%To define cost-optimality of a MAPF-E-CT solution, we first define the \emph{cost} of a plan $\pi_i$ to be the sum of the durations of its constituent actions. Several forms of solution cost-optimality have been discussed in \ac{MAPF} research. Most notable are \emph{makespan} and \emph{\ac{SOC}}, where the makespan is the max over the costs of the constituent plans and \ac{SOC} is their sum. The problem we address in this work is to find a solution to a given problem that is optimal w.r.t its \ac{SOC}, that is, no other solution has a lower \ac{SOC}. 
