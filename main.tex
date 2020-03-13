@@ -32,6 +32,7 @@
 
 \newcommand{\tuple}[1]{\ensuremath{\left \langle #1 \right \rangle }}
 \newcommand{\mddr}{\ensuremath{MDD_R}}
+\newcommand{\implicitct}{\textit{ImplicitCT}\xspace}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amssymb}
@@ -127,6 +128,7 @@
 \newcommand{\coord}{\textit{coord}\xspace}
 \newcommand{\iscollision}{\textsc{IsCollision}\xspace}
 \newcommand{\inconflict}{\textsc{InConflict}\xspace}
+\newcommand{\OPEN}{\textsc{Open}\xspace}
 
 
 
@@ -966,7 +968,7 @@ Originally, \sipp uses the trajectories of the dynamic obstacles to compute the 
 
 Consider the following example: two \ccbs constraints imposed over the wait actions associated with the same graph vertex $v$ are passed to \sipp: $\tuple{i, a_1, [t_1, t^u_1)}$ and $\tuple{i, a_2, [t_2, t^u_2)}$ ($t_1 < t^u_1 < t_2 < t^u_2$). Then, the safe intervals for $v$ are the following: $[0; t_1]$, $[t^u_1; t_2]$, $[t_u^2, +\infty)$.\footnote{Note that the safe intervals include the boundary time moments $t_1$, $t_2$. The rationale behind this is the following. \ccbs constrains wait actions that have certain durations, that is -- no wait action is possible that starts at $t_1$ or $t_2$. However, the agent can start moving at $t_1$ (or $t_2$) and thus leave the vertex immediately after that time moment, without violating the \ccbs constraint.}
 
-\ccbs constraints imposed over move actions are incorporated into \sipp in a different way. Let $\tuple{i, a_i, [t_i, t^u_i)}$ be a \ccbs constraint imposed over a move action that is defined by the graph edge $(v, v')$ and a \sipp search node associated with the vertex $v$
+\ccbs constraints imposed over move actions are incorporated into \sipp in a different way. Let $\tuple{i, a_i, [t_i, t^u_i)}$ be a \ccbs constraint imposed over a move action that is defined by the graph edge $(v, v')$ and a \sipp search node associated with the vertex $v$. 
 %$n=\langle v, [t_1, t_2] \rangle$. 
 For this search node, we replace the action $a_i$ 
 with action $a_i'$ that starts by waiting in $v$ for duration $t^u_i-t_i$ before moving to $v'$.
@@ -1004,22 +1006,21 @@ Third, SCIPP is designed to consider soft-constraints so as to allow bounded-sub
 %Let $v$ be the vertex in which the agent is waiting in $a_i$. We forbid the agent from waiting at $v$ in the range $[t_i, t^u_i)$ by splitting the safe intervals of $v$ accordingly. For example, if $v$ is associated with a single safe interval: $[0,\infty)$, then splitting it to two intervals $[0, t_i)$ and $[t^u_i,\infty)$. 
 
 \begin{algorithm}
-\SetKwBlock{CCBS}
-{\ccbs($\mathcal{G}=(V,E)$, \source, \target)}{end} 
-CCBS{
-    \ForEach{agent $i$}{
+	\SetKwInOut{Input}{input}
+	\Input{$\mathcal{G}=(V,E)$, \source, \target)}
+	\ForEach{agent $i$}{
         $\pi_i\gets$\astar$\big(\mathcal{G},\source(i),\target(i)\big)$ \nllabel{line:sipp} \\
     }
     $N\gets \Big(\emptyset,(\pi_1,\ldots,\pi_k)\Big)$\\
-    Create OPEN; Add $N$ to OPEN\\
-    \While{OPEN is not empty}{
-        $N\gets$ pop $N$ from OPEN such that
-        $\cost(N.\Pi)=\min\limits_{N'\in OPEN}\cost(N'.\Pi)$ \nllabel{line:pop} \\
+    Create \OPEN; Add $N$ to \OPEN\\
+    \While{\OPEN is not empty}{
+        $N\gets$ pop $N$ from \OPEN such that
+        $\cost(N.\Pi)=\min\limits_{N'\in \OPEN}\cost(N'.\Pi)$ \nllabel{line:pop} \\
         \If{$N.\Pi$ has no conflicts}{
             \Return $N.\Pi$
         }
         $\tuple{i,j, (a_i, t_i), (a_j,t_j)}\gets$ FindConflict($N.\Pi$) \nllabel{line:findconflicts}\\
-        \For{$l\in\{i,j\}$}{
+        \For{$l\in\{i,j\}$ \nllabel{line:ccbs:start-expand}}{
             $[t_l,t^u_l)\gets $ compute unsafe interval for agent $l$ \nllabel{line:unsafe} \\
             $\const \gets N.\const\cup \{
             \tuple{l, [t_l, t^u_l)} \}$ \nllabel{line:ccbsconstraints}\\ 
@@ -1027,10 +1028,10 @@ CCBS{
             \csipp\big(\mathcal{G},\source(l),\target(l), \const \big)$\\
             $\Pi'\gets (N.\Pi\setminus \{N.\pi_l\}) \cup \{\pi'_l\}$ \\
             $N_l\gets (\const, \Pi')$\\ 
-            Add $N_l$ to OPEN 
+            Add $N_l$ to \OPEN \nllabel{line:ccbs:end-expand}
         }
     }
-}
+
 \caption{\ccbs pseudo code.}
 \label{alg:ccbs}
 \end{algorithm}
@@ -1038,11 +1039,11 @@ CCBS{
 
 \subsubsection{\ccbs Pseudo-code}
 Algorithm~\ref{alg:ccbs} lists the complete pseudo-code of \ccbs. First, a simple \astar search is used to find a single-agent plan for each agent ignoring all other agents (line~\ref{line:sipp}). Note that \sipp is not needed as this stage, because the optimal plan for each agent at this stage includes only move actions. %\konstantin{I think that in our implementation we use A* for the first pass. There is no point in running SIPP as for every vertex there exist only one maximal safe interval $[0, +\infty)$ at first}\roni{Ok, fixed} 
-This set of single-agent plans is used to create the root of the \ct, which is added to the open list (OPEN). 
-Then, in every iteration of the algorithm we extract the node $N$ from OPEN that has represents a solution with a minimal cost, compared to solutions in the other nodes in OPEN (line~\ref{line:pop}). 
+This set of single-agent plans is used to create the root of the \ct, which is added to the open list (\OPEN). 
+Then, in every iteration of the algorithm we extract the node $N$ from \OPEN that has represents a solution with a minimal cost, compared to solutions in the other nodes in \OPEN (line~\ref{line:pop}). 
 If $N$ has no \ccbs conflicts, we return $N.\Pi$. 
 Otherwise, some \ccbs conflict $\tuple{i,j, (a_i,t_i), (a_j,t_j)}$ detected for $N.\Pi$ is chosen. 
-For each agent in the conflict, i.e., $i$ and $j$, we compute the unsafe interval for its action (line~\ref{line:unsafe}), added create a new \ct node with the corresponding constraint and a new single-agent plan for that agent. Note that in the pseudo code we use $N.\pi_l$ to refer to the single agent plan of agent $l$ in $N.\Pi$. This \ct node is added to OPEN, so that it may be chosen for expansion in future iterations. 
+For each agent in the conflict, i.e., $i$ and $j$, we compute the unsafe interval for its action (line~\ref{line:unsafe}), added create a new \ct node with the corresponding constraint and a new single-agent plan for that agent. Note that in the pseudo code we use $N.\pi_l$ to refer to the single agent plan of agent $l$ in $N.\Pi$. This \ct node is added to \OPEN, so that it may be chosen for expansion in future iterations. 
 
 
 \subsection{Theoretical Properties}
@@ -1231,19 +1232,25 @@ In more general cases, not only new constraints are added to resolve a conflict 
 
 \subsection{SMT for Solving Fixed-Makespan \mapfr Problems}
 
-Next, we propose an SMT-based algorithm for solving the following decision problem: given a \mapfr problem $\Pi$ and a makespan bound $\mu$, is there a solution to $\Pi$ whose makespan is at most $\mu$? 
+Next, we propose an SMT-based algorithm for solving the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
 We call this decision problem the \emph{fixed-makespan \mapfr problem}.  
 
 
 % High-level: we grow an implicit CT
-Our SMT-based algorithm for solving a fixed-makespan problem mimics to some extent the behavior of \ccbs by \emph{implicitly growing the \ct} of \ccbs. This \ct is implicit in the sense that it each \ct node contains \ccbs constraints but it does not contain a solution that satisfies them. That is, every node $N$ in the implicit \ct is defined by $N.\const$ and not $N.\pi$. 
+Our SMT-based algorithm for solving a fixed-makespan problem mimics to the behavior of \ccbs by growing an implicit version of the \ccbs Constraint Tree (\ct). 
+This implicit \ct represents only the leaves of the \ccbs Constraint Tree 
+and every node in the implicit \ct represents a set of \ccbs constraints. 
+This is slightly different from a \ct node in \ccbs, which represents a set of \ccbs constraints and a solution that satisfy them. That is, a \ct node $N$ in \ccbs defines $N.\const$ and $N.\pi$ while a node $N$ in our implicit \ct represents only $N.\const$. 
 
 % High-level: the PS is created to find a solution for the implicit CT
-Our \ps is created such that a satisfying assignment to the \ps defines a \mapfr solution $\pi$ that is consistent with the constraints of some leaf $N$ of the implicit \ct. 
-The \decidet procedure is analogues to checking if $N$ is a goal \ct node. That is, \decidet checks if $\pi$ is valid, i.e., if it represents a set of single-agent plans that do not conflict. 
-If $\pi$ is not a valid solution, our \decidet returns a corresponding \ccbs conflict. 
-Then, we extend the implicit \ct by expanding $N$ according to this \ccbs conflict as done by \ccbs. 
-The \ps is updated to reflect the change in the implicit \ct. 
+The \ps of our SMT-based algorithm is created for a given implicit \ct
+such that a satisfying assignment to the \ps 
+defines a \mapfr solution $\Pi$ that is consistent with the constraints of at least one (leaf) node $N$ of the implicit \ct. 
+We describe the  construction of this \ps in Section~\ref{sec:propositional-skeleton}. 
+The \decidet procedure checks if $\Pi$ is valid, i.e., if it represents a set of single-agent plans that do not conflict.\footnote{This \decidet procedure is analogues to checking if the node $(N.\const, \Pi)$ is a goal \ct node in \ccbs.} 
+If $\Pi$ is not a valid solution, our \decidet returns a corresponding \ccbs conflict. 
+This conflict is used to extend the implicit \ct by expanding $N$ according to this \ccbs conflict as done by \ccbs. 
+The \ps is then updated to reflect the change in the implicit \ct. 
 This process continues until a solution is found or until the \ps is unsatisfiable, in which case we can return that there is no solution to the given fixed-makespan \mapfr problem. 
 \konstantin{Does this means that SMT-based approach is 'strongly' complete (apposed to CCBS that is 'weakly' complete)?}
 \roni{Yes, but note that this is just for the fixed-makespan problem. For the optimal-makespan problem, we are still weakly complete: we don't know when to stop increasing the makespan bound}
@@ -1252,148 +1259,72 @@ This process continues until a solution is found or until the \ps is unsatisfiab
 
 \begin{algorithm}
 \SetKwInOut{Input}{input}
-%\SetKwIBlock{($\mathcal{G}=(V,E)$, \source, \target,X)}
+\Input{($\mathcal{G}=(V,E)$, \source, \target,X)}
     $N\gets\emptyset$\\
-    Create LEAVES; Add $N$ to LEAVES \nllabel{line:smt:init}\\
-    \While{LEAVES is not empty}{
-        \ps $\gets$ CreatePS(Leaves) \nllabel{line:smt:createps}\\
-        $(N,\pi)\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
-        \If{No solution found to \ps }{
-            \Return No solution exists\\
+    Create \implicitct; Add $N$ to \implicitct \nllabel{line:smt:init}\\
+    \While{\implicitct is not empty}{
+        \ps $\gets$ CreatePS(\implicitct) \nllabel{line:smt:createps}\\
+        $(N,\Pi)\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
+        \If{No solution found (i.e., Solve(\ps) returned null)}{
+            \Return No solution exists \nllabel{line:smt:no-solution}\\
         }
-        $Con\gets$ \decidet($\pi$) \nllabel{line:smt:decidet}\\
-        \If{No conflict found (i.e., $Con$ is null)}{
-            \Return $\pi$\\
+        $Con\gets$ \decidet($\Pi$) \nllabel{line:smt:decidet}\\
+        \If{No conflict found (i.e., \decidet($\Pi$) returned null)}{
+            \Return $\Pi$ \nllabel{line:smt:solution}\\
         }
-        Remove $N$ from LEAVES\\        
-        $N_1, N_2\gets$ expand $N$ according to $Con$\\
-        Add $N_1$ and $N_2$ to LEAVES\\
+        Remove $N$ from \implicitct\\        
+        $N_1, N_2\gets$ expand $N$ according to $Con$ \nllabel{line:smt:expand}\\
+        Add $N_1$ and $N_2$ to \implicitct\\
     }
 \caption{SMT approach to Fixed-Makespan \mapfr}
 \label{alg:smt-ccbs}
 \end{algorithm}
 
 
-Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. The LEAVES datastructure contains the set of leaf nodes of our implicit \ct. 
-Initially, LEAVES contain a node with an empty set of constraints (line~\ref{line:smt:init}). 
-In every iteration, a \ps is created for the current set of \ct leaves (line~\ref{line:smt:createps}). 
+Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. 
+The \implicitct datastructure contains the set of leaf nodes of our implicit \ct. 
+Initially, \implicitct contain a node with an empty set of constraints (line~\ref{line:smt:init}). 
+In every iteration, a \ps is created for \implicitct (line~\ref{line:smt:createps}). 
 A SAT solver is used to search for a solution to this \ps (line~\ref{line:smt:solve}). 
 If no solution exists, the given decision problem is unsolvable. 
 Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
 If it is a valid solution, we return it.
-Otherwise, \decidet returns a \ccbs conflict and we create two new leaf \ct nodes by adding \ccbs constraints to resolve this conflicts. 
-
-We describe this SMT-based algorithm in detail below.
+Otherwise, \decidet returns a \ccbs conflict and we create two nodes in \implicitct by adding \ccbs constraints to resolve this conflicts (line~\ref{line:smt:expand}). 
+Creating these two nodes is done exactly as is done by \ccbs (see Algorithm~\ref{alg:ccbs} lines~\ref{line:ccbs:start-expand}-\ref{line:ccbs:end-expand}) except that a new solutions that satisfy these constraints is not computed at this stage (recall that the implicit \ct contains only constraints and not solutions in each node). 
+These new nodes replace $N$ in \implicitct, and the process continues until either a solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
 
 
 \subsubsection{Generating the Propositional Skeleton}
 \label{sec:propositional-skeleton}
 %The propositional skeleton in our SMT-based algorithm asks the question: is there a solution to the given fixed-makespan \mapfr problem that is consistent with a given set of \ccbs constraints. We describe how to generate such a propositional skeleton in Section~\ref{sec:propositional-skeleton}. The \decidet
 
-\begin{algorithm}[h]
-\begin{footnotesize}
-\SetKwBlock{NRICL}{SMT-CBS-Fixed$_R$($\mathcal{G}=(V,E)$, \source, \target, $conflicts$, $\mu$)}{end} \NRICL{
-	    $\textsc{Rdd} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
-	    $\mathcal{F}(\mu) \gets$ encode($\textsc{Rdd}$, $\mathcal{G}$, \source, \target, $conflicts$ ,$\mu$)\\
-	    \While {$\mathit{TRUE}$}{
-	        $assignment \gets$ consult-SAT-Solver$(\mathcal{F}(\mu))$\\
-	        \If {$assignment \neq \mathit{UNSAT}$}{
-	            $\Pi \gets$ extract-Solution$(assignment)$\\
-	            $collisions \gets$ validate-Plans($\Pi$) $\;\;\;\;$ /* $\mathit{DECIDE}_{\mathit{MAPF}_R}$ */\\
-                   \If {$collisions = \emptyset$}{
-                      \Return $(\Pi, \emptyset, \mathit{UNDEF})$\\
-                   }
-                      \For{each $\tuple{a_i,t_i,a_j,t_j} \in collisions$}{                     
-                      {\bf let} $a_i=\tuple{(u_i,v_i), [t_i,t'_i]}$\\
-                      {\bf let} $a_j=\tuple{(u_j,v_j), [t_j,t'_j]}$\\                                            
-                      
-                      $\mathcal{F}(\mu) \gets \mathcal{F}(\mu) \cup \{\neg \mathcal{E}_{u_i,v_i}^{t_i,t'_i} \vee \neg \mathcal{E}_{u_j,v_j}^{t_j,t'_j}$\}\\
-                      
- 			   $[t_i,t_i^u) \gets$  unsafe-Interval$(\tuple{i,(u_i,v_i\},[t_i,t'_i]}, \tuple{j,(u_j,v_j),[t_j,t'_j]})$\\                 
- 			   $[t_j,t_j^u) \gets$  unsafe-Interval$(\tuple{j,(u_j,v_j),[t_j,t'_j]}, \tuple{i,(u_i,v_i\},[t_i,t'_i]})$\\                  			   
-                   	   
-                      $conflicts \gets conflicts \cup \{\tuple{i,(u_i,v_i),[t_i,t_i^u)},\tuple{j,(u_j,v_j),[t_j,t_j^u)}\}$\\                   
-                   }                  
-	    		$\textsc{Var} \gets$ generate-RDD($\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\
-	    		$\mathcal{F}(\mu) \gets$ encode($\mathcal{F}(\mu)$, $\textsc{RDD}$, $\mathcal{G}$, \source, \target, $conflicts$, $\mu$)\\                   
-               }
-         }
-	   $\mu_{next} \gets$ min$\{ t\;|\; (u,t) \in \textsc{Rdd} \wedge t > \mu)\}$ \\               
-         \Return {($\mathit{UNSAT}$, $conflicts$, $\mu_{next}$)}\\
-}
-\caption{Low-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-low}
-\end{footnotesize}
-\end{algorithm}
-
-
 
 % Introducing MDD_R. High-level
-To generate our \ps for an implicit \ct, we compute for each agent $a_i$ all single-agent plans that \csipp may return for it in one of the leaf nodes of the implict \ct. 
-
-
-
-that represents a breadth-first search over all single-agent plans for $a_i$ having cost lower than the fixed makespan bound $\mu_{max}$ that may satisfy the set of \ccbs constraints. \roni{This is not accurate. There is an infinite number of such single-agent plans. So, I'm not sure how to exactly define what this \mddr represents.} \konstantin{And I didn't get the phrase once again :) Aren't some words missing in it?}
-We store this set of single-agent plans in a compact data structure called
+To generate our \ps for an implicit \ct, we compute for each agent $a_i$ 
+every single-agent plans that \csipp may return if applied to every node in the implicit \ct
+and whose duration is at most $\mu$ (the makespan bound). 
+We compute this set of single-agent plans and store it in a compact data structure called
 \emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
-An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labelled as either true or false. This is equivalent to having a single sink that gathers all sinks labelled as true, and removing all branches that only end up in sinks labelled as false.}
+An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
 MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
 
-\begin{algorithm}[t]
-\begin{footnotesize}
-\SetKwBlock{NRICL}{generate-RDD ($\mathcal{G}=(V,E)$, $\source$, $\target$, $conflicts$, $\mu_{max}$)}{end} \NRICL{
-    \For {each $i \in {1,2,...k}$}{
-        $X^i \gets \emptyset$\\
-        $E^i \gets \emptyset$\\    
-        $\textsc{Open} \gets \emptyset$ \\   
-        insert $(\source(i),0)$ into $\textsc{Open}$\\
-        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
-        \While {$\textsc{Open} \neq \emptyset$} {
-                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
-                remove-Min$_{t}(\textsc{Open}$) \\
-                \If {$t \leq \mu_{max}$}{
-    	            \For {each $v$ such that $\{u,v\} \in E$}{
-          		             $\Delta t \gets dist(u,v) / \mathit{speed}(a)$ \\
-                 		insert $(v,t+\Delta t)$ into $\textsc{Open}$\\            
-                 		
-    				$X^i \gets X^i \cup \{  (v,t+\Delta t) \}$ \\             		 		
-    				$E^i \gets E^i \cup \{  [(u,t);(v,t+\Delta t)] \}$ \\             		 						
-                			\For {each $(i, (u, v), [t_i,t_i^u]) \in conflicts$}{
-                				\If {$t \geq t_i$ {\bf and} $t \leq t_i^u$}{
-                 				insert $(u,t_i^u)$ into $\textsc{Open}$\\
-    						$X^i \gets X^i \cup \{  (u,t_i^u) \}$ \\
-    						$E^i \gets E^i \cup \{  [(u,t);(u,t_i^u)] \}$ \\
-                 	    }
-    	            }
-                }
-            }
-        }
-    }
-    \Return ${(X^i,E^i)}_{i=1}^k$\\
-} 
-\caption{Generation of decision variables in the SMT-based algorithm for \mapfr solving.} \label{alg-DEC-gen}
-\end{footnotesize}
-\end{algorithm}
-
-% Introducing MDD_R. Psuedo code
-The pseudo code for generating an \mddr for a given agent $a_i$ and a set of \ccbs constraints in fixed-makespan \mapfr problem with makespan bound $\mu_{max}$ is described in Algorithm \ref{alg-DEC-gen}. 
-A node in the \mddr is a pair $(u,t)$ where $u$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
-Generating this \mddr is done by performing a breadth-first search (BFS), starting from $(\source(i),0)$. 
-Expanding a node $(u,t)$ involves generating a new node $(v,t+a_D)$ 
-for every move action $a$ that moves the agent from $u$ to $v$, as long as it ends before the makespan bound, i.e., when $t+a_D\leq \mu_{max}$. 
-We create the new node $(v,t+a_D)$
-This includes move actions that conflict with the given set of \ccbs constraints. 
-In such cases, i.e., when a node $(u,t)$ has an action $a$ 
-If such a move action 
-Two types of actions are used: {\em edge traversals} and {\em waiting}. 
-The edge traversal is the standard operation from BFS; having node $(u,t)$ at hand we create a new node $(v,t+a_D)$ for every 
-action $a$ that moves the agent from $u$ to $v$ (line 12). 
-Nodes and corresponding edges resulting from this expansion are added to \mddr (lines 15-16). 
-A wait action 
 
 
-For each constraint forbidding agent $i$ to traverse from $(u,v)$ at time $t$, we allow the agent to wait at $u$ from $t$ to the end of the constraint's time interface $[t_i,t_i^u]$, we add a wait action in $u$ until $t_i^u$ is performed and RDD is extended with wait nodes and edges (lines 20-21). Consequently each conflict during the RDD generation process through BFS is treated as both present and absent which in effect generates all possible important moments.
-
-% Getting from the MDDR to a propositional skeleton
+Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
+The children of a node $(v,t)$ are generated as follows. 
+For every move action $a\in \mathcal{A}$ in the graph 
+that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
+we create a child node $(v',t')$ where 
+$v'$ is the location of the agent after applying $a$ and 
+$t'$ is the time reached after performing $a$ at time $t$. 
+Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
+If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in one of the \ct nodes 
+that conflicts with doing $a$ at time $t$, 
+then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+More formally, for an \mddr node $(v,t)$ 
+and a move action $a$ from $v$ to $v'$, 
+if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
+To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
 
 
 % Getting conflicts and constraints via decidet
@@ -1848,6 +1779,68 @@ This work also highlighted that conflict detection becomes a bottleneck when sol
 
 \subsubsection*{Acknowledgments}
 This research was partially funded by the ISF grant to Dr. Roni Stern no. 201/17. 
+
+\appendix
+
+\section{Pseudo Code for Generating the \mddr}
+\label{sec:code-mddr}
+
+
+\begin{algorithm}[t]
+	\SetKwInOut{Input}{input}
+	\Input{$\mathcal{G}=(V,E)$, \source(i), \target(i), $\mu$, \implicitct)}
+	$\textsc{Open} \gets \emptyset$ \\   
+	insert $(\source(i),0)$ into $\textsc{Open}$\\
+	$X^i \gets \{ (\source(i),0) \}$\\
+	$E^i \gets \emptyset$\\    	
+	\While {$\textsc{Open} \neq \emptyset$} {
+		$(v,t) \gets$ min$_{t}(\OPEN)$\\
+		Remove $(v,t)$ from \OPEN \\
+		\For {each $a\in \mathcal{A}$ such that $a_\varphi(0)=v$}{
+			\If{$t+a_D\leq \mu$}{
+				$v'=a_\varphi(a_D)$\\
+				Insert $(v',t+a_D)$ into \OPEN\\            					
+				$X^i \gets X^i \cup \{  (v',t+a_D) \}$ \\             		 		
+				$E^i \gets E^i \cup \{  [(v,t),(v',t+a_D)] \}$\\             		 						
+				\ForEach {$(i, (u, v), [t_i,t_i^u]) \in \bigcup\limits_{N\in \implicitct} 		N.\const$}{
+					\If {$t \in [t_i, t_i^u]$ and $t_i^u\leq\mu$}{
+						Insert $(v,t_i^u)$ into \OPEN\\
+						$X^i \gets X^i \cup \{  (v,t_i^u) \}$ \\
+						$E^i \gets E^i \cup \{  [(v,t),(v,t_i^u)] \}$ \\
+					}
+				}	
+			}
+		}
+	}
+	\Return $(X^i,E^i)$\\ 
+	\caption{Creating the \mddr for agent $a_i$, makespan bound $\mu$, and implicit CT \implicitct.} 
+		\label{alg:mddr}
+\end{algorithm}
+% Introducing MDD_R. Psuedo code
+Algorithm~\ref{alg:mddr} lists the pseudo code for generating the \mddr 
+for agent $a_i$, makespan bound $\mu$, 
+and implicit \ct \implicitct. 
+%A node in the \mddr is a pair $(u,t)$ where $u$ is a vertex in $\mathcal{G}$ and $t$ is a point in time.  Generating this \mddr is done by performing a breadth-first search (BFS), starting from $(\source(i),0)$. Expanding a node $(u,t)$ involves generating a new node $(v,t+a_D)$  for every move action $a$ that moves the agent from $u$ to $v$, as long as it ends before the makespan bound, i.e., when $t+a_D\leq \mu_{max}$.  We create the new node $(v,t+a_D)$ This includes move actions that conflict with the given set of \ccbs constraints.  In such cases, i.e., when a node $(u,t)$ has an action $a$  If such a move action  Two types of actions are used: {\em edge traversals} and {\em waiting}.  The edge traversal is the standard operation from BFS; having node $(u,t)$ at hand we create a new node $(v,t+a_D)$ for every  action $a$ that moves the agent from $u$ to $v$ (line 12).  Nodes and corresponding edges resulting from this expansion are added to \mddr (lines 15-16). A wait action 
+
+
+
+%It performs a breadth-first search (BFS), starting from $(\source(i),0)$.  Expanding a node $(v,t)$ involves generating a new node $(v',t+a_D)$  for every move action $a$ that moves the agent from $v$ to $v'$, as long as it ends before the makespan bound.  We create the new node $(v,t+a_D)$ This includes move actions that conflict with the given set of \ccbs constraints.  In such cases, i.e., when a node $(u,t)$ has an action $a$  If such a move action  Two types of actions are used: {\em edge traversals} and {\em waiting}.  The edge traversal is the standard operation from BFS; having node $(u,t)$ at hand we create a new node $(v,t+a_D)$ for every  action $a$ that moves the agent from $u$ to $v$ (line 12).  Nodes and corresponding edges resulting from this expansion are added to \mddr (lines 15-16).  A wait action 
+%For each constraint forbidding agent $i$ to traverse from $(u,v)$ at time $t$, we allow the agent to wait at $u$ from $t$ to the end of the constraint's time interface $[t_i,t_i^u]$, we add a wait action in $u$ until $t_i^u$ is performed and RDD is extended with wait nodes and edges (lines 20-21). 
+%Consequently each conflict during the RDD generation process through BFS is treated as both present and absent which in effect generates all possible important moments.
+% Getting from the MDDR to a propositional skeleton
+% Introducing MDD_R. Psuedo code
+%The pseudo code for generating an \mddr for a given agent $a_i$ and a set of \ccbs constraints in fixed-makespan \mapfr problem with makespan bound $\mu_{max}$ is described in Algorithm \ref{alg-DEC-gen}. 
+
+% Key idea: no need to check all possible wait actions
+%\csipp only allows a wait action in the following case. 
+%There agent is at vertex $v$ at time $t$ 
+%and there is an edge ($v,v'$) and a constraint $
+%in the underlying graph ($\mathcal{G}$), the agent is at time $t$
+
+
+
+
+
 
 %\bibliographystyle{theapa}
 %\noindent {\bf References.}
