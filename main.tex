@@ -1241,18 +1241,12 @@ We call this decision problem the \emph{fixed-makespan \mapfr problem}.
 % High-level: we grow an implicit CT
 Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs by growing an implicit version of the \ccbs Constraint Tree (\ct). 
 This implicit \ct is defined by a set of \ccbs conflicts $(C_1,...,C_n)$. 
-The tree has $i$ levels, where every level represents one of these conflicts. 
-Every outgoing edge from a node in a level for a conflict $\tuple{i,j, (a_i, t_i), (a_j, t_j)}$ 
-represents one of the two \ccbs constraint that can resolve it: 
-$\tuple{i, ]
-
-Note that for any \ccbs conflict   
-there is exactly 
-
-a full binary tree that is 
-
-Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve. 
-The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs 
+Let $Cons(C_i)$ be the pair of \ccbs constraints that \ccbs would impose to resolve the \ccbs conflict $C_i$. That is, for a conflict $\tuple{i,j, (a_i, t_i), (a_j, t_j)}$ 
+ we define 
+ \begin{equation}
+	Cons(\tuple{i,j, (a_i, t_i), (a_j, t_j)})=\{ \tuple{i,a_i, [t_i,t_i^u)}, \tuple{j,a_j, [t_j,t_j^u)}] \}
+ \end{equation}
+%$()Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve them, based on their unsafe intervals. The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs constraint from each pair 
 
 
 represents only the leaves of the \ccbs Constraint Tree 
