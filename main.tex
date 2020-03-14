@@ -1282,22 +1282,6 @@ This process continues until either a valid solution is found (line~\ref{line:sm
 
 
 
- which is then incorporated into the \ps by adding appropriate \ccbs constraints. 
-
-
-% Active conflicts
-Throughout its execution, our algorithm maintains a set of active \ccbs conflicts. 
-This set is initially empty and new \ccbs conflicts are added to it after every invocation of our \decidet procedure. 
-Our \ps is constructed in such a way that a satisfying assignment to it 
-defines a solution to the given \mapfr problem that resolves the set of active conflicts and has a makespan under the makespan bound $\mu$. 
-
-
-We show below how this is done. 
-
-
-
-
-
 
 \subsubsection{Generating the Propositional Skeleton}
 \label{sec:propositional-skeleton}
