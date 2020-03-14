@@ -1237,8 +1237,13 @@ We call this decision problem the \emph{fixed-makespan \mapfr problem}.
 
 
 % High-level: we grow an implicit CT
-Our SMT-based algorithm for solving a fixed-makespan problem mimics to the behavior of \ccbs by growing an implicit version of the \ccbs Constraint Tree (\ct). 
-This implicit \ct represents only the leaves of the \ccbs Constraint Tree 
+Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs by growing an implicit version of the \ccbs Constraint Tree (\ct). 
+This implicit \ct is defined by a set of \ccbs conflicts. 
+Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve. 
+The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs 
+
+
+represents only the leaves of the \ccbs Constraint Tree 
 and every node in the implicit \ct represents a set of \ccbs constraints. 
 This is slightly different from a \ct node in \ccbs, which represents a set of \ccbs constraints and a solution that satisfy them. That is, a \ct node $N$ in \ccbs defines $N.\const$ and $N.\pi$ while a node $N$ in our implicit \ct represents only $N.\const$. 
 
@@ -1282,6 +1287,7 @@ This process continues until a solution is found or until the \ps is unsatisfiab
 
 
 Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. 
+
 The \implicitct datastructure contains the set of leaf nodes of our implicit \ct. 
 Initially, \implicitct contain a node with an empty set of constraints (line~\ref{line:smt:init}). 
 In every iteration, a \ps is created for \implicitct (line~\ref{line:smt:createps}). 
@@ -1300,8 +1306,21 @@ These new nodes replace $N$ in \implicitct, and the process continues until eith
 
 
 % Introducing MDD_R. High-level
-To generate our \ps for an implicit \ct, we compute for each agent $a_i$ 
-every single-agent plans that \csipp may return if applied to every node in the implicit \ct
+The objective of the \ps generated for an implicit Constraint Tree \implicitct is to find a solution that satisfies at least one of the \ct nodes in \implicitct. 
+To this end, we design the \ps so that is simulates applying \csipp to search for a solution that satisfies the constraints in each of these \ct nodes. 
+This is done in two stages. 
+First, we compute for every agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
+
+
+the set of single-agent plans 
+that may be s
+and every \ct node $N\in \implicitct$ 
+
+
+To generate our \ps for a given implicit \ct \implicitct, we compute for every agent $a_i$ the set of all single-agent plans that may part of a solution \csipp will return to a \ct node $N\in \implicitct$. 
+
+if it is used to find a solution applied to find 
+for each agent $a_i$ all single-agent plan that \csipp may return if applied to every node in the implicit \ct
 and whose duration is at most $\mu$ (the makespan bound). 
 We compute this set of single-agent plans and store it in a compact data structure called
 \emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
@@ -1326,6 +1345,8 @@ and a move action $a$ from $v$ to $v'$,
 if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
 To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
 
+
+\subsubsection{From \mddr to a Propositional Skeleton}
 
 % Getting conflicts and constraints via decidet
 
