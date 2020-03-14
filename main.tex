@@ -1238,6 +1238,157 @@ Next, we propose an SMT-based algorithm for solving the following decision probl
 We call this decision problem the \emph{fixed-makespan \mapfr problem}.  
 
 
+
+% High-level: we grow an implicit CT
+Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints that are computed in the same way as in \ccbs. It follows the standard SMT solving procedure described above with a \ps and a \decidet procedure. 
+The \ps defines a solution to the given \mapfr problem, while the \decidet applies a conflict detection mechanism to check if that solution is valid. If not, it returns one of the detected \ccbs conflict. 
+Throughout its execution, our algorithm maintains a set of all the previously detected \ccbs conflicts. We call this set the \emph{active conflicts} set. 
+Our \ps is constructed in such a way that a satisfying assignment to it 
+defines a solution to the given \mapfr problem that resolves the set of active conflicts and has a makespan smaller than or equal to the makespan bound $\mu$. 
+
+
+
+\begin{algorithm}
+	\SetKwInOut{Input}{input}
+	\Input{($\mathcal{G}=(V,E)$, \source, \target,X)}
+	$\Psi\gets\emptyset$ \nllabel{line:smt:init}\\
+	\While{True}{
+		\ps $\gets$ CreatePS(\Psi) \nllabel{line:smt:createps}\\
+		$\Pi\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
+		\If{No solution found (i.e., Solve(\ps) returned null)}{
+			\Return No solution exists \nllabel{line:smt:no-solution}\\
+		}
+		$Con\gets$ \decidet($\Pi$) \nllabel{line:smt:decidet}\\
+		\If{No conflict found (i.e., \decidet($\Pi$) returned null)}{
+			\Return $\Pi$ \nllabel{line:smt:solution}\\
+		}
+		Add $Con$ to $\Psi$\\
+	}
+	\caption{SMT approach to Fixed-Makespan \mapfr}
+	\label{alg:smt-ccbs}
+\end{algorithm}
+
+% Pseudo code
+Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. 
+$\Psi$ contains the set of active conflicts, which is initially empty (line~\ref{line:smt:init}). 
+In every iteration, a \ps is created for the set of active conflicts (line~\ref{line:smt:createps}). 
+A SAT solver is used to search for a solution to this \ps (line~\ref{line:smt:solve}). 
+If no solution exists, the given decision problem is unsolvable. 
+Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
+If it is a valid solution, we return it.
+Otherwise, \decidet returns a \ccbs conflict, which is added to the set of active conflicts. 
+This process continues until either a valid solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
+
+
+
+
+ which is then incorporated into the \ps by adding appropriate \ccbs constraints. 
+
+
+% Active conflicts
+Throughout its execution, our algorithm maintains a set of active \ccbs conflicts. 
+This set is initially empty and new \ccbs conflicts are added to it after every invocation of our \decidet procedure. 
+Our \ps is constructed in such a way that a satisfying assignment to it 
+defines a solution to the given \mapfr problem that resolves the set of active conflicts and has a makespan under the makespan bound $\mu$. 
+
+
+We show below how this is done. 
+
+
+
+
+
+
+\subsubsection{Generating the Propositional Skeleton}
+\label{sec:propositional-skeleton}
+%The propositional skeleton in our SMT-based algorithm asks the question: is there a solution to the given fixed-makespan \mapfr problem that is consistent with a given set of \ccbs constraints. We describe how to generate such a propositional skeleton in Section~\ref{sec:propositional-skeleton}. The \decidet
+
+
+% Introducing MDD_R. High-level
+%The objective of the \ps generated for an implicit Constraint Tree \implicitct is to find a solution that satisfies at least one of the \ct nodes in \implicitct. 
+
+
+
+To this end, we design the \ps so that is simulates applying \csipp to search for a solution that satisfies the constraints in each of these \ct nodes. 
+This is done in two stages. 
+First, we compute for every agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
+
+
+the set of single-agent plans 
+that may be s
+and every \ct node $N\in \implicitct$ 
+
+
+To generate our \ps for a given implicit \ct \implicitct, we compute for every agent $a_i$ the set of all single-agent plans that may part of a solution \csipp will return to a \ct node $N\in \implicitct$. 
+
+if it is used to find a solution applied to find 
+for each agent $a_i$ all single-agent plan that \csipp may return if applied to every node in the implicit \ct
+and whose duration is at most $\mu$ (the makespan bound). 
+We compute this set of single-agent plans and store it in a compact data structure called
+\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
+An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
+MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
+
+
+
+Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
+The children of a node $(v,t)$ are generated as follows. 
+For every move action $a\in \mathcal{A}$ in the graph 
+that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
+we create a child node $(v',t')$ where 
+$v'$ is the location of the agent after applying $a$ and 
+$t'$ is the time reached after performing $a$ at time $t$. 
+Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
+If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in one of the \ct nodes 
+that conflicts with doing $a$ at time $t$, 
+then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+More formally, for an \mddr node $(v,t)$ 
+and a move action $a$ from $v$ to $v'$, 
+if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
+To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+: we create a \ps, apply a SAT solver to find a satisfying assignment to this \ps, use a \decidet procedure to detect if  if this assignment satsifying the underlying non-Boolean logic 
+
+ First, find a satisfying assignment of the \ps. 
+Then, call \decidet with this assignment. If \decidet returns \true, the satisfying assignment is returned and we are finished. 
+Otherwise the \ps is extended with new constraints designed to resolve the conflict returned by \decidet. 
+In more general cases, not only new constraints are added to resolve a conflict but also new propositional variables.
+
+
+
+For a \ccbs conflict $C=\tuple{i,j, (a_i, t_i), (a_j, t_j)}$, 
+let $Cons(C)$ be the pair of \ccbs constraints that \ccbs would impose to resolve $C$. 
+That is, 
+\begin{equation}
+Cons(\tuple{i,j, (a_i, t_i), (a_j, t_j)})=\{ \tuple{i,a_i, [t_i,t_i^u)}, \tuple{j,a_j, [t_j,t_j^u)}] \}
+\end{equation}
+
+
+
+
+%$()Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve them, based on their unsafe intervals. The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs constraint from each pair 
+The implicit \ct defined by the conflicts $\Psi=(C_1,\ldots C_n)$ 
+is a binary tree with $n$ levels, where every node in level $i$ of this tree
+has an outgoing edge for each \ccbs constraint in $Cons(C_i)$. 
+Thus, a leaf node in this implicit \ct represents choosing a single \ccbs constraint for every conflict in $\Psi$. In other words, leaf node is a minimal hitting set of the set $\{Cons(C_1),\ldots,Cons(C_n)\}$. 
+
+
+
 % High-level: we grow an implicit CT
 Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs by growing an \emph{implicit} version of the \ccbs Constraint Tree (\ct) that is defined by a set of \ccbs conflicts.  
 Let $Cons(C_i)$ be the pair of \ccbs constraints that \ccbs would impose to resolve $C_i$. That is, for conflict $\tuple{i,j, (a_i, t_i), (a_j, t_j)}$ we define 
@@ -1248,10 +1399,7 @@ Let $Cons(C_i)$ be the pair of \ccbs constraints that \ccbs would impose to reso
 The implicit \ct defined by the conflicts $\Psi=(C_1,\ldots C_n)$ 
 is a binary tree with $n$ levels, where every node in level $i$ of this tree
 has an outgoing edge for each \ccbs constraint in $Cons(C_i)$. 
-Thus, a leaf node in this implicit \ct represents choosing a single \ccbs constraint for every conflict in $\Psi$.  
-
-a hitting set 
-of the set $\{Cons(C_1),\ldots,Cons(C_n)\}$
+Thus, a leaf node in this implicit \ct represents choosing a single \ccbs constraint for every conflict in $\Psi$. In other words, leaf node is a minimal hitting set of the set $\{Cons(C_1),\ldots,Cons(C_n)\}$. 
 
 
 represents only the leaves of the \ccbs Constraint Tree 
@@ -1310,51 +1458,6 @@ Otherwise, \decidet returns a \ccbs conflict and we create two nodes in \implici
 Creating these two nodes is done exactly as is done by \ccbs (see Algorithm~\ref{alg:ccbs} lines~\ref{line:ccbs:start-expand}-\ref{line:ccbs:end-expand}) except that a new solutions that satisfy these constraints is not computed at this stage (recall that the implicit \ct contains only constraints and not solutions in each node). 
 These new nodes replace $N$ in \implicitct, and the process continues until either a solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
 
-
-\subsubsection{Generating the Propositional Skeleton}
-\label{sec:propositional-skeleton}
-%The propositional skeleton in our SMT-based algorithm asks the question: is there a solution to the given fixed-makespan \mapfr problem that is consistent with a given set of \ccbs constraints. We describe how to generate such a propositional skeleton in Section~\ref{sec:propositional-skeleton}. The \decidet
-
-
-% Introducing MDD_R. High-level
-The objective of the \ps generated for an implicit Constraint Tree \implicitct is to find a solution that satisfies at least one of the \ct nodes in \implicitct. 
-To this end, we design the \ps so that is simulates applying \csipp to search for a solution that satisfies the constraints in each of these \ct nodes. 
-This is done in two stages. 
-First, we compute for every agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
-
-
-the set of single-agent plans 
-that may be s
-and every \ct node $N\in \implicitct$ 
-
-
-To generate our \ps for a given implicit \ct \implicitct, we compute for every agent $a_i$ the set of all single-agent plans that may part of a solution \csipp will return to a \ct node $N\in \implicitct$. 
-
-if it is used to find a solution applied to find 
-for each agent $a_i$ all single-agent plan that \csipp may return if applied to every node in the implicit \ct
-and whose duration is at most $\mu$ (the makespan bound). 
-We compute this set of single-agent plans and store it in a compact data structure called
-\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
-An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
-MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
-
-
-
-Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
-The children of a node $(v,t)$ are generated as follows. 
-For every move action $a\in \mathcal{A}$ in the graph 
-that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
-we create a child node $(v',t')$ where 
-$v'$ is the location of the agent after applying $a$ and 
-$t'$ is the time reached after performing $a$ at time $t$. 
-Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
-If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in one of the \ct nodes 
-that conflicts with doing $a$ at time $t$, 
-then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
-More formally, for an \mddr node $(v,t)$ 
-and a move action $a$ from $v$ to $v'$, 
-if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
-To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
 
 
 \subsubsection{From \mddr to a Propositional Skeleton}
