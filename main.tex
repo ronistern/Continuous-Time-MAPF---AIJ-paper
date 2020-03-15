@@ -1331,31 +1331,6 @@ The final step is adding constraints that will verify if the overall solution in
 
 
 
-
-\subsection{Solving \mapfr with SMT}
-
-%This SMT solving procedure is similar to \cbs and \ccbs:  the propositional skeleton is the constraint tree and
-%\decidet corresponds to checking if a solution $N.\Pi$ in some CT node $N$ is a valid solution.
-\pavel{The previous version was somewhat not good.}\roni{I editted some more. Is it Ok now?}
-
-Next, we propose an algorithm for finding a makespan-optimal solution for \mapfr that uses the standard SMT solving procedure described above. We call this algorithm \smtcbs. 
-%This algorithm draws from MDD-SAT, \cbs, and \ccbs. 
-\smtcbs is similar to MDD-SAT in that it finds a makespan optimal solution by solving a sequence of decision problems. 
-Each of these decision problems ask if there is a solution to the given \mapfr problem with makespan smaller than some fixed value $\mu$. We start by setting the makespan bound $\mu$ to the cost of the maximal lowest-cost single-agent plan when ignoring all other agents. 
-If there is solution to the corresponding decision problem, we increase $\mu$ by the minimal edge cost in the graph. 
-This continues until finding a makespan bound for which the solution to the corresponding decision problem is true, in which case we are guaranteed to have found a makespan-optimal solution. 
-
-
-The main challenge in our algorithm is how to solve these decision problems. Next, we propose an algorithm for solving these \emph{fixed-makespan} \mapfr problems that follows the SMT solving procedure. 
-We refer to these 
-fixed-makespan \mapfr problem. 
-We call each of these decision problems \emph{fixed-makespan \mapfr}. 
-
-
-The main challenge in our algorithm is how to solve these fixed-makespan \mapfr problem. 
-The algorithm we used to do so can be viewed as an SMT version of \ccbs: a solution to its propositional skeleton is analogous to a node $N$ in the CT and its \decidet procedure corresponds to checking if the solution $N.\Pi$ is a valid solution, returning a conflict if it is not. Next, we describe this algorithm in detail. \konstantin{Still no example given so far to what is 'propositional skeleton'. The phrase above says only that 'the solution to a skeleton' is analoguos to CCBS node. What is PS in a nutshell analogous to?}
-
-
 %This observation inspired us to propose a SMT-based \mapfr algorithm. This algorithm was initially described in~  \cite{DBLP:conf/socs/Surynek19,surynek2019lazy}.
 %\roni{Instead of the last sentence, we will need a full paragraph in the introduction, explaining that this work combines stuff from several prior submissions}
 %We explain this approach first in a high-level manner, and then in more details. 
