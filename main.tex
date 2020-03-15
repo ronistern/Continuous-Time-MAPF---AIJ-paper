@@ -1300,6 +1300,7 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 
 
 
+
 \subsubsection{Generating the Propositional Skeleton}
 \label{sec:propositional-skeleton}
 %The propositional skeleton in our SMT-based algorithm asks the question: is there a solution to the given fixed-makespan \mapfr problem that is consistent with a given set of \ccbs constraints. We describe how to generate such a propositional skeleton in Section~\ref{sec:propositional-skeleton}. The \decidet
@@ -1310,8 +1311,55 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 
 
 
+% The problem. This somewhat repeats what we have above. Maybe remove?
+%The CreatePS procedure accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. It outputs a \ps that is satisfiable iff there exists a solution (not necessarily valid) to the given \mapf problem with makespan at most $\mu$ that does not have any of the \ccbs conflicts in $\Psi$. We generate such a \ps by mimicking \ccbs, as follows. 
 
-The process of generating our \ps accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. The resulting \ps is satisfiable iff there exists a solution (not necessarily a valid) to the given \mapf problem with makespan at most $\mu$ that resolves all the \ccbs conflicts in $\Psi$. 
+% Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
+The CreatePS procedure mimicks \ccbs as follows. 
+For a \ccbs conflict $C$, let $Cons(C)$ denote the pair of \ccbs 
+constraints used by \ccbs to resolve $C$ (defined in Lemma~\ref{lem:sound}). 
+Let $Cons(\Psi)$ be the set of \ccbs constraints pairs for all the constraints in $\Psi$, i.e., $Cons(\Psi)=\{ Con(C) | C\in \Psi \}$. 
+Observe that every \mapfr solution that does not include any conflicts from $\Psi$ must satisfy the following 
+\begin{equation}
+\bigwedge_{C\in \Psi} \bigvee_{c\in Cons(C)} c
+\end{equation}
+
+a set of \ccbs constraints that is a hitting set of $Cons(\Psi)$. 
+
+
+Let $Cons(\Psi)_i$ be the set of \ccbs constraints that are defined for agent $a_i$. 
+
+
+
+it creates a pair of \ccbs constraints as defined in Lemma~\ref{lem:sound}. 
+Let $Cons(C)$ denote this pair of \ccbs constraints 
+and $Cons(\Psi)=\{ Con(C) | C\in \Psi \}$. 
+Note that $Cons(\Psi)$ is a set of pairs of \ccbs constraints. 
+Due to Lemma~\ref{lem:sound}, every \mapfr solution that does not include any conflict in $\Psi$ must satisfy a set of \ccbs constraints that is a hitting set of $Cons(\Psi)$. 
+
+
+Based on this observation, we compute for every agent $a_i$ the set of single-agent plans that \csipp may return given a hitting set of constraints. 
+
+
+
+. 
+%This pair of \ccbs constraints is known to be sound (in the sense of Definition~\ref{def:sound}), and thus every solution that does not have the conflict $C$ must satisfy one of the \ccbs constraints in $Cons(C)$. 
+Due to Lemma~\ref{lem:sound}, we have that every \mapfr solution that does not include any conflict in $\Psi$ must satisfy 
+for every $C\in\Psi$ one of the \ccbs constraints in $Con(C)$. 
+In other words, every such \mapfr solution 
+satisfies a \emph{hitting set} of $\{ Con(C) | C\in \Psi \}$. 
+
+
+
+
+
+More generally, we define our \ps such that an assignment that satisfies it
+defines a \mapfr solution that satisfies for every $C\in \Psi$ one of the \ccbs constraints in $Con(C)$. 
+
+
+% To CSIPP
+
+
 
 
 
