@@ -1315,214 +1315,22 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 %The CreatePS procedure accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. It outputs a \ps that is satisfiable iff there exists a solution (not necessarily valid) to the given \mapf problem with makespan at most $\mu$ that does not have any of the \ccbs conflicts in $\Psi$. We generate such a \ps by mimicking \ccbs, as follows. 
 
 % Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
-The CreatePS procedure mimicks \ccbs as follows. 
-For a \ccbs conflict $C$, let $Cons(C)$ denote the pair of \ccbs 
-constraints used by \ccbs to resolve $C$ (defined in Lemma~\ref{lem:sound}). 
-For a constraint $c\in Cons(C)$, we denote by $c(\Pi)$ the proposition that constraint $c$ is satisfied in a solution $\Pi$. 
-Observe that a \mapfr solution $\Pi$ does not include any conflicts from $\Psi$ iff at least one of the constraints in $Cons(C)$ for every \ccbs conflict $C\in\Psi$. This translates to the following 
-\begin{equation}
-\text{$\Pi$ has no conflicts from $\Psi$}
-\leftrightarrow
-\bigwedge_{C\in \Psi} \Big(\bigvee_{c\in Cons(C)} c(\Pi) \Big)
-\end{equation}
+The CreatePS procedure mimicks \ccbs by considering all sets of constraints that \ccbs would impose to resolve the conflicts in $\Psi$, 
+and by considering the single-agent plans \csipp would find to satisfy these constraints. 
+\ccbs resolves a conflict $\tuple{}$ by imposing one of the following constraints $\tupe{}$. 
+\csipp satisfies this constraint by allowing the agent to wait at ... until .... 
+The first step in CreatePS is to computes the set of single-agent plans \csipp considers in its search. 
+...
 
-a set of \ccbs constraints that is a hitting set of $Cons(\Psi)$. 
+The second step is to convert the \mddr to a propositional formula whose satisfying assignment corresponds to one of the single-agent plans 
+represented by the \mddr. 
+...
 
+The final step is adding constraints that will verify if the overall solution indeed resolves all the conflicts. 
+...
 
-Let $Cons(\Psi)_i$ be the set of \ccbs constraints that are defined for agent $a_i$. 
 
 
-
-it creates a pair of \ccbs constraints as defined in Lemma~\ref{lem:sound}. 
-Let $Cons(C)$ denote this pair of \ccbs constraints 
-and $Cons(\Psi)=\{ Con(C) | C\in \Psi \}$. 
-Note that $Cons(\Psi)$ is a set of pairs of \ccbs constraints. 
-Due to Lemma~\ref{lem:sound}, every \mapfr solution that does not include any conflict in $\Psi$ must satisfy a set of \ccbs constraints that is a hitting set of $Cons(\Psi)$. 
-
-
-Based on this observation, we compute for every agent $a_i$ the set of single-agent plans that \csipp may return given a hitting set of constraints. 
-
-
-
-. 
-%This pair of \ccbs constraints is known to be sound (in the sense of Definition~\ref{def:sound}), and thus every solution that does not have the conflict $C$ must satisfy one of the \ccbs constraints in $Cons(C)$. 
-Due to Lemma~\ref{lem:sound}, we have that every \mapfr solution that does not include any conflict in $\Psi$ must satisfy 
-for every $C\in\Psi$ one of the \ccbs constraints in $Con(C)$. 
-In other words, every such \mapfr solution 
-satisfies a \emph{hitting set} of $\{ Con(C) | C\in \Psi \}$. 
-
-
-
-
-
-More generally, we define our \ps such that an assignment that satisfies it
-defines a \mapfr solution that satisfies for every $C\in \Psi$ one of the \ccbs constraints in $Con(C)$. 
-
-
-% To CSIPP
-
-
-
-
-
-
-
-
-
-
-We construct this \ps in two steps. 
-First, for each agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
-
-The first step in generating our \ps is to create for each agent the set 
-
-To this end, we design the \ps so that is simulates applying \csipp to search for a solution that satisfies the constraints in each of these \ct nodes. 
-This is done in two stages. 
-First, we compute for every agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
-
-
-the set of single-agent plans 
-that may be s
-and every \ct node $N\in \implicitct$ 
-
-
-To generate our \ps for a given implicit \ct \implicitct, we compute for every agent $a_i$ the set of all single-agent plans that may part of a solution \csipp will return to a \ct node $N\in \implicitct$. 
-
-if it is used to find a solution applied to find 
-for each agent $a_i$ all single-agent plan that \csipp may return if applied to every node in the implicit \ct
-and whose duration is at most $\mu$ (the makespan bound). 
-We compute this set of single-agent plans and store it in a compact data structure called
-\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
-An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
-MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
-
-
-
-Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
-The children of a node $(v,t)$ are generated as follows. 
-For every move action $a\in \mathcal{A}$ in the graph 
-that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
-we create a child node $(v',t')$ where 
-$v'$ is the location of the agent after applying $a$ and 
-$t'$ is the time reached after performing $a$ at time $t$. 
-Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
-If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in one of the \ct nodes 
-that conflicts with doing $a$ at time $t$, 
-then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
-More formally, for an \mddr node $(v,t)$ 
-and a move action $a$ from $v$ to $v'$, 
-if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
-To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-: we create a \ps, apply a SAT solver to find a satisfying assignment to this \ps, use a \decidet procedure to detect if  if this assignment satsifying the underlying non-Boolean logic 
-
- First, find a satisfying assignment of the \ps. 
-Then, call \decidet with this assignment. If \decidet returns \true, the satisfying assignment is returned and we are finished. 
-Otherwise the \ps is extended with new constraints designed to resolve the conflict returned by \decidet. 
-In more general cases, not only new constraints are added to resolve a conflict but also new propositional variables.
-
-
-
-For a \ccbs conflict $C=\tuple{i,j, (a_i, t_i), (a_j, t_j)}$, 
-let $Cons(C)$ be the pair of \ccbs constraints that \ccbs would impose to resolve $C$. 
-That is, 
-\begin{equation}
-Cons(\tuple{i,j, (a_i, t_i), (a_j, t_j)})=\{ \tuple{i,a_i, [t_i,t_i^u)}, \tuple{j,a_j, [t_j,t_j^u)}] \}
-\end{equation}
-
-
-
-
-%$()Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve them, based on their unsafe intervals. The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs constraint from each pair 
-The implicit \ct defined by the conflicts $\Psi=(C_1,\ldots C_n)$ 
-is a binary tree with $n$ levels, where every node in level $i$ of this tree
-has an outgoing edge for each \ccbs constraint in $Cons(C_i)$. 
-Thus, a leaf node in this implicit \ct represents choosing a single \ccbs constraint for every conflict in $\Psi$. In other words, leaf node is a minimal hitting set of the set $\{Cons(C_1),\ldots,Cons(C_n)\}$. 
-
-
-
-% High-level: we grow an implicit CT
-Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs by growing an \emph{implicit} version of the \ccbs Constraint Tree (\ct) that is defined by a set of \ccbs conflicts.  
-Let $Cons(C_i)$ be the pair of \ccbs constraints that \ccbs would impose to resolve $C_i$. That is, for conflict $\tuple{i,j, (a_i, t_i), (a_j, t_j)}$ we define 
- \begin{equation}
-	Cons(\tuple{i,j, (a_i, t_i), (a_j, t_j)})=\{ \tuple{i,a_i, [t_i,t_i^u)}, \tuple{j,a_j, [t_j,t_j^u)}] \}
- \end{equation}
-%$()Each of these \ccbs conflicts is associated with a pair of \ccbs constraints that resolve them, based on their unsafe intervals. The \ps in our SMT-based algorithm is created such that a satisfying assignment to this \ps defines a \mapfr solution $\Pi$ that is consistent with one \ccbs constraint from each pair 
-The implicit \ct defined by the conflicts $\Psi=(C_1,\ldots C_n)$ 
-is a binary tree with $n$ levels, where every node in level $i$ of this tree
-has an outgoing edge for each \ccbs constraint in $Cons(C_i)$. 
-Thus, a leaf node in this implicit \ct represents choosing a single \ccbs constraint for every conflict in $\Psi$. In other words, leaf node is a minimal hitting set of the set $\{Cons(C_1),\ldots,Cons(C_n)\}$. 
-
-
-represents only the leaves of the \ccbs Constraint Tree 
-and every node in the implicit \ct represents a set of \ccbs constraints. 
-This is slightly different from a \ct node in \ccbs, which represents a set of \ccbs constraints and a solution that satisfy them. That is, a \ct node $N$ in \ccbs defines $N.\const$ and $N.\pi$ while a node $N$ in our implicit \ct represents only $N.\const$. 
-
-% High-level: the PS is created to find a solution for the implicit CT
-The \ps of our SMT-based algorithm is created for a given implicit \ct
-such that a satisfying assignment to the \ps 
-defines a \mapfr solution $\Pi$ that is consistent with the constraints of at least one (leaf) node $N$ of the implicit \ct. 
-We describe the  construction of this \ps in Section~\ref{sec:propositional-skeleton}. 
-The \decidet procedure checks if $\Pi$ is valid, i.e., if it represents a set of single-agent plans that do not conflict.\footnote{This \decidet procedure is analogues to checking if the node $(N.\const, \Pi)$ is a goal \ct node in \ccbs.} 
-If $\Pi$ is not a valid solution, our \decidet returns a corresponding \ccbs conflict. 
-This conflict is used to extend the implicit \ct by expanding $N$ according to this \ccbs conflict as done by \ccbs. 
-The \ps is then updated to reflect the change in the implicit \ct. 
-This process continues until a solution is found or until the \ps is unsatisfiable, in which case we can return that there is no solution to the given fixed-makespan \mapfr problem. 
-\konstantin{Does this means that SMT-based approach is 'strongly' complete (apposed to CCBS that is 'weakly' complete)?}
-\roni{Yes, but note that this is just for the fixed-makespan problem. For the optimal-makespan problem, we are still weakly complete: we don't know when to stop increasing the makespan bound}
-
-
-
-\begin{algorithm}
-\SetKwInOut{Input}{input}
-\Input{($\mathcal{G}=(V,E)$, \source, \target,X)}
-    $N\gets\emptyset$\\
-    Create \implicitct; Add $N$ to \implicitct \nllabel{line:smt:init}\\
-    \While{\implicitct is not empty}{
-        \ps $\gets$ CreatePS(\implicitct) \nllabel{line:smt:createps}\\
-        $(N,\Pi)\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
-        \If{No solution found (i.e., Solve(\ps) returned null)}{
-            \Return No solution exists \nllabel{line:smt:no-solution}\\
-        }
-        $Con\gets$ \decidet($\Pi$) \nllabel{line:smt:decidet}\\
-        \If{No conflict found (i.e., \decidet($\Pi$) returned null)}{
-            \Return $\Pi$ \nllabel{line:smt:solution}\\
-        }
-        Remove $N$ from \implicitct\\        
-        $N_1, N_2\gets$ expand $N$ according to $Con$ \nllabel{line:smt:expand}\\
-        Add $N_1$ and $N_2$ to \implicitct\\
-    }
-\caption{SMT approach to Fixed-Makespan \mapfr}
-\label{alg:smt-ccbs}
-\end{algorithm}
-
-
-Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. 
-
-The \implicitct datastructure contains the set of leaf nodes of our implicit \ct. 
-Initially, \implicitct contain a node with an empty set of constraints (line~\ref{line:smt:init}). 
-In every iteration, a \ps is created for \implicitct (line~\ref{line:smt:createps}). 
-A SAT solver is used to search for a solution to this \ps (line~\ref{line:smt:solve}). 
-If no solution exists, the given decision problem is unsolvable. 
-Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
-If it is a valid solution, we return it.
-Otherwise, \decidet returns a \ccbs conflict and we create two nodes in \implicitct by adding \ccbs constraints to resolve this conflicts (line~\ref{line:smt:expand}). 
-Creating these two nodes is done exactly as is done by \ccbs (see Algorithm~\ref{alg:ccbs} lines~\ref{line:ccbs:start-expand}-\ref{line:ccbs:end-expand}) except that a new solutions that satisfy these constraints is not computed at this stage (recall that the implicit \ct contains only constraints and not solutions in each node). 
-These new nodes replace $N$ in \implicitct, and the process continues until either a solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
 
 
 
