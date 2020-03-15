@@ -1193,9 +1193,7 @@ $\mathcal{X}_{v}^{t}(a_i)$ and
 $\mathcal{E}_{u,v}^{t}(a_i)$ variables) required to solve an \mapfr problem with MDD-SAT, is infinite. 
 
 % Outline of section
-In this section, we propose an alternative compilation-based algorithm for finding makespan-optimal solution to \mapfr problems. This algorithm is called \smtcbs
-
-based on \emph{SAT modulu Theory (SMT)}~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. We start by providing a brief background on SMT. 
+In this section, we propose an alternative compilation-based algorithm called \smtcbs for finding makespan-optimal solution to \mapfr problems. \smtcbs can be viewed as an implementation of \ccbs using \smt~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. We start by providing a brief background on \smt. 
 Then, we describe an SMT-based approach to solve the decision problem of finding a solution to a \mapfr problem under a given makespan bound. 
 Finally, we present a complete and optimal \mapfr algorithm that is based on solving a sequence of these decision problems. 
 
