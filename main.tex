@@ -1291,6 +1291,13 @@ This process continues until either a valid solution is found (line~\ref{line:sm
 
 
 
+Our \decidet procedure is exactly the same as the conflict-detection step in \ccbs. 
+It applying some conflict-detection mechanism to check for collisions between the agents' plans in the given solution. 
+The process of generating our \ps for a given set of \ccbs conflicts, \mapfr problem, and makespan bound -- CreatePS($\Psi$, P, $\mu$) -- is more involved and we describe it next. 
+
+
+
+
 
 
 \subsubsection{Generating the Propositional Skeleton}
@@ -1300,6 +1307,8 @@ This process continues until either a valid solution is found (line~\ref{line:sm
 
 % Introducing MDD_R. High-level
 %The objective of the \ps generated for an implicit Constraint Tree \implicitct is to find a solution that satisfies at least one of the \ct nodes in \implicitct. 
+
+
 
 
 The process of generating our \ps accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. The resulting \ps is satisfiable iff there exists a solution (not necessarily a valid) to the given \mapf problem with makespan at most $\mu$ that resolves all the \ccbs conflicts in $\Psi$. 
