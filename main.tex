@@ -17,7 +17,7 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage{graphicx}
 \usepackage{xspace}
-\xspaceaddexceptions{]\}()}
+\xspaceaddexceptions{]\})}
 \usepackage[usenames]{color}
 
 
@@ -1243,24 +1243,16 @@ In more general cases, not only new constraints are added to resolve a conflict 
 
 \subsection{SMT for Solving Fixed-Makespan \mapfr Problems}
 
-% We start by converting the optimization problem to a decision problem 
-We p
+% We use SMT to solve the fixed makespan problem. 
+The fixed-makespan \mapfr problem is the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
+Next, we propose an algorithm that solves this problem by following the standard \smt solving procedure described above. 
+A satisfying assignment to the \ps in our algorithm defines a solution to the given \mapfr problem whose makespan is smaller than or equal to $\mu$. 
+The \decidet procedure in our algorithm applies a conflict detection mechanism to check if that solution is valid. 
+If not, it returns one of the detected \ccbs conflict. 
+In such cases, the \ps is subsequently updated so that 
+satisfying assignments to it will resolve the detected conflict by satisfying one of the corresponding \ccbs constraints. 
+%This algorithm mimics the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints. 
 
-
-
-A key component in our SMT-based algorithm for solving \mapfr is an algorithm that solves the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
-We call this decision problem the \emph{fixed-makespan \mapfr problem}.  
-
-
-
-% High-level: we grow an implicit CT
-The algorithm we propose for solving the fixed-makespan problem mimics to the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints. 
-This algorithm follows the standard SMT solving procedure described above, 
-iteratively creating a \ps, solving it, and using a \decidet procedure to check if it satisfied the underlying non-Boolean logic. 
-This \ps defines a solution to the given \mapfr problem, while the \decidet applies a conflict detection mechanism to check if that solution is valid. If not, it returns one of the detected \ccbs conflict. 
-Throughout its execution, our algorithm maintains a set of all the previously detected \ccbs conflicts. We call this set the \emph{active conflicts} set. 
-Our \ps is constructed in such a way that a satisfying assignment to it 
-defines a solution to the given \mapfr problem that resolves the set of active conflicts and has a makespan smaller than or equal to the makespan bound $\mu$. 
 
 
 
@@ -1285,14 +1277,14 @@ defines a solution to the given \mapfr problem that resolves the set of active c
 \end{algorithm}
 
 % Pseudo code
-Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for our SMT-based algorithm. 
-$\Psi$ contains the set of active conflicts, which is initially empty (line~\ref{line:smt:init}). 
-In every iteration, a \ps is created for the set of active conflicts (line~\ref{line:smt:createps}). 
+Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for this algorithm. 
+$\Psi$ contains the set of \ccbs conflicts detected so far, which is initially empty (line~\ref{line:smt:init}). 
+In every iteration, the \ps is created for the set of previously-found conflicts (CreatePS($\Psi$) in line~\ref{line:smt:createps}). 
 A SAT solver is used to search for a solution to this \ps (line~\ref{line:smt:solve}). 
 If no solution exists, the given decision problem is unsolvable. 
 Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
 If it is a valid solution, we return it.
-Otherwise, \decidet returns a \ccbs conflict, which is added to the set of active conflicts. 
+Otherwise, \decidet returns a \ccbs conflict, which is added to the set of conflicts $\Psi$. 
 This process continues until either a valid solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
 
 
@@ -1308,6 +1300,19 @@ This process continues until either a valid solution is found (line~\ref{line:sm
 %The objective of the \ps generated for an implicit Constraint Tree \implicitct is to find a solution that satisfies at least one of the \ct nodes in \implicitct. 
 
 
+The process of generating our \ps accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. The resulting \ps is satisfiable iff there exists a solution (not necessarily a valid) to the given \mapf problem with makespan at most $\mu$ that resolves all the \ccbs conflicts in $\Psi$. 
+
+
+
+
+
+
+
+
+We construct this \ps in two steps. 
+First, for each agent $a_i$ the set of all single agent plans that satisfy every subset of constraints 
+
+The first step in generating our \ps is to create for each agent the set 
 
 To this end, we design the \ps so that is simulates applying \csipp to search for a solution that satisfies the constraints in each of these \ct nodes. 
 This is done in two stages. 
