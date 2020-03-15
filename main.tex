@@ -1468,9 +1468,9 @@ These new nodes replace $N$ in \implicitct, and the process continues until eith
 %\decidet corresponds to checking if a solution $N.\Pi$ in some CT node $N$ is a valid solution.
 \pavel{The previous version was somewhat not good.}\roni{I editted some more. Is it Ok now?}
 
-Next, we propose an algorithm for finding a makespan-optimal solution for \mapfr that uses the standard SMT solving procedure described above. We call this algorithm \smtmapfr. 
+Next, we propose an algorithm for finding a makespan-optimal solution for \mapfr that uses the standard SMT solving procedure described above. We call this algorithm \smtcbs. 
 %This algorithm draws from MDD-SAT, \cbs, and \ccbs. 
-\smtmapfr is similar to MDD-SAT in that it finds a makespan optimal solution by solving a sequence of decision problems. 
+\smtcbs is similar to MDD-SAT in that it finds a makespan optimal solution by solving a sequence of decision problems. 
 Each of these decision problems ask if there is a solution to the given \mapfr problem with makespan smaller than some fixed value $\mu$. We start by setting the makespan bound $\mu$ to the cost of the maximal lowest-cost single-agent plan when ignoring all other agents. 
 If there is solution to the corresponding decision problem, we increase $\mu$ by the minimal edge cost in the graph. 
 This continues until finding a makespan bound for which the solution to the corresponding decision problem is true, in which case we are guaranteed to have found a makespan-optimal solution. 
