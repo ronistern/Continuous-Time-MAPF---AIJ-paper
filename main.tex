@@ -1333,9 +1333,7 @@ and let $Cnst(\Psi)$ be the set of all pairs of \ccbs constraints were generated
 Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
 \end{equation}
 \begin{equation}
-Cnst(\Psi) = \{ \big( \tuple{i, a_i, [t_i, t_i^u)}, 
-					  \tuple{j, a_j, [t_j, t_j^u)} \big) | 
-					  \tuple{(a_i, t_i), (a_j, t_j)}\in \Psi\} 
+Cnst(\Psi) = \{ Const(C) | C\in \Psi\} 
 \end{equation}
 %\begin{equation}
 %Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
