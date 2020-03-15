@@ -1344,7 +1344,7 @@ Cnst(\Psi) = \{ Const(C) | C\in \Psi\}
 \noindent \textbf{Step \#2. Creating a propositional formula for all relevant single-agent plans.} 
 The variables in this propositional formula are similar to those used by MDD-SAT. 
 
-\ccbs Constraints for every conflict.}
+\ccbs Constraints for every conflict.
 
 The first step in CreatePS is to computes the set of single-agent plans \csipp considers in its search. 
 ...
@@ -1400,8 +1400,7 @@ We evaluated the suggested algorithms in different setups that involved $2^k$-co
     \label{fig:2k-grids}
 \end{figure}
 
-For each grid we set the connectivity to be $2^k$ where $k$ varied from $2$ to $5$ (see Fig.\ref{fig:2k-grids}). We assumed the moving speed of an agent (with inertial effects neglected) to be 1 grid cell per 1 time unit, that is in one time unit agent covers the segment which length is equal to the distance between two orthogonally adjacent cells. E.g. the time needed to execute a diagonal move equals $\sqrt{2}$. This time, as said before, is the cost of the corresponding \mapfr action. Agents' shapes were assumed to be disks of radius $ \frac{\sqrt{2}}{4}$. This specific size was chosen as this is the maximal size when disk agents with volume can both simultaneously perform a manoeuvre, shown in Fig.~\ref{}, that is somewhat common in classical \mapf. \konstantin{Not sure how to explain this in elegant way}.
-
+For each grid we set the connectivity to be $2^k$ where $k$ varied from $2$ to $5$ (see Fig.\ref{fig:2k-grids}). We assumed the moving speed of an agent (with inertial effects neglected) to be 1 grid cell per 1 time unit, that is in one time unit agent covers the segment which length is equal to the distance between two orthogonally adjacent cells. E.g. the time needed to execute a diagonal move equals $\sqrt{2}$. This time, as said before, is the cost of the corresponding \mapfr action. Agents' shapes were assumed to be disks of radius $ \frac{\sqrt{2}}{4}$. This specific size was chosen as this is the maximal size when disk agents with volume can both simultaneously perform a manoeuvre, shown in Fig.~\ref{}, that is somewhat common in classical \mapf. \konstantin{Not sure how to explain this in elegant way}
 Shape of an agent was indeed taken into account when estimating the validity of the move action w.r.t static obstacles, i.e. blocked grid cells. If the endpoints of the segment representing a move action were the centers of the free cells but the disk that moves along this segment intersects any of the blocked cells, the action was considered to be invalid.
 
 The instances for each map were created using the \texttt{random} scenarios from \url{https://movingai.com/benchmarks/mapf.html}. There are 25 different scenarios in the set and each scenario is a list of randomly picked start-goal locations. We used this list to create instances in the way suggested by the maintainers of the benchmark repository. I.e. we started with one agent on a map and sequentially added one agent at a time by taking next start-goal pair from the scenario file, until an algorithm was not able to solve a problem in a given time limit. The latter was set to be 30 seconds. Overall, for each map and specific number of agents we ran algorithms on 25 different instances.
