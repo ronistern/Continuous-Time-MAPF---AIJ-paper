@@ -1319,11 +1319,13 @@ The CreatePS procedure generates a \ps that mimicks the behavior in \ccbs.
 It considers the possible sets of constraints that \ccbs would impose to resolve the conflicts in $\Psi$, and it considers the possible single-agent plans \csipp would find to satisfy these constraints. This is done as follows. 
 
 For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. 
-Let $Cnst_i$ be the set of all \ccbs constraints on agent $a_i$ that were generated this way, i.e., 
-\begin{equation}
-Cnst_i = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
+Let $Cnst(C)$ be this pair of \ccbs constraints, 
+and let $Cnst_i(\Psi)$ be the set of all \ccbs constraints on agent $a_i$ that were generated this way, i.e., 
+\begin{align}
+Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = &\{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}\\
+Cnst_i(\Psi) = &\{ \tuple{i, a_i, [t_i, t_i^u)} | 
 \exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
-\end{equation}
+\end{align}
 
 
 
