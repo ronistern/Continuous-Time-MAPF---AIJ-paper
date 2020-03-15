@@ -1325,7 +1325,7 @@ one of its respective \ccbs constraints.
 
 
 
-\noindent \textbf{Step \#1. Computing \ccbs Constraints for every conflict.}
+\noindent \textbf{Step \#1. Computing \ccbs constraints for every conflict.}
 For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. This requires computing the unsafe intervals for each conflict. 
 Let $Cnst(C)$ be the pair of \ccbs constraints for a conflict $C\in \Psi$, 
 and let $Cnst(\Psi)$ be the set of all pairs of \ccbs constraints were generated this way, i.e., 
@@ -1340,6 +1340,11 @@ Cnst(\Psi) = \{ Const(C) | C\in \Psi\}
 %\exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
 %\end{equation}
 
+
+\noindent \textbf{Step \#2. Creating a propositional formula for all relevant single-agent plans.} 
+The variables in this propositional formula are similar to those used by MDD-SAT. 
+
+\ccbs Constraints for every conflict.}
 
 The first step in CreatePS is to computes the set of single-agent plans \csipp considers in its search. 
 ...
