@@ -1256,11 +1256,11 @@ defines a solution to the given \mapfr problem that resolves the set of active c
 	\While{True}{
 		\ps $\gets$ CreatePS($\Psi$) \nllabel{line:smt:createps}\\
 		$\Pi\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
-		\If{No solution found (i.e., Solve(\ps) returned null)}{
+		\If{No solution found (i.e., $\Pi$ is null)}{
 			\Return No solution exists \nllabel{line:smt:no-solution}
 		}
 		$Con\gets$ \decidet($\Pi$) \nllabel{line:smt:decidet}\\
-		\If{No conflict found (i.e., \decidet($\Pi$) returned null)}{
+		\If{No conflict found (i.e., $Con$ is null)}{
 			\Return $\Pi$ \nllabel{line:smt:solution}
 		}
 		Add $Con$ to $\Psi$\\
