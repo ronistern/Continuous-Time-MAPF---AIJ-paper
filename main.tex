@@ -1266,7 +1266,7 @@ define a solution in which all the \ccbs conflicts returned so far by \decidet a
 		\If{No solution found (i.e., $\Pi$ is null)}{
 			\Return No solution exists \nllabel{line:smt:no-solution}
 		}
-		$Con\gets$ \decidet($\Pi$) \nllabel{line:smt:decidet}\\
+		$Con\gets$ \decidet($\Pi$, P, $\mu$) \nllabel{line:smt:decidet}\\
 		\If{No conflict found (i.e., $Con$ is null)}{
 			\Return $\Pi$ \nllabel{line:smt:solution}
 		}
