@@ -1318,10 +1318,12 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 The CreatePS procedure mimicks \ccbs as follows. 
 For a \ccbs conflict $C$, let $Cons(C)$ denote the pair of \ccbs 
 constraints used by \ccbs to resolve $C$ (defined in Lemma~\ref{lem:sound}). 
-Let $Cons(\Psi)$ be the set of \ccbs constraints pairs for all the constraints in $\Psi$, i.e., $Cons(\Psi)=\{ Con(C) | C\in \Psi \}$. 
-Observe that every \mapfr solution that does not include any conflicts from $\Psi$ must satisfy at least one of the constraints in $Cons(C)$ for every \ccbs conflict $C\in\Psi$. This translates to the following propositional. 
+For a constraint $c\in Cons(C)$, we denote by $c(\Pi)$ the proposition that constraint $c$ is satisfied in a solution $\Pi$. 
+Observe that a \mapfr solution $\Pi$ does not include any conflicts from $\Psi$ iff at least one of the constraints in $Cons(C)$ for every \ccbs conflict $C\in\Psi$. This translates to the following 
 \begin{equation}
-\bigwedge_{C\in \Psi} \Big(\bigvee_{c\in Cons(C)} c \Big)
+\text{$\Pi$ has no conflicts from $\Psi$}
+\leftright
+\bigwedge_{C\in \Psi} \Big(\bigvee_{c\in Cons(C)} c(\Pi) \Big)
 \end{equation}
 
 a set of \ccbs constraints that is a hitting set of $Cons(\Psi)$. 
