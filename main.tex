@@ -1322,10 +1322,10 @@ For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraint
 Let $Cnst(C)$ be this pair of \ccbs constraints, 
 and let $Cnst_i(\Psi)$ be the set of all \ccbs constraints on agent $a_i$ that were generated this way, i.e., 
 \begin{equation}
-Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = &\{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
+Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
 \end{equation}
 \begin{equation}
-Cnst_i(\Psi) = &\{ \tuple{i, a_i, [t_i, t_i^u)} | 
+Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
 \exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
 \end{equation}
 
