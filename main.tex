@@ -33,6 +33,7 @@
 
 \newcommand{\tuple}[1]{\ensuremath{\left \langle #1 \right \rangle }}
 \newcommand{\mddr}{\ensuremath{MDD_R}\xspace}
+\newcommand{\mddrs}{\ensuremath{MDD_R}s\xspace}
 \newcommand{\implicitct}{\textit{ImplicitCT}\xspace}
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -1342,6 +1343,85 @@ Cnst(\Psi) = \{ Const(C) | C\in \Psi\}
 
 
 \noindent \textbf{Step \#2. Creating a propositional formula for all relevant single-agent plans.} 
+For each agent, we first compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Const(\Psi)$. 
+We store this set of single-agent plans in a compact data structure called
+\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
+An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
+MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
+
+
+
+% Describing the MDDR
+Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
+The children of a node $(v,t)$ are generated as follows. 
+For every move action $a\in \mathcal{A}$ in the graph 
+that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
+we create a child node $(v',t')$ where 
+$v'$ is the location of the agent after applying $a$ and 
+$t'$ is the time reached after performing $a$ at time $t$. 
+Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
+If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in $Const(\Psi)$ 
+that conflicts with doing $a$ at time $t$, 
+then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+More formally, for an \mddr node $(v,t)$ 
+and a move action $a$ from $v$ to $v'$, 
+if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
+To create the \mddr for each agent $a_i$, we generate all children of all nodes in a breadth-first manner, starting from the root node $(\source(i),0)$, which represents agent $a_i$ in its start location at time 0. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
+
+
+% From MDDR to propositional formula
+These \mddrs The \ps formula 
+
+
+
+This set of single-agent plans is stored in a
+and store 
+
+
+and store this 
+
+, we create a specific multi-valued decision diagram (MDD)~\cite{srinivasan1990algorithms}. 
+
+
+
+
+
+To generate our \ps for a given implicit \ct \implicitct, we compute for every agent $a_i$ the set of all single-agent plans that may part of a solution \csipp will return to a \ct node $N\in \implicitct$. 
+
+if it is used to find a solution applied to find 
+for each agent $a_i$ all single-agent plan that \csipp may return if applied to every node in the implicit \ct
+and whose duration is at most $\mu$ (the makespan bound). 
+We compute this set of single-agent plans and store it in a compact data structure called
+\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
+An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
+MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
+
+
+
+Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
+The children of a node $(v,t)$ are generated as follows. 
+For every move action $a\in \mathcal{A}$ in the graph 
+that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
+we create a child node $(v',t')$ where 
+$v'$ is the location of the agent after applying $a$ and 
+$t'$ is the time reached after performing $a$ at time $t$. 
+Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
+If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in one of the \ct nodes 
+that conflicts with doing $a$ at time $t$, 
+then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+More formally, for an \mddr node $(v,t)$ 
+and a move action $a$ from $v$ to $v'$, 
+if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
+To create the \mddr for agent $a_i$, we generating all children of all nodes in a breadth-first manner, starting from the node $(\source(i),0)$, which represents agent $a_i$ in its start location. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
+
+
+
+
+
+
+
+
+
 The variables in this propositional formula are similar to those used by MDD-SAT. 
 
 \ccbs Constraints for every conflict.
