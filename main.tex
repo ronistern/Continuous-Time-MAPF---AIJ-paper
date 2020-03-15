@@ -17,6 +17,8 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage{graphicx}
 
+\usepackage{subcaption}
+
 \usepackage[usenames]{color}
 
 
@@ -1387,33 +1389,76 @@ The algorithm we used to do so can be viewed as an SMT version of \ccbs: a solut
 
 \section{Experimental Evaluation}
 \subsection{Setup}
-We evaluated the suggested algorithms in different setups that involved $2^k$-connected grids \cite{rivera2017grid} and arbitrary graphs (roadmaps) as well. Grid maps that we used came for the well-known in the community benchmark maintained by N.Sturtevant \cite{stern2019mapf} and available at \url{https://movingai.com/benchmarks/mapf.html}. Particularly we used the following maps: \texttt{empty-16-16} ($16 \times 16$), \texttt{warehouse-10-20-10-2-2} ($161 \times 63$), \texttt{room-64-64-8} ($64 \times 64$) and \texttt{den520d} ($256 \times 257$). We chose these maps as they represent a variety of different settings \mapf solver might come across, including video-games (\texttt{den520d}), logistics (\texttt{warehouse-10-20-10-2-2}), indoor robotics (\texttt{room-64-64-8}) and field robotics (\texttt{empty-16-16}).
+We evaluated the suggested algorithms in different setups that involved $2^k$-connected grids \cite{rivera2017grid} and arbitrary graphs (roadmaps) as well. Grid maps that we used came from the well-known in the community benchmark maintained by N. Sturtevant \cite{stern2019mapf} and available at \url{https://movingai.com/benchmarks/mapf.html}. Particularly, we used the following maps: \texttt{empty-16-16} ($16 \times 16$), \texttt{warehouse-10-20-10-2-2} ($161 \times 63$), \texttt{room-64-64-8} ($64 \times 64$) and \texttt{den520d} ($256 \times 257$). We chose these maps as they represent a variety of different settings \mapf solver might come across, including video-games (\texttt{den520d}), logistics (\texttt{warehouse-10-20-10-2-2}), indoor robotics (\texttt{room-64-64-8}) and field robotics (\texttt{empty-16-16}).
 
 \begin{figure}
 \centering
     \centering
-    \includegraphics[width=0.75\columnwidth]{2k-neighborhood.png}
+    \includegraphics[width=0.75\linewidth]{2k-neighborhood.png}
     \caption{Illustration of the $2^k$ neighborhood for $k=2,3,4,$ and $5$.}
     \label{fig:2k-grids}
 \end{figure}
 
-For each grid we set the connectivity to be $2^k$ where $k$ varied from $2$ to $5$ (see Fig.\ref{fig:2k-grids}). We assumed the moving speed of an agent (with inertial effects neglected) to be 1 grid cell per 1 time unit, that is in one time unit agent covers the segment which length is equal to the distance between two orthogonally adjacent cells. E.g. the time needed to execute a diagonal move equals $\sqrt{2}$. This time, as said before, is the cost of the corresponding \mapfr action. Agents' shapes were assumed to be disks of radius $ \frac{\sqrt{2}}{4}$. This specific size was chosen as this is the maximal size when disk agents with volume can both simultaneously perform a manoeuvre, shown in Fig.~\ref{}, that is somewhat common in classical \mapf. \konstantin{Not sure how to explain this in elegant way}.
+\begin{figure}
+\centering
+    \centering
+    \includegraphics[width=0.5\linewidth]{classical-MAPF-common-manoeuvre.png}
+    \caption{A common manoeuvre in classical \mapf. Initial configuration is shown on the left and both agents start moving at the same time. The resultant configuration is shown on the right. In \mapfr such a manoeuvre can be executed by the identical in size disk-shaped agents \emph{iff} their radius is equal to $\frac{\sqrt{2}}{4}$.}
+    \label{fig:classical-MAPF-common-manoeuvre}
+\end{figure}
 
-Shape of an agent was indeed taken into account when estimating the validity of the move action w.r.t static obstacles, i.e. blocked grid cells. If the endpoints of the segment representing a move action were the centers of the free cells but the disk that moves along this segment intersects any of the blocked cells, the action was considered to be invalid.
+\begin{figure}
+\centering
+    \centering
+    \includegraphics[width=0.25\linewidth]{MAPFr-invalid-move-on-a-grid.png}
+    \caption{An example of the invalid move on 16-connected grid. Although the source and the target cells are unblocked and the line connecting the centers of those cells does not intersect the blocked cell, a disk-shaped agent of radius $\frac{\sqrt{2}}{4}$ will run into the latter in case the move is executed.}
+    \label{fig:MAPFr-invalid-move-on-a-grid}
+\end{figure}
 
-The instances for each map were created using the \texttt{random} scenarios from \url{https://movingai.com/benchmarks/mapf.html}. There are 25 different scenarios in the set and each scenario is a list of randomly picked start-goal locations. We used this list to create instances in the way suggested by the maintainers of the benchmark repository. I.e. we started with one agent on a map and sequentially added one agent at a time by taking next start-goal pair from the scenario file, until an algorithm was not able to solve a problem in a given time limit. The latter was set to be 30 seconds. Overall, for each map and specific number of agents we ran algorithms on 25 different instances.
+For each grid the connectivity was set to $2^k$ where $k$ varied from $2$ to $5$ (see Fig.\ref{fig:2k-grids}). We assumed the moving speed of the agents (with inertial effects neglected) to be 1 grid cell per 1 time unit, that is, in one time unit an agent covers the segment which length is equal to the distance between two orthogonally adjacent cells. E.g. the time needed to execute a diagonal move equals $\sqrt{2}$. This time is the cost of the corresponding \mapfr action. Agents' shapes were assumed to be disks of radius $\frac{\sqrt{2}}{4}$. This specific size was chosen as this is the maximal size when disk agents with volume can both simultaneously perform a manoeuvre, shown in Fig.~\ref{fig:classical-MAPF-common-manoeuvre}, that is somewhat common in classical \mapf. \konstantin{Not sure how to explain this in elegant way}.
 
-We also evaluated the algorithms on three different roadmaps -- \texttt{r-sparse}, \texttt{r-semi-sparse}, \texttt{r-dense} -- that were generated by processing the \texttt{den520d} map with the roadmap-generation tool used in the robotics community -- \textbf{TODO: add name and link}. The roadmaps differ in their sizes: \texttt{r-sparse} encounter XXX vertices and YYY edges, \texttt{r-semi-sparse} -- XXX vertices and YYY edges, \texttt{r-dense} -- XXX vertices and YYY edges.
+Shape of an agent was indeed taken into account when estimating the validity of the move actions w.r.t static obstacles, i.e. blocked grid cells. If the endpoints of the segment representing a move action were the centers of the free cells but the disk that moves along this segment intersects any of the blocked cells, the action was considered to be invalid (see Fig.~\ref{fig:MAPFr-invalid-move-on-a-grid} for example).
 
-Instances for the roadmaps were generated in a similar way as for grid maps. First, we generated 25 scenarios that contain non-overlapping start-goal pairs chosen randomly out of graph vertices. Then we again started with one agent on a map and sequentially added one agent at a time by taking next start-goal pair from the scenario until an algorithm was not able to solve a problem in a 30 seconds time limit.
+The instances for each map were created using the \texttt{random} scenarios from \url{https://movingai.com/benchmarks/mapf.html}. There are 25 different scenarios in the set and each scenario is a list of randomly picked start and goal locations. We used this list to create instances in the way suggested by the maintainers of the benchmark repository. I.e. we started with one agent on a map and sequentially added one agent at a time by taking next start-goal pair from the scenario file, until an algorithm was not able to solve a problem in a given time limit. The latter was set to be 30 seconds. Overall, for each map and specific number of agents we ran algorithms on 25 different instances.
 
+We also evaluated the algorithms on two different roadmaps -- \texttt{sparse}, and \texttt{dense} -- that were generated by processing the \texttt{den520d} map with the roadmap-generation tool widely used in the robotics community -- \textbf{TODO: add name and link}. The roadmaps differ in their sizes: \texttt{sparse} encounter 169 vertices and 349 edges, \texttt{dense} -- 878 vertices and 7341 edges.
+
+Instances for the roadmaps were generated in a similar way as for the grid maps. First, we generated 25 scenarios that contain non-overlapping start-goal pairs chosen randomly out of the graph vertices. Then we again started with one agent on a map and sequentially added one agent at a time by taking next start-goal pair from the scenario until an algorithm was not able to solve a problem in a 30 seconds time limit.
+
+\begin{figure*}[t]
+\centering
+\begin{subfigure}{\linewidth}
+    \centering
+    \begin{subfigure}{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{den520d-roadmap-sparse.png}
+        %\caption{}
+        %\label{}
+    \end{subfigure}\hspace{0.025\linewidth}%
+    \begin{subfigure}{0.4\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{den520d-roadmap-dense.png}
+        %\caption{}
+        %\label{}
+    \end{subfigure}\hspace{0.025\linewidth}%
+\end{subfigure}
+
+\caption{Roadmaps used in the experiments. Left -- \texttt{sparse}, right -- \texttt{dense}.}
+\label{fig:roadmaps}
+\end{figure*}
 
 \subsection{Design choices and implementation details}
-One of the major design choice one have to make when implementing an algorithm of the \cbs family is what conflict to choose for the resolution at each iteration of high level search. Previous research on this topic in classical \mapf \cite{} \konstantin{Guys, help me with the right links} provides a clear evidence  choosing the conflicts in a right way may significantly reduce the number of nodes explored at the high level of \cbs and speed up the algorithm up to one order of magnitude or higher \konstantin{Am i not exaggerating?}. One of the common approaches to choosing conflicts that leads to such results in practice is preferring \emph{cardinal} conflicts to \emph{semi-cardinal} and preferring the latter to the \emph{non-cardinal} ones. The conflict between two plans is called cardinal if after imposing constraints and re-planning the cost of both individual plans does increase. The conflict is semi-cardinal if the cost of only one plan increases. In all other cases the conflict is non-cardinal.
+One of the major design choice one have to make when implementing an algorithm of the \cbs family is what conflict to choose for the resolution when processing a high-level node. Previous research on this topic in classical \mapf \cite{} \konstantin{Guys, help me with the right links} provides a clear evidence that choosing the conflicts in a right way may significantly reduces the number of the explored \cbs nodes and speeds up the search up to one order of magnitude or higher \konstantin{Am i not exaggerating?}. One of the common approaches to choosing conflicts that leads to such results in practice is preferring \emph{cardinal} conflicts to \emph{semi-cardinal} and preferring the latter to the \emph{non-cardinal} ones. The conflict between two plans is called cardinal \emph{iff} after imposing constraints and re-planning the cost of both individual plans does increase. The conflict is semi-cardinal if the cost of only one plan increases (and the other -- does not). In all other cases the conflict is non-cardinal.
 
-Preferring cardinal conflicts to semi-cardinal to non-cardinal showed to work well for \mapfr as well. However, in \ccbs the computational cost of identifying to which class a \ccbs conflict belongs is, presumably, higher than for \cbs as now ... \textbf{TODO: add the arguments why it is true}. In our previous work \cite{andreychuk2019multi} we tried to avoid these computations in cases that heuristically seem no-promising. Nevertheless, after conducting more thorough evaluation we came to a conclusion that such an elective avoidance does not lead to a desired result (lowering down the number nodes explored at the high level) in a range of cases. Thus, we finally chose to always detect whether the newly encountered conflicts are cardinal, semi-cardinal or non-cardinal and prefer the former to the latter.
+Preferring cardinal conflicts to semi-cardinal to non-cardinal showed to work well for \mapfr as well. However, in \ccbs the computational cost of identifying to which class a \ccbs conflict belongs is, presumably, higher than for \cbs as now ... \textbf{TODO: add the arguments why it is true}. In our previous work \cite{andreychuk2019multi} we tried to avoid these computations in cases that seem no-promising and introduced a special heuristic for that. Nevertheless, after conducting more thorough evaluation we came to a conclusion that such a strategy does not lead to a desired result (lowering down the number nodes explored at the high level) in a range of cases. Thus, in this work we always detected whether the newly encountered conflicts are cardinal, semi-cardinal or non-cardinal and prefer the former to the latter. Among the conflicts of the same cardinality-type we chose to process the one that occurs earlier in time.
 
-\textbf{TODO: Add implementation details of conflicts bookkeping. And a phrase on how \inconflict was implement and unsafe-intervals were computed.}
+Implementation wise we store all the conflicts (with their types) in the nodes of \ccbs constraint tree (CT). Thus, when a child CT node is generated we have to identify the cardinality-type only for the conflicts that are caused by a newly constructed plan for a constrained agent (all other conflicts are copied from the parent node). \konstantin{Not sure that this paragraph is 100\% needed. What do you think?}
+
+The following tie-breaking strategies for the \ccbs were adopted. If two or more high-level nodes with the same (minimal) cost exist in the CT tree we prefer the one with the lower number of conflicts. Secondary tie-breaking criteria was the number of constraints. We prefer the nodes with more constraints to the nodes with fewer constraints.
+
+\iscollision, \inconflict and unsafe-interval computation were implemented as discussed in Section~\ref{sec:conflict-and-unsafe-detection}.
+
+Our implementation of \ccbs is available at \url{github.com/PathPlanning/Continuous-CBS}. 
 
 \konstantin{Pavel, do we need to say smth. about SMT-CBS?}
 
