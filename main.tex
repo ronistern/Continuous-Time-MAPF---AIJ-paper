@@ -1281,7 +1281,7 @@ Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for this algorithm.
 The algorithm maintains a set $\Psi$ that contains all the \ccbs conflicts returned by our \decidet procedure so far. 
 Initially, $\Psi$ is empty (line~\ref{line:smt:init}). 
 In every iteration, the \ps is created for the current set of conflicts (CreatePS($\cdot$) in line~\ref{line:smt:createps}). 
-A SAT solver is used to search for a satisfying assignment to this \ps (line~\ref{line:smt:solve}). 
+A SAT solver is used to search for a satisfying assignment to this \ps~ (line~\ref{line:smt:solve}). 
 If no solution exists, the given decision problem is unsolvable. 
 Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
 If it is a valid solution, we return it.
@@ -1315,8 +1315,44 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 %The CreatePS procedure accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. It outputs a \ps that is satisfiable iff there exists a solution (not necessarily valid) to the given \mapf problem with makespan at most $\mu$ that does not have any of the \ccbs conflicts in $\Psi$. We generate such a \ps by mimicking \ccbs, as follows. 
 
 % Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
-The CreatePS procedure generates a \ps that mimicks the behavior in \ccbs. 
-It considers the possible sets of constraints that \ccbs would impose to resolve the conflicts in $\Psi$, and it considers the possible single-agent plans \csipp would find to satisfy these constraints. This is done as follows. 
+The CreatePS procedure generates a \ps such that a satisfying assignments to it
+defines a solution in which all the \ccbs conflicts in $\Psi$ are avoided. 
+CreatePS consists of three steps. 
+In the first step, it computes the possible sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$, based on Lemma~\ref{lem:sound}. 
+In the second step, it creates a propositional formula that represents all possible single-agent plans \csipp would return for each of the agents that satisfy these constraints.
+In the third and final step, it adds to this formula additional constraints to verify that the set of single-agent plans selected avoided all conflicts by satisfying for every conflict in $\Psi$
+one of its respective \ccbs constraints. 
+
+
+
+\noindent \textbf{Step \#1. Computing \ccbs Constraints for every conflict.}
+For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. This requires computing the unsafe intervals for each conflict. 
+Let $Cnst(C)$ be the pair of \ccbs constraints for a conflict $C\in \Psi$, 
+and let $Cnst(\Psi)$ be the set of all pairs of \ccbs constraints were generated this way, i.e., 
+\begin{equation}
+Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
+\end{equation}
+\begin{equation}
+Cnst(\Psi) = \{ \big( \tuple{i, a_i, [t_i, t_i^u)}, 
+					  \tuple{j, a_j, [t_j, t_j^u)} \big) | 
+					  \tuple{(a_i, t_i), (a_j, t_j)}\in \Psi\} 
+\end{equation}
+%\begin{equation}
+%Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
+%\exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
+%\end{equation}
+
+
+The first step in CreatePS is to computes the set of single-agent plans \csipp considers in its search. 
+...
+
+
+This is done as follows. 
+
+
+
+
+
 
 For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. 
 Let $Cnst(C)$ be this pair of \ccbs constraints, 
