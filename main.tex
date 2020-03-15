@@ -116,7 +116,8 @@
 
 \newcommand{\mapfr}{\ac{MAPF}$_R$\xspace}
 
-\newcommand{\smtmapfr}{\mddr-\smt\xspace}
+\newcommand{\smtcbs}{SMT-CBS\xspace}
+
 \newcommand{\mapfect}{\mapfr-CT\xspace}
 
 \newcommand{\mapf}{\ac{MAPF}\xspace}
@@ -1180,16 +1181,21 @@ Overall, when agents are represented as disks that move from one location to the
 
 \section{An SMT-Based Approach for \mapfr}
 
-Compiling a classical \mapf problem to Boolean satisfiability (SAT) problem and solving it with an off-the-shelf SAT solver is a well-studied successful alternative to \cbs~\cite{surynek2012towards,surynek14compact,DBLP:conf/ecai/SurynekFSB16}. In some domains SAT-based \mapf algorithms may outperform \cbs, e.g., in small densely populated graphs~\cite{surynekFSB16comparison,surynek17expansion}. %\roni{Pavel, can you plug in here a bunch of references for SAT-based solvers?} \pavel{Done.}
+% What we want: SAT-based for MAPFR
+Compiling a classical \mapf problem to Boolean satisfiability (SAT) problem and solving it with an off-the-shelf SAT solver is a well-studied successful alternative to \cbs~\cite{surynek2012towards,surynek14compact,DBLP:conf/ecai/SurynekFSB16}. In some domains SAT-based \mapf algorithms may outperform \cbs, e.g., in small densely populated graphs~\cite{surynekFSB16comparison,surynek17expansion}. 
 Thus, natural question in our context is can we create an alternative to \ccbs that is based on SAT?
 
+% SAT-based for MAPFR is non-trivial. The world is no longer Boolean. 
 Creating a SAT-based solver for \mapfr is challenging, because \mapfr explicitly allows arbitrary action durations while SAT is discrete, hence in general, ill-suited to handle real numbers. 
 In particular, the MDD-SAT encoding described in Section~\ref{sec:mdd-sat},cannot be used directly for \mapfr, since in \mapfr there is no notion of time steps as time is continuous. 
 In other words, the number of Boolean variables (the 
 $\mathcal{X}_{v}^{t}(a_i)$ and 
 $\mathcal{E}_{u,v}^{t}(a_i)$ variables) required to solve an \mapfr problem with MDD-SAT, is infinite. 
 
-In this section, we propose an alternative compilation-based approach for \mapfr based on \emph{SAT modulu Theory (SMT)}~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. We start by providing a brief background on SMT. 
+% Outline of section
+In this section, we propose an alternative compilation-based algorithm for finding makespan-optimal solution to \mapfr problems. This algorithm is called \smtcbs
+
+based on \emph{SAT modulu Theory (SMT)}~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10}. We start by providing a brief background on SMT. 
 Then, we describe an SMT-based approach to solve the decision problem of finding a solution to a \mapfr problem under a given makespan bound. 
 Finally, we present a complete and optimal \mapfr algorithm that is based on solving a sequence of these decision problems. 
 
@@ -1233,16 +1239,24 @@ In more general cases, not only new constraints are added to resolve a conflict 
 %A general $T$-formula $\Gamma$ being decided for satisfiability is transformed to a {\em propositional skeleton} by replacing its atoms with propositional variables. The standard SAT-solving procedure then decides what variables should be assigned $\mathit{TRUE}$ in order to satisfy the skeleton - these variables tells what atoms hold in $\Gamma$. $\mathit{DECIDE_T}$ then checks if the conjunction of atoms assigned $\mathit{TRUE}$ is valid with respect to axioms of $T$. If so then satisfying assignment is returned and we are finished. Otherwise a conflict from $\mathit{DECIDE_T}$ (often called a {\em lemma}) is reported back to the SAT solver and the skeleton is extended with new constraints resolving the conflict. In more general cases, not only new constraints are added to resolve a conflict but also new variables i.e. atoms can be added to $\Gamma$.
 
 
+
 \subsection{SMT for Solving Fixed-Makespan \mapfr Problems}
 
-Next, we propose an SMT-based algorithm for solving the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
+% We start by converting the optimization problem to a decision problem 
+We p
+
+
+
+A key component in our SMT-based algorithm for solving \mapfr is an algorithm that solves the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
 We call this decision problem the \emph{fixed-makespan \mapfr problem}.  
 
 
 
 % High-level: we grow an implicit CT
-Our SMT-based algorithm for solving the fixed-makespan problem mimics to the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints that are computed in the same way as in \ccbs. It follows the standard SMT solving procedure described above with a \ps and a \decidet procedure. 
-The \ps defines a solution to the given \mapfr problem, while the \decidet applies a conflict detection mechanism to check if that solution is valid. If not, it returns one of the detected \ccbs conflict. 
+The algorithm we propose for solving the fixed-makespan problem mimics to the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints. 
+This algorithm follows the standard SMT solving procedure described above, 
+iteratively creating a \ps, solving it, and using a \decidet procedure to check if it satisfied the underlying non-Boolean logic. 
+This \ps defines a solution to the given \mapfr problem, while the \decidet applies a conflict detection mechanism to check if that solution is valid. If not, it returns one of the detected \ccbs conflict. 
 Throughout its execution, our algorithm maintains a set of all the previously detected \ccbs conflicts. We call this set the \emph{active conflicts} set. 
 Our \ps is constructed in such a way that a satisfying assignment to it 
 defines a solution to the given \mapfr problem that resolves the set of active conflicts and has a makespan smaller than or equal to the makespan bound $\mu$. 
