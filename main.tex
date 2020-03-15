@@ -1244,13 +1244,13 @@ In more general cases, not only new constraints are added to resolve a conflict 
 \subsection{SMT for Solving Fixed-Makespan \mapfr Problems}
 
 % We use SMT to solve the fixed makespan problem. 
-The fixed-makespan \mapfr problem is the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a solution to $P$ whose makespan is at most $\mu$? 
+The fixed-makespan \mapfr problem is the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a valid solution to $P$ whose makespan is at most $\mu$? 
 Next, we propose an algorithm that solves this problem by following the standard \smt solving procedure described above. 
-A satisfying assignment to the \ps in our algorithm defines a solution to the given \mapfr problem whose makespan is smaller than or equal to $\mu$. 
-The \decidet procedure in our algorithm applies a conflict detection mechanism to check if that solution is valid. 
-If not, it returns one of the detected \ccbs conflict. 
-In such cases, the \ps is subsequently updated so that 
-satisfying assignments to it will resolve the detected conflict by satisfying one of the corresponding \ccbs constraints. 
+The \ps in our algorithm is constructed in such a way that a 
+satisfying assignment to it defines a solution to $P$ with makespan at most $\mu$. 
+The \decidet procedure in our algorithm checks if this solution is valid, i.e., if it contains any \ccbs conflicts. 
+If the solution is not valid, our \decidet returns one of the detected \ccbs conflicts. Then, the \ps is updated so that assignments that satisfy it 
+define a solution in which all the \ccbs conflicts returned so far by \decidet are avoided. 
 %This algorithm mimics the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints. 
 
 
@@ -1258,7 +1258,7 @@ satisfying assignments to it will resolve the detected conflict by satisfying on
 
 \begin{algorithm}
 	\SetKwInOut{Input}{input}
-	\Input{($\mathcal{G}=(V,E)$, \source, \target,$\mu$)}
+	\Input{($P$, the \mapfr problem; $\mu$, the makespan bound)}
 	$\Psi\gets\emptyset$ \nllabel{line:smt:init}\\
 	\While{True}{
 		\ps $\gets$ CreatePS($\Psi$) \nllabel{line:smt:createps}\\
@@ -1278,13 +1278,15 @@ satisfying assignments to it will resolve the detected conflict by satisfying on
 
 % Pseudo code
 Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for this algorithm. 
-$\Psi$ contains the set of \ccbs conflicts detected so far, which is initially empty (line~\ref{line:smt:init}). 
-In every iteration, the \ps is created for the set of previously-found conflicts (CreatePS($\Psi$) in line~\ref{line:smt:createps}). 
-A SAT solver is used to search for a solution to this \ps (line~\ref{line:smt:solve}). 
+The algorithm maintains a set $\Psi$ that contains all the \ccbs conflicts returned by our \decidet procedure so far. 
+Initially, $\Psi$ is empty (line~\ref{line:smt:init}). 
+In every iteration, the \ps is created for the current set of conflicts (CreatePS($\Psi$) in line~\ref{line:smt:createps}). 
+A SAT solver is used to search for a satisfying assignment to this \ps (line~\ref{line:smt:solve}). 
 If no solution exists, the given decision problem is unsolvable. 
 Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
 If it is a valid solution, we return it.
-Otherwise, \decidet returns a \ccbs conflict, which is added to the set of conflicts $\Psi$. 
+Otherwise, \decidet returns a \ccbs conflict that exists in this solution. 
+The returned \ccbs conflict is added to the set of conflicts $\Psi$. 
 This process continues until either a valid solution is found (line~\ref{line:smt:solution}) or we establish that no solution exists (line~\ref{line:smt:no-solution}).
 
 
