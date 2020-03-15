@@ -1258,8 +1258,7 @@ define a solution in which all the \ccbs conflicts returned so far by \decidet a
 
 \begin{algorithm}
 	\SetKwInOut{Input}{Input}
-	\Input{$P$, the \mapfr problem}
-	\Input{$\mu$, the makespan bound}	
+	\Input{$P$, the \mapfr problem; $\mu$, the makespan bound}
 	$\Psi\gets\emptyset$ \nllabel{line:smt:init}\\
 	\While{True}{
 		\ps $\gets$ CreatePS($\Psi$) \nllabel{line:smt:createps}\\
