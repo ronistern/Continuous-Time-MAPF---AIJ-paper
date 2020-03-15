@@ -1315,8 +1315,18 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 %The CreatePS procedure accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. It outputs a \ps that is satisfiable iff there exists a solution (not necessarily valid) to the given \mapf problem with makespan at most $\mu$ that does not have any of the \ccbs conflicts in $\Psi$. We generate such a \ps by mimicking \ccbs, as follows. 
 
 % Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
-The CreatePS procedure mimicks \ccbs by considering all sets of constraints that \ccbs would impose to resolve the conflicts in $\Psi$, 
-and by considering the single-agent plans \csipp would find to satisfy these constraints. 
+The CreatePS procedure generates a \ps that mimicks the behavior in \ccbs. 
+It considers the possible sets of constraints that \ccbs would impose to resolve the conflicts in $\Psi$, and it considers the possible single-agent plans \csipp would find to satisfy these constraints. This is done as follows. 
+
+For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. 
+Let $Cnst_i$ be the set of all \ccbs constraints on agent $a_i$ that were generated this way, i.e., 
+\begin{equation}
+Cnst_i = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
+\exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
+\end{equation}
+
+
+
 \ccbs resolves a conflict $\tuple{}$ by imposing one of the following constraints $\tuple{}$. 
 \csipp satisfies this constraint by allowing the agent to wait at ... until .... 
 The first step in CreatePS is to computes the set of single-agent plans \csipp considers in its search. 
