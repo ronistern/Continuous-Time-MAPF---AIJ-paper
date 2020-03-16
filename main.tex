@@ -1246,12 +1246,10 @@ In more general cases, not only new constraints are added to resolve a conflict 
 
 % We use SMT to solve the fixed makespan problem. 
 The fixed-makespan \mapfr problem is the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a valid solution to $P$ whose makespan is at most $\mu$? 
-Next, we propose an algorithm called $\mu$\smtcbs
-
-that solves this problem by following the standard \smt solving procedure described above. 
-The \ps in our algorithm is constructed in such a way that a 
+Next, we propose an algorithm called $\mu$\smtcbs that solves this problem by following the standard \smt solving procedure described above. 
+The \ps in $\mu$\smtcbs is constructed in such a way that a 
 satisfying assignment to it defines a solution to $P$ with makespan at most $\mu$. 
-The \decidet procedure in our algorithm checks if this solution is valid, i.e., if it contains any \ccbs conflicts. 
+The \decidet procedure in $\mu$\smtcbs checks if this solution is valid, i.e., if it contains any \ccbs conflicts. 
 If the solution is not valid, our \decidet returns one of the detected \ccbs conflicts. Then, the \ps is updated so that assignments that satisfy it 
 define a solution in which all the \ccbs conflicts returned so far by \decidet are avoided. 
 %This algorithm mimics the behavior of \ccbs in that it detects \ccbs conflicts and resolves them by imposing of \ccbs constraints. 
@@ -1275,7 +1273,7 @@ define a solution in which all the \ccbs conflicts returned so far by \decidet a
 		}
 		Add $Con$ to $\Psi$\\
 	}
-	\caption{The Fixed-\smtcbs algorithm.}
+	\caption{The $\mu$\smtcbs algorithm.}
 	\label{alg:smt-ccbs}
 \end{algorithm}
 
@@ -1431,24 +1429,6 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 
 
-\subsection{\smtcbs}
-\begin{algorithm}[h]
-		\SetKwInOut{Input}{input}
-		\Input{$\mathcal{G}=(V,E)$, \source, \target)}
-			$\Psi \gets \emptyset$\\
-			$\Pi \gets$ $\{\pi_i$ a shortest  plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
-			$\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
-			\While {$True$}{
-					
-				$(\Pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$_R$($\mathcal{G}$, $\source$, $\target$, $conflicts$, $\mu$)\\
-				\If {$\Pi \neq$ UNSAT}{
-					\Return $\Pi$\\
-				}
-				$\mu \gets \mu_{next}$\\
-			}
-		}
-		\caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
-\end{algorithm}
 
 
 Finally, we present our \smtcbs algorithm. 
