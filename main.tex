@@ -1390,18 +1390,18 @@ Setting $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ to true represents that agent $a_i$ pla
 Note that wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ variables with $v=v'$. 
 To ensure that an assignment to all these variables constitutes a solution to the given \mapfr problem, 
 we create a propositional formula with the following constraints over these Boolean variables. 
-\begin{equation}
+\begin{equation}[C1]
 {  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
 }
 \label{eq-1}
 \end{equation}
 
-\begin{equation}
+\begin{equation}[C2]
 {  \sum_{(v,t')\:|\:[(u,t);(v,t')] \in E^i }{\mathcal{E}_{u,v}^{t,t'}{(i)} \leq 1}
 }
 \label{eq-2}
 \end{equation}
-\begin{equation}
+\begin{equation}[C3]
 {  \mathcal{E}_{u,v}^{t,t'}(i) \Rightarrow \mathcal{X}_v^{t'}(i)
 }
 \label{eq-3}
