@@ -1429,7 +1429,7 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 
 
-\subsection{$\mu\smtcbs}
+\subsection{$\mu$\smtcbs}
 
 
 \begin{algorithm}[h]
@@ -1437,8 +1437,15 @@ The resulting propositional formula is used in our algorithm as the \ps.
 		\Input{$P$, the \mapfr problem}
 
 		$\Psi \gets \emptyset$\\
-		$\Pi \gets \{\pi_1,\ldots,\pi_k \}$ where $\pi_i$ is the shortest single-agent plan for agent $a_i$ \\
-
+		$\Pi \gets \{\pi_1,\ldots,\pi_k \}$, where $\pi_i$ is the shortest single-agent plan for agent $a_i$ \\
+		$\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
+		\While {True}{
+			$(\Pi,\Psi,\mu_{next}) \gets$ $\mu$\smtcbs($P$, $\mu$)\\
+			\If {$\Pi \neq$ UNSAT}{
+				\Return $\Pi$\\
+			}
+			$\mu \gets \mu_{next}$\\
+}
 
 		\caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
 
