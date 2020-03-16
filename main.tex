@@ -1448,13 +1448,13 @@ The resulting propositional formula is used in our algorithm as the \ps.
 	}
 	\caption{Pseudo code for \smtcbs} \label{alg-SMTCBS-high}
 \end{algorithm}
+Finally, we can present our \smtcbs algorithm. Pseudo code is listed in Algorithm~\ref{alg-SMTCBS-high}. 
+\smtcbs maintains the set of observed \ccbs conflicts $\Psi$, which is initially empty. It starts by setting the makespan bound $\mu$ to the single-agent plan with the longest duration. Then, it runs $\mu\smtcbs$ to try to find a valid solution whose makespan is under $\mu$. If it succeeded, it returns that solution. 
+Otherwise, a new conflict is added to $\Psi$ and $\mu$ is increased. 
+The process continues until a valid solution is found. 
 
-Finally, we can present our \smtcbs algorithm. 
 
-
-Algorithm \ref{alg-SMTCBS-high} shows the main loop of SMT-CBS$^\mathcal{R}$. The algorithm checks if there is a solution for given \mapfr $\Sigma_\mathcal{R}$ of makespan $\mu$. The algorithm starts at the lower bound for $\mu$ that is obtained as the duration of the longest temporal plan from individual temporal plans ignoring other agents (lines 3-4).
-
-Then $\mu$ is iteratively increased in the main loop (lines 5-9). The algorithm relies on the fact that the solvability of \mapfr w.r.t. cumulative objective like the makespan behaves as a non decreasing monotonic function. Hence trying increasing makespans eventually leads to finding the optimal makespan provided we do not skip any relevant makespan $\mu$. The next makespan to try will then be obtained by taking the current makespan plus the smallest duration of the continuing movement (line 20 of Algorithm \ref{alg-SMTCBS-low}). The iterative scheme for trying larger makespans follows MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16}.
+The correctness of this algorithm relies on the fact that the solvability of \mapfr w.r.t. cumulative objective like the makespan behaves as a non decreasing monotonic function. Hence trying increasing makespans eventually leads to finding the optimal makespan provided we do not skip any relevant makespan $\mu$. The next makespan to try will then be obtained by taking the current makespan plus the smallest duration of the continuing movement. The iterative scheme for trying larger makespans follows MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16}.
 
 
 
