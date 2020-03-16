@@ -1278,10 +1278,10 @@ define a solution in which all the \ccbs conflicts returned so far by \decidet a
 \end{algorithm}
 
 % Pseudo code
-Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for this algorithm. 
-The algorithm maintains a set $\Psi$ that contains all the \ccbs conflicts returned by our \decidet procedure so far. 
+Algorithm~\ref{alg:smt-ccbs} lists a high-level pseudo-code for $\mu$\smtcbs. 
+$\mu$\smtcbs maintains a set $\Psi$ that contains all the \ccbs conflicts returned by our \decidet procedure so far. 
 Initially, $\Psi$ is empty (line~\ref{line:smt:init}). 
-In every iteration, the \ps is created for the current set of conflicts (CreatePS($\cdot$) in line~\ref{line:smt:createps}). 
+In every iteration of $\mu$\smtcbs, the \ps is created for the current set of conflicts (CreatePS($\cdot$) in line~\ref{line:smt:createps}). 
 A SAT solver is used to search for a satisfying assignment to this \ps~ (line~\ref{line:smt:solve}). 
 If no solution exists, the given decision problem is unsolvable. 
 Otherwise, we apply \decidet to check if the found solution is a valid \mapfr solution (line~\ref{line:smt:decidet}). 
@@ -1429,9 +1429,9 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 
 
+\subsection{$\mu\smtcbs}
 
-
-Finally, we present our \smtcbs algorithm. 
+Finally, we can present our \smtcbs algorithm. 
 \smtcbs starts by computing a lower bound on the mak
  apply the fixed-makespan \mapfr algorithm described above to find a makespan-optimal solution as follows. 
 
