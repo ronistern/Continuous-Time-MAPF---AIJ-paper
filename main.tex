@@ -1376,20 +1376,20 @@ Importantly, this child node is not added to $(v,t)$ instead of $(v', t+a_D)$.
 That is, for every constraint in $Cons(\Psi)$, our \mddr represents single-agent plans that satisfy it
 as well as single-agent plans that do not. 
 For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
-We denote by the set of edges and nodes in the \mddr by $E^i$ and $X^i$, respectively. 
+
 
 \roni{Pavel had some visual examples of \mddr.}
 
 
-\noindent \textbf{Step \#3. Create propositional formula.}
-For every node $(v,t)$ and edge $\big((v,t), (v',t')\big)$ in the \mddr of each agent $a_i$ 
-we create the Boolean variables $\mathcal{X}_{v}^{t}(a_i)$ and
-$\mathcal{E}_{v,v'}^{t,t'}(a_i)$, respectively. 
+\noindent \textbf{Step \#3. Create a propositional formula.}
+Let $E^i$ and $X^i$ denote the set of edges and nodes, respectively, in the \mddr of agent $a_i$. 
+We create the Boolean variables $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ and $\mathcal{X}_{v}^{t}(a_i)$ 
+for every edge and node in $E^i$ and $X^i$ respectively. 
 Setting $\mathcal{X}_v^t(a_i)$ to true represents that agent $a_i$ plans to occupy location $v$ in time $t$. 
 Setting $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ to true represents that agent $a_i$ plans performs an action that start at time $t$, ends at time $t'$, and moves the agent from $v$ to $v'$. 
 Note that wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ variables with $v=v'$. 
-
-Our \ps includes the following constraints over these Boolean variables to ensure that an assignment to them is a solution to the given \mapfr problem. 
+To ensure that an assignment to all these variables constitutes a solution to the given \mapfr problem, 
+we create a propositional formula with the following constraints over these Boolean variables. 
 \begin{equation}
 {  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
 }
@@ -1405,6 +1405,7 @@ Our \ps includes the following constraints over these Boolean variables to ensur
 {  \mathcal{E}_{u,v}^{t,t'}(i) \Rightarrow \mathcal{X}_v^{t'}(i)
 }
 \label{eq-3}
+
 \end{equation}
 
 
