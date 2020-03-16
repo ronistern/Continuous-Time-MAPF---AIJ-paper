@@ -1317,11 +1317,29 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 
 % Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
 
-The CreatePS procedure generates a \ps such that a satisfying assignments to it
-defines a solution in which all the \ccbs conflicts in $\Psi$ are avoided. 
+%The CreatePS procedure generates a \ps such that a satisfying assignments to itdefines a solution in which all the \ccbs conflicts in $\Psi$ are avoided. 
+
+CreatePS consists of the following steps. 
+In the first step, it computes the possible sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$. 
+In the second step, it computes the possible single-agent plans \csipp would generate to satisfy every subset of these constraints. 
+In the third step, it creates a propositional formula such that every satisfying assignment of this formula 
+corresponds to a \mapfr solution in which each agent follows one of the single-agent plans computed in the second step. 
+In the forth and final step, additional constraints are added to verify that a satisfying assignment corresponds to a \mapfr solution that avoids all \ccbs conflicts in $\Psi$. 
+
+creates a propositional formula that represents for each of the agents the set of all single-agent plans \csipp would return that satisfy these constraints.
+In the third and final step, we add to this formula additional constraints to verify that every set of single-agent plans that satisfy all constraints indeed avoids all conflicts in $\Psi$. 
+
+
+one of its respective \ccbs constraints. 
+
+
+
+
 Just like the SAT-MDD encoding, our \ps has two Boolean variables -- $\mathcal{X}_{v}^{t}(a_i)$ and
 $\mathcal{E}_{v,v'}^{t,t'}(a_i)$. Setting $\mathcal{X}_v^t(a_i)$ to true represents that agent $a_i$ is at location $v$ in time $t$. Setting $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ to true represents that agent $a_i$ performs an action that start at time $t$, ends at time $t'$, and moves the agent from $v$ to $v'$. 
 Wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ variables with $v=v'$. 
+Let $E^i$ be the set of $\mathcal{E}_{v,v'}^{t,t'}(a_i)$
+
 Our \ps includes the following constraints over these variables to ensure that an assignment to the variables that satisfy these constraints is a solution to the given \mapfr problem. 
 \begin{equation}
 {  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
@@ -1384,12 +1402,6 @@ CreatePS computes for every agent $a_i$ the set
 These are the same variables as in the SAT encoding in SAT-MDD. 
 
 Unlike SAT-MDD, however, there is no discret
-
-CreatePS consists of three steps. 
-In the first step, it computes the possible sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$, based on Lemma~\ref{lem:sound}. 
-In the second step, it creates a propositional formula that represents all possible single-agent plans \csipp would return for each of the agents that satisfy these constraints.
-In the third and final step, it adds to this formula additional constraints to verify that the set of single-agent plans selected avoided all conflicts by satisfying for every conflict in $\Psi$
-one of its respective \ccbs constraints. 
 
 
 
