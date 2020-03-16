@@ -1438,15 +1438,7 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 		$\Psi \gets \emptyset$\\
 		$\Pi \gets \{\pi_1,\ldots,\pi_k \}$ where $\pi_i$ is the shortest single-agent plan for agent $a_i$ \\
-		$\{\pi_i$ a shortest temporal plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
-		$\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
-		\While {$\mathit{TRUE}$}{
-			$(\Pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$_R$($\mathcal{G}$, $\source$, $\target$, $conflicts$, $\mu$)\\
-			\If {$\Pi \neq$ UNSAT}{
-				\Return $\Pi$\\
-			}
-			$\mu \gets \mu_{next}$\\
-		}
+
 
 		\caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
 
