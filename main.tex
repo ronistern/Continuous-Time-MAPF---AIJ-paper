@@ -1320,6 +1320,76 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 %The CreatePS procedure generates a \ps such that a satisfying assignments to itdefines a solution in which all the \ccbs conflicts in $\Psi$ are avoided. 
 
 CreatePS consists of the following steps. 
+\begin{enumerate}
+	\item Compute the sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$. 
+	\item Compute the single-agent plans \csipp would generate to satisfy every subset of these constraints. 
+	\item Create a propositional formula for choosing solutions from this set of single-agent plans. 
+	\item Add constraints to verify the chosen solution indeed avoids all conflicts in $\Psi$. 
+\end{enumerate}
+
+
+
+\noindent \textbf{Step \#1. Compute the set of relevant \ccbs constraints.}
+For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$. 
+This pair of \ccbs constraints is specified in Lemma~\ref{lem:sound}. 
+Note that to compute this pair of constraints, we need to compute the unsafe intervals for each conflict. 
+Let $Cnst(C)$ be the pair of \ccbs constraints for a conflict $C\in \Psi$, 
+and let $Cnst(\Psi)$ be the set of all pairs of \ccbs constraints were generated this way, i.e., 
+\begin{equation}
+Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
+\end{equation}
+\begin{equation}
+Cnst(\Psi) = \{ Const(C) | C\in \Psi\} 
+\end{equation}
+%\begin{equation}
+%Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
+%\exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
+%\end{equation}
+
+
+\noindent \textbf{Step \#2. Compute \csipp single-agent plans.}
+For each agent, we first compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Const(\Psi)$. 
+To compute and store this set of single-agent plans efficiently, we create a 
+\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
+An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
+MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. 
+The MDD we create, however, is different from that MDD. 
+To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
+
+
+
+% Describing the MDDR
+Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
+The children of a node $(v,t)$ are generated as follows. 
+For every move action $a\in \mathcal{A}$ in the graph 
+that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
+we create a child node $(v',t')$ where 
+$v'$ is the location of the agent after applying $a$ (i.e., $v'=a_\varphi(a_D)$) and 
+$t'$ is the time reached after performing $a$ at time $t$ (i.e., $t'=t+a_D$). 
+If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in $Const(\Psi)$ 
+that conflicts with agent $a_i$ performing $a$ at time $t$, 
+then we create an additional node in the \mddr to represent the option of waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+More formally, for an \mddr node $(v,t)$ 
+and a move action $a$ from $v$ to $v'$, 
+if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
+Importantly, this child node is not added to $(v,t)$ instead of $(v', t+a_D)$. 
+That is, for every constraint in $Cons(\Psi)$, our \mddr represents single-agent plans that satisfy it
+as well as single-agent plans that do not. 
+
+, our \mddr represents 
+the option of satisfying it and the option of ignoring it. 
+
+To create the \mddr for each agent $a_i$, we generate all children of all nodes in a breadth-first manner, starting from the root node $(\source(i),0)$, which represents agent $a_i$ in its start location at time 0. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
+
+
+
+
+
+\noindent \textbf{Step \#3. Create propositional formula.}
+
+
+\noindent \textbf{Step \#4. Add constraints to verify all conflicts are avoided.}
+
 In the first step, it computes the possible sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$. 
 In the second step, it computes the possible single-agent plans \csipp would generate to satisfy every subset of these constraints. 
 In the third step, it creates a propositional formula such that every satisfying assignment of this formula 
@@ -1406,19 +1476,6 @@ Unlike SAT-MDD, however, there is no discret
 
 
 \noindent \textbf{Step \#1. Computing \ccbs constraints for every conflict.}
-For every \ccbs conflict $C$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $C$, as specified in Lemma~\ref{lem:sound}. This requires computing the unsafe intervals for each conflict. 
-Let $Cnst(C)$ be the pair of \ccbs constraints for a conflict $C\in \Psi$, 
-and let $Cnst(\Psi)$ be the set of all pairs of \ccbs constraints were generated this way, i.e., 
-\begin{equation}
-Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
-\end{equation}
-\begin{equation}
-Cnst(\Psi) = \{ Const(C) | C\in \Psi\} 
-\end{equation}
-%\begin{equation}
-%Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
-%\exists C\in \Psi ~~ \tuple{i, a_i, [t_i, t_i^u)}\in Cnst(C) \}
-%\end{equation}
 
 
 \noindent \textbf{Step \#2. Creating a propositional formula for all relevant single-agent plans.} 
@@ -1435,32 +1492,6 @@ In other words, the number of Boolean variables (the
 $\mathcal{X}_{v}^{t}(a_i)$ and 
 $\mathcal{E}_{u,v}^{t}(a_i)$ variables) required to solve an \mapfr problem with MDD-SAT, is infinite. 
 
-
-
-For each agent, we first compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Const(\Psi)$. 
-We store this set of single-agent plans in a compact data structure called
-\emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
-An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
-MDDs have been used in the context of \mapf before, especially in the well-known ICTS algorithm~\cite{sharon2013increasing}. To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
-
-
-
-% Describing the MDDR
-Every node in the \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
-The children of a node $(v,t)$ are generated as follows. 
-For every move action $a\in \mathcal{A}$ in the graph 
-that starts with $v$ and ended before the makespan bound (i.e., $t+a_D\leq \mu$)
-we create a child node $(v',t')$ where 
-$v'$ is the location of the agent after applying $a$ and 
-$t'$ is the time reached after performing $a$ at time $t$. 
-Formally, $v'=a_\varphi(a_D)$ and $t'=t+a_D$. 
-If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in $Const(\Psi)$ 
-that conflicts with doing $a$ at time $t$, 
-then we create an additional node in the \mddr that corresponds to waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
-More formally, for an \mddr node $(v,t)$ 
-and a move action $a$ from $v$ to $v'$, 
-if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
-To create the \mddr for each agent $a_i$, we generate all children of all nodes in a breadth-first manner, starting from the root node $(\source(i),0)$, which represents agent $a_i$ in its start location at time 0. For a pseudo code of this \mddr generation process, see~\ref{sec:code-mddr}. 
 
 
 % From MDDR to propositional formula
