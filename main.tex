@@ -1316,8 +1316,75 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 %The CreatePS procedure accepts a \mapfr problem, a makespan bound $\mu$, and a set of \ccbs conflicts $\Psi$. It outputs a \ps that is satisfiable iff there exists a solution (not necessarily valid) to the given \mapf problem with makespan at most $\mu$ that does not have any of the \ccbs conflicts in $\Psi$. We generate such a \ps by mimicking \ccbs, as follows. 
 
 % Approach: mimic ccbs: define a sound pair of ccbs constraints for every ccbs conflict as defined in Lemma 1. Then simulate csipp. 
+
 The CreatePS procedure generates a \ps such that a satisfying assignments to it
 defines a solution in which all the \ccbs conflicts in $\Psi$ are avoided. 
+Just like the SAT-MDD encoding, our \ps has two Boolean variables -- $\mathcal{X}_{v}^{t}(a_i)$ and
+$\mathcal{E}_{v,v'}^{t,t'}(a_i)$. Setting $\mathcal{X}_v^t(a_i)$ to true represents that agent $a_i$ is at location $v$ in time $t$. Setting $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ to true represents that agent $a_i$ performs an action that start at time $t$, ends at time $t'$, and moves the agent from $v$ to $v'$. 
+Wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(a_i)$ variables with $v=v'$. 
+Our \ps includes the following constraints over these variables to ensure that an assignment to the variables that satisfy these constraints is a solution to the given \mapfr problem. 
+\begin{equation}
+{  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
+}
+\label{eq-1}
+\end{equation}
+
+\begin{equation}
+{  \sum_{(v,t')\:|\:[(u,t);(v,t')] \in E^i }{\mathcal{E}_{u,v}^{t,t'}{(i)} \leq 1}
+}
+\label{eq-2}
+\end{equation}
+\begin{equation}
+{  \mathcal{E}_{u,v}^{t,t'}(i) \Rightarrow \mathcal{X}_v^{t'}(i)
+}
+\label{eq-3}
+\end{equation}
+
+
+We show below a constraint stating that if agent $a_i$ appears in vertex $u$ at time $t$ then it has to leave through exactly one edge connected to $u$ (waiting included).
+
+\begin{equation}
+{  \mathcal{X}_u^t(i) \Rightarrow \bigvee_{(v,t')\;|\;[(u,t);(v,t')] \in E^i}{\mathcal{E}^{t,t'}_{u,v}(i)},
+}
+\label{eq-1}
+\end{equation}
+
+\begin{equation}
+{  \sum_{(v,t')\:|\:[(u,t);(v,t')] \in E^i }{\mathcal{E}_{u,v}^{t,t'}{(i)} \leq 1}
+}
+\label{eq-2}
+\end{equation}
+
+We also need to add constraints establishing the correspondence between vertex and edge decision variables. That is, once an agent enters a directed edge (in RDD) it has to leave it at its end point. The following constraint ensures this property:
+
+\begin{equation}
+{  \mathcal{E}_{u,v}^{t,t'}(i) \Rightarrow \mathcal{X}_v^{t'}(i)
+}
+\label{eq-3}
+\end{equation}
+
+All such local constraints can be expressed as clauses (disjuctions of literals). Since all constraints need to be satisfied we altogether have their conjunction eventually resulting in a formula in {\em conjuctive normal form} (CNF). Notice that we did not add any constraint forbidding collisions between agents. These constraints are added on demand.
+
+
+
+
+
+An assignment to these variables represents a 
+, where $\mathcal{X}_v^t(a_i)$ is true iff agent $a_i$ is at location $v$ in time $T$ and 
+$\mathcal{E}_{v,v'}^{t}(a_i)$ is true iff agent $a_i$ starts at time $t$ an action that moves it from $v$ to $v'$. An assignment to these variables represent a solution to the \mapfr problem, 
+where $X
+
+Our \ps is different from the SAT-MDD encoding in the constraints it imposes on these variables and in that it only generate these variables for a carefully chosen sets of agents, vertices, actions, and time points. 
+
+
+
+
+CreatePS computes for every agent $a_i$ the set 
+
+These are the same variables as in the SAT encoding in SAT-MDD. 
+
+Unlike SAT-MDD, however, there is no discret
+
 CreatePS consists of three steps. 
 In the first step, it computes the possible sets of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$, based on Lemma~\ref{lem:sound}. 
 In the second step, it creates a propositional formula that represents all possible single-agent plans \csipp would return for each of the agents that satisfy these constraints.
@@ -1343,6 +1410,21 @@ Cnst(\Psi) = \{ Const(C) | C\in \Psi\}
 
 
 \noindent \textbf{Step \#2. Creating a propositional formula for all relevant single-agent plans.} 
+The propositional formula we generate to represent all single-agent plans of all agent is similar to the MDD-SAT encoding described in Section~\ref{sec:mdd-sat}. 
+There are two Boolean variables: $\mathcal{X}_{v}^{t}(a_i)$ and 
+$\mathcal{E}_{v,v'}^{t}(a_i)$, where $\mathcal{X}_v^t(a_i)$ is true iff agent $a_i$ is at location $v$ in time $T$ and 
+$\mathcal{E}_{v,v'}^{t}(a_i)$ is true iff agent $a_i$ starts at time $t$ an action that moves it from $v$ to $v'$. Unlike SAT-MDD, however, there is no discret
+
+
+variables) required to solve an \mapfr problem with MDD-SAT, is infinite. 
+
+In particular, the MDD-SAT encoding described in Section~\ref{sec:mdd-sat},cannot be used directly for \mapfr, since in \mapfr there is no notion of time steps as time is continuous. 
+In other words, the number of Boolean variables (the 
+$\mathcal{X}_{v}^{t}(a_i)$ and 
+$\mathcal{E}_{u,v}^{t}(a_i)$ variables) required to solve an \mapfr problem with MDD-SAT, is infinite. 
+
+
+
 For each agent, we first compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Const(\Psi)$. 
 We store this set of single-agent plans in a compact data structure called
 \emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms}. 
@@ -1370,7 +1452,7 @@ To create the \mddr for each agent $a_i$, we generate all children of all nodes 
 
 
 % From MDDR to propositional formula
-These \mddrs The \ps formula 
+These \mddrs are used to create the following propositional formulate. 
 
 
 
