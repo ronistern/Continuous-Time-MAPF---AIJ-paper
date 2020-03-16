@@ -1368,7 +1368,7 @@ $v'$ is the location of the agent after applying $a$ (i.e., $v'=a_\varphi(a_D)$)
 $t'$ is the time reached after performing $a$ at time $t$ (i.e., $t'=t+a_D$). 
 If there exists a \ccbs constraint $(i, (v,v'), [t_i, t_i^u])$ in $Const(\Psi)$ 
 that conflicts with agent $a_i$ performing $a$ at time $t$, 
-then we create an additional node in the \mddr to represent the option of waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
+then we create an additional node in the \mddr to represent the option of waiting at $v$ until $a$ can be performed without conflicting with` this constraint. 
 More formally, for an \mddr node $(v,t)$ 
 and a move action $a$ from $v$ to $v'$, 
 if $t\in [t_i, t_i^u]$ then we add to the node $(v,t)$ a child node $(v,t_i^u)$. 
