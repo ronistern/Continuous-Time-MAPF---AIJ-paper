@@ -1414,6 +1414,17 @@ Thus, a satisfying assignment to this formula represents a solution to the given
 
 \noindent \textbf{Step \#4. Add constraints to verify all conflicts are avoided.}
 To avoid all the \ccbs conflicts in $\Psi$, we verify that for every conflict $C\in\Psi$ one of the \ccbs constraints in $Cnst(C)$ is satisfied. 
+This is done by adding to the propositional formula created in step \#3 
+an appropriate disjunction. 
+That is, for a conflict $\tuple{(a_i,t_i), (a_j, t_j)}$ 
+where $a_i$ moves from $v$ to $v'$ 
+and $a_j$ moves from $u$ to $u'$, 
+we add following clause:
+\begin{equation}
+	\mathcal{E}^{t_i, t_i+{a_i}_D}_{v,v'}(i)}
+\vee
+	\mathcal{E}^{t_j, t_j+{a_j}_D}_{u,u'}(j)}
+\end{equation}
 
 
 
