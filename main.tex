@@ -1431,12 +1431,32 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 \subsection{$\mu\smtcbs}
 
+
+\begin{algorithm}[h]
+
+		\SetKwBlock{NRICL}{SMT-CBS$_R$ ($\mathcal{G}=(V,E)$, \source, \target)}{end} \NRICL{
+			$conflicts \gets \emptyset$\\
+			$\Pi \gets$ $\{\pi_i$ a shortest temporal plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
+			$\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
+			\While {$\mathit{TRUE}$}{
+				$(\Pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$_R$($\mathcal{G}$, $\source$, $\target$, $conflicts$, $\mu$)\\
+				\If {$\Pi \neq$ UNSAT}{
+					\Return $\Pi$\\
+				}
+				$\mu \gets \mu_{next}$\\
+			}
+		}
+		\caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
+
+\end{algorithm}
+
 Finally, we can present our \smtcbs algorithm. 
-\smtcbs starts by computing a lower bound on the mak
- apply the fixed-makespan \mapfr algorithm described above to find a makespan-optimal solution as follows. 
 
 
-Given our SMT-based algorithm for solving the fixed-makespan \mapfr problem. 
+Algorithm \ref{alg-SMTCBS-high} shows the main loop of SMT-CBS$^\mathcal{R}$. The algorithm checks if there is a solution for given \mapfr $\Sigma_\mathcal{R}$ of makespan $\mu$. The algorithm starts at the lower bound for $\mu$ that is obtained as the duration of the longest temporal plan from individual temporal plans ignoring other agents (lines 3-4).
+
+Then $\mu$ is iteratively increased in the main loop (lines 5-9). The algorithm relies on the fact that the solvability of \mapfr w.r.t. cumulative objective like the makespan behaves as a non decreasing monotonic function. Hence trying increasing makespans eventually leads to finding the optimal makespan provided we do not skip any relevant makespan $\mu$. The next makespan to try will then be obtained by taking the current makespan plus the smallest duration of the continuing movement (line 20 of Algorithm \ref{alg-SMTCBS-low}). The iterative scheme for trying larger makespans follows MDD-SAT \cite{DBLP:conf/ecai/SurynekFSB16}.
+
 
 
 \section{Experimental Evaluation}
