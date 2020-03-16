@@ -1246,7 +1246,9 @@ In more general cases, not only new constraints are added to resolve a conflict 
 
 % We use SMT to solve the fixed makespan problem. 
 The fixed-makespan \mapfr problem is the following decision problem: given a \mapfr problem $P$ and a makespan bound $\mu$, is there a valid solution to $P$ whose makespan is at most $\mu$? 
-Next, we propose an algorithm that solves this problem by following the standard \smt solving procedure described above. 
+Next, we propose an algorithm called \emph{\mu\smtcbs}
+
+that solves this problem by following the standard \smt solving procedure described above. 
 The \ps in our algorithm is constructed in such a way that a 
 satisfying assignment to it defines a solution to $P$ with makespan at most $\mu$. 
 The \decidet procedure in our algorithm checks if this solution is valid, i.e., if it contains any \ccbs conflicts. 
@@ -1273,7 +1275,7 @@ define a solution in which all the \ccbs conflicts returned so far by \decidet a
 		}
 		Add $Con$ to $\Psi$\\
 	}
-	\caption{SMT algorithm to solve fixed-makespan \mapfr problems}
+	\caption{The Fixed-\smtcbs algorithm.}
 	\label{alg:smt-ccbs}
 \end{algorithm}
 
@@ -1429,14 +1431,15 @@ The resulting propositional formula is used in our algorithm as the \ps.
 
 
 
-\subsection{Finding Optimal Makespan Solutions}
+\subsection{\smtcbs}
 \begin{algorithm}[h]
-	\begin{footnotesize}
-		\SetKwBlock{NRICL}{SMT-CBS$_R$ ($\mathcal{G}=(V,E)$, \source, \target)}{end} \NRICL{
-			$conflicts \gets \emptyset$\\
-			$\Pi \gets$ $\{\pi_i$ a shortest temporal plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
+		\SetKwInOut{Input}{input}
+		\Input{$\mathcal{G}=(V,E)$, \source, \target)}
+			$\Psi \gets \emptyset$\\
+			$\Pi \gets$ $\{\pi_i$ a shortest  plan from $\source(i)$ to $\target(i)\;|\;i = 1,2,...,k\}$ \\
 			$\mu \gets \max_{i=1}^k{\mu(\pi_i)}$ \\
-			\While {$\mathit{TRUE}$}{
+			\While {$True$}{
+					
 				$(\Pi,conflicts,\mu_{next}) \gets$ SMT-CBS-Fixed$_R$($\mathcal{G}$, $\source$, $\target$, $conflicts$, $\mu$)\\
 				\If {$\Pi \neq$ UNSAT}{
 					\Return $\Pi$\\
@@ -1445,7 +1448,6 @@ The resulting propositional formula is used in our algorithm as the \ps.
 			}
 		}
 		\caption{High-level of the SMT-based \mapfr solving} \label{alg-SMTCBS-high}
-	\end{footnotesize}
 \end{algorithm}
 
 
