@@ -1,0 +1,41 @@
+
+\appendix
+
+\section{Pseudo Code for Generating the \mddr}
+\label{sec:code-mddr}
+
+
+\begin{algorithm}[h!]
+	\SetKwInOut{Input}{input}
+	\Input{$\mathcal{G}=(V,E)$, \source(i), \target(i), $\mu$, \implicitct)}
+	$\textsc{Open} \gets \emptyset$ \\   
+	insert $(\source(i),0)$ into $\textsc{Open}$\\
+	$X^i \gets \{ (\source(i),0) \}$\\
+	$E^i \gets \emptyset$\\    	
+	\While {$\textsc{Open} \neq \emptyset$} {
+		$(v,t) \gets$ min$_{t}(\OPEN)$\\
+		Remove $(v,t)$ from \OPEN \\
+		\For {each $a\in \mathcal{A}$ such that $a_\varphi(0)=v$}{
+			\If{$t+a_D\leq \mu$}{
+				$v'=a_\varphi(a_D)$\\
+				Insert $(v',t+a_D)$ into \OPEN\\            					
+				$X^i \gets X^i \cup \{  (v',t+a_D) \}$ \\             		 		
+				$E^i \gets E^i \cup \{  [(v,t),(v',t+a_D)] \}$\\             		 						
+				\ForEach {$(i, (u, v), [t_i,t_i^u]) \in \bigcup\limits_{N\in \implicitct} 		N.\const$}{
+					\If {$t \in [t_i, t_i^u]$ and $t_i^u\leq\mu$}{
+						Insert $(v,t_i^u)$ into \OPEN\\
+						$X^i \gets X^i \cup \{  (v,t_i^u) \}$ \\
+						$E^i \gets E^i \cup \{  [(v,t),(v,t_i^u)] \}$ \\
+					}
+				}	
+			}
+		}
+	}
+	\Return $(X^i,E^i)$\\ 
+	\caption{Creating the \mddr for agent $a_i$, makespan bound $\mu$, and implicit CT \implicitct.} 
+		\label{alg:mddr}
+\end{algorithm}
+% Introducing MDD_R. Psuedo code
+Algorithm~\ref{alg:mddr} lists the pseudo code for generating the \mddr 
+for agent $a_i$, makespan bound $\mu$, 
+and implicit \ct \implicitct. 
