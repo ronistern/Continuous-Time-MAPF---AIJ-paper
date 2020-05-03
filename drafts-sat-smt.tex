@@ -1,0 +1,110 @@
+
+
+\subsubsection{An \smt Approach to Classical \mapf}
+
+
+\smtcbsO~\cite{DBLP:conf/ijcai/Surynek19} is a recently introduce \mapf algorithm that integrates ideas from \cbs and SAT-based \mapf algorithms. 
+Like SAT-based \mapf algorithm, \smtcbsO finds an optimal solution to the given \mapf problem by solving a sequence of bounded-cost \mapf problems. However, \smtcbsO solves each of these bounded-cost problems using a SAT Modulo Theory (SMT)~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10} 
+problem-solving framework. For completeness, we provide a brief brackground on \smt. 
+
+
+% Minimal background on SMT
+\smt is a problem-solving framework 
+designed to leverage the power of modern SAT solvers while applying them to a larger set of problems. 
+The basic use of \smt divides a given decision problem $\Gamma$ into two parts. The first, called the \ps, is an abstraction of $\Gamma$ that keeps only its Boolean structure. The second, called \decidet, is a decision procedure that accepts an assignment that satisfies the \ps and outputs \true if this assignment corresponds to a solution of the original problem $\Gamma$. 
+If \decidet returns \false, i.e., if it is given a solution to the \ps that cannot be mapped to a solution for $\Gamma$, then \decidet returns also a \emph{conflict}  (often called a {\em lemma}) that explains why the solution to the \ps is not valid. 
+
+% More background on SMT
+The standard \smt solving procedure is iterative. First, find a satisfying assignment of the \ps. 
+Then, call \decidet with this assignment. If \decidet returns \true, the satisfying assignment is returned and the \smt solving procedure is finished. 
+Otherwise, the \ps is extended with new constraints designed to resolve the conflict returned by \decidet. 
+In more general cases, not only new constraints are added to resolve a conflict but also new propositional variables.
+
+
+\begin{example}
+%To demonstrate SMT and the standard SMT solving procedure described above, c
+Consider the following simple example. The decision problem is to assign integer values to the variables 
+$a,b,c,d$ such that the following formula is true: 
+\begin{equation}
+\Gamma := ((a = b) \wedge (a=c)) \vee (\neg(b = c) \wedge \neg(a=d))
+\end{equation}
+Note that in any solution to $\Gamma$, the common axioms of equality, such as transitivity, must hold. 
+In an \smt approach to solve $\Gamma$, we can define the \ps  
+\begin{equation}
+ (X_{ab} \wedge X_{ac}) \vee (\neg X_{bc} \wedge \neg X_{ad})   
+\end{equation}
+where $X_{ab}$, $X_{ac}$, $X_{bc}$, and $X_{ad}$ are propositional variables such that $x_{ij}$ represents that $i=j$ for $i,j=\{a,b,c\}$. 
+%That is, the propositional variables in this \ps correspond to the different clauses in $\Gamma$. 
+The SAT solver can set $X_{ab}=true$, $X_{ac}=true$, $X_{bc}=false$, and $X_{ad}=false$ to satisfy this \ps. % which in original $\Gamma$ is interpreted as satisfying individual atoms according to the truth value assignment. 
+The corresponding solution is inconsistent with the semantic of equality (EQ) theory, due to transitivity of equality. Namely, if $x_{ab}$ and $x_{ac}$ are both true, then $x_{ac}$ must also be true. Note that the SAT solver does not know this, as it is not represented in the \ps. A suitable \decidet is needed to check that equality theory holds and suggest a conflict otherwise. We denote by DECIDE$_{EQ}$ this implementation of \decidet. 
+In our case, DECIDE$_{EQ}$ can suggest the conflict $X_{ab} \wedge X_{ac} \rightarrow X_{bc}$. This conflict is added as to \ps, so the SAT solver can give a new assignment. %}. 
+In this way, knowledge from the underlying theory is propagated by the conflict to the \ps level.
+\end{example}
+
+\roni{Frankly, I think this example is too detailed, and I'd rather have it in an appendix.}
+
+
+\smtcbsO follows the same \smt solving procedure for solving bounded-cost \mapf. The \ps initially created in \smtcbsO is the same as the SAT problem created by SAT-based \mapf algorithms, except that it does not encode constraints to avoid conflicts between the agents' plans. 
+Instead, these conflicts are detected after a solution to this \ps is found, in a \mapf-specific \decidet procedure that we denote by DECIDE$_\mapf$. 
+That is, whenever the SAT solver outputs a solution, this solution is checked for conflicts. If no conflicts exists, the solution is returned. Otherwise, additional constraints are added to all subsequent \ps to ensure that every previously detected conflict will not occur again. These constraints are exactly the constraints \cbs would impose to resolve the found conflicts. 
+A similar approach has been used in the Lazy CBS algorithm~\cite{gange2019lazy}. 
+\smtcbsO showed impressive performance on standard \mapf benchmark. 
+%\roni{Added this subsection, to better connect to \smtcbsO. Please read}
+
+
+
+
+
+
+
+\subsubsection{\mddsat}
+\label{sec:mdd-sat}
+\mddsat~\cite{DBLP:conf/ecai/SurynekFSB16} is also a complete and optimal algorithm for classical \mapf. 
+A Boolean Satifiability (SAT) problem is defined by a set of Boolean variables $\{v_1,\ldots v_n\}$ and a Boolean formula $\Phi$ defined over these variables. 
+A solution to a SAT problem is an assignment to these variables such that $\Phi$ is satisfied, or UNSAT if there is no assignment of these variables that satisfies $\Phi$. 
+
+
+\mddsat~\cite{DBLP:conf/ecai/SurynekFSB16} compiles a classical \mapf problem to a sequence of SAT problems similarly as it is done in the SATPlan \cite{DBLP:conf/ecai/KautzS92,DBLP:conf/ijcai/KautzS99} algorithm for classical planning. Each SAT problem represents the decision problem: ``is there a valid solution to the given classical \mapf problem with at most $t_{max}$ time steps?'' where $t_{max}$ is a parameter. 
+$t_{max}$ is initially set to one, and incremented one by one until the minimal $t_{max}$ for which the answer to the corresponding decision problem is ``yes'', is found.  
+
+%\pavel{$T$ here looks like a theory, let us change it to some $t^+$ or something.}\roni{Let's choose today the notation for max time}\roni{Changing to tmax}
+
+
+Every such decision problem is encoded as a SAT problem by defining two types of Boolean variables. The first type, denoted
+$\mathcal{X}_{v}^{t}(i)$, is defined 
+for every discrete time step $t=\{0,\ldots, t_{max}\}$, 
+agent $i$, 
+and vertex $v$ the agent may occupy at time step $t$. 
+The second type of variables, denoted $\mathcal{E}_{u,v}^{t}(i)$, is defined 
+for every time step $t$, agent $i$, 
+and edge $(u,v)$ the agent may start traversing at time step $t$. 
+%uses the following decision variables $\mathcal{X}_{v}^{t}(a_i)$ and $\mathcal{E}_{u,v}^{t}(a_i)$ for discrete time-steps $t \in \{0,1,2, ...\}$ describing occurrence of agent $a_i$ in $v$ or the traversal of edge $\{u,v\}$ by $a_i$ at time-step $t$. 
+\mapf movement rules and collision avoidance constraints are encoded on top of these variables as simple local constraints. 
+The resulting Boolean formulae is given to a SAT solver, which returns either a satisfying assignment or UNSAT. A satisfying assignment to the decision variables specifies a valid solution for the given \mapf problem. An UNSAT indicates no valid solution exists within $t_{max}$ time steps. In this case, $t_{max}$ is increased by one. 
+This approach returns makespan-optimal solutions, and with some additional bookmarking can also be used to return SOC-optimal solutions. 
+
+A major parameter that affects the speed of solving of Boolean formulae is their size. Therefore $\mathcal{X}_{v}^{t}(i)$ and $\mathcal{E}_{u,v}^{t}(i)$ variables are not introduced in $\Phi$ for every vertex and edge at each time step but for only reachable vertices and edges at given time step $t$. This reachability analysis is done by constructing a 
+{\em Multi-Value Decision Diagram}  (MDD)~\cite{srinivasan1990algorithms} 
+that defines for each agent the set of vertices and edges it might reach in any single-agent plan up to some fixed length. Vertices and edges that do ont belong to such a single-agent plan are not represented in the MDD. The construction of $\Phi$ then relies on MDDs rather than on the original graph. MDDs are used in a similar manner in the Increasing Cost Tree Search \mapf algorithm~\cite{sharon2013increasing}.
+
+%\pavel{Better citation for MDD?}.Done
+%\roni{Since we say we use \mddsat, maybe we need to elaborate a bit more here about the MDD part. At least, to say that \mddsat is based on the above encoding, but also use a multi-valued decision diagram to remove decision variables that can be predicted apriori to be false. Pavel/Konstantin, what do you think?} 
+%\konstantin{I agree. Right now it is not evident what MDD means in the algorithm name. The text we have just describes 'sequential SAT' approach for classical MAPF}
+%\pavel{Added some explanation that \mddsat uses MDDs and that is why it is called \mddsat.}
+\subsubsection{\smtcbsO}
+\label{sec:smtcbs}
+
+
+% Background on SMT
+
+% Describe SMT-CBS
+
+
+
+
+\smtcbsO~\cite{DBLP:conf/ijcai/Surynek19} is a recently introduce algorithm for finding optimal solutions to classical \mapf problems. \smtcbsO integrates ideas from \cbs and \mddsat. Like \mddsat, is solves \mapf by solving a sequence of decision problems, and each decision problem is solved by compiling it to a SAT problem and applying a SAT solver. 
+
+
+However, in \smtcbsO these SAT problems are an \emph{incomplete model} of the given \mapf problem. This means every valid \mapf solution corresponds to a solution to the created SAT problem, 
+but a solution to that SAT problem may not correspond to a valid \mapf solution. In more details, the propositional formulae initially created by \smtcbsO do not encode constraints to avoid collisions between the agents. Instead, these constraints are added lazily. Whenever the SAT solver outputs a solution, this solution is checked for conflicts. If no conflicts exists, the solution is returned. Otherwise, additional constraints are added to all subsequent SAT problems to ensure that every previously detected conflict will not occur again. A similar approach has been used in the Lazy CBS algorithm~\cite{gange2019lazy}. 
+\smtcbsO showed impressive performance on standard \mapf benchmark. 

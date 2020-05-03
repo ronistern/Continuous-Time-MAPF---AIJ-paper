@@ -1,0 +1,21 @@
+
+The MDD we create, however, is different from that MDD. 
+To avoid confusion with the MDD used by ICTS, we refer to our MDD as \mddr. 
+Every node in the \mddr is a timed action $(a,t)$, 
+except the root of the \mddr which represents starting the single-agent plan at time zero. 
+The children of a node $n=(a,t)$ are generated as follows. 
+For every move action $a'\in \mathcal{A}$ 
+that starts in $\tov(a)$ and ends before the makespan bound (i.e., $t+a_D+a'_D\leq \mu$)
+we create a child node $n'=(a',t')$, 
+where $t'=t+a_D$ and $v'=\tov(a)$. 
+This child is added to $n$ even if there exists a constraint $Con=\tuple{i, a', [t_i, t_i^u)}$ in $Const(\Psi)$ that prohibits agent $i$ from performing $a'$ at time $t'$, i.e., 
+if $t\in[t_i, t_i^u)$. 
+To represent the option of satisfying $Con$, we add a new child to $n$ that represents the option of performing a wait action that stays at $v'$ until $a'$ can be performed without conflicting with $Con$. 
+That is, we add a new child node $(a'', t')$ to $(a,t)$ where $a''$ is the wait action that stays at $v'$ until time $t_i^u$. The duration of this wait action is simply $t_i^u-t'$. 
+If $\Psi$ contains a conflict with this timed wait actions $(a'',t'')$, then we add 
+Note that the set of conflicts $(\Psi)$ may contain a conflict that includes the newly added timed action $(a'',t')$. 
+Regardless, th
+
+
+
+[[End of new text]]

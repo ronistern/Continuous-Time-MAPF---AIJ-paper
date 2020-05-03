@@ -1,0 +1,154 @@
+
+\begin{algorithm}
+	\SetKwInOut{Input}{Input}
+	\Input{$P$, the \mapfr problem; $\mu$, the makespan bound}
+	$\Psi\gets\emptyset$ \nllabel{line:smt:init}\\
+	\While{True}{
+		(\ps,$\mu_{next}$) $\gets$ CreatePS($\Psi$, P, $\mu$) \nllabel{line:smt:createps}\\
+		$\Pi\gets$ Solve(\ps) \nllabel{line:smt:solve}\\
+		\If{No solution found (i.e., $\Pi$ is null)}{
+			\Return ($null$, $\mu_{next}$) \nllabel{line:smt:no-solution}
+		}
+		$Con\gets$ \decidemapfr($\Pi$, P, $\mu$) \nllabel{line:smt:decidet}\\
+		\If{No conflict found (i.e., $Con$ is null)}{
+			\Return $\Pi$ \nllabel{line:smt:solution}
+		}
+		Add $Con$ to $\Psi$\\
+	}
+	\caption{The $\mu$\smtccbs algorithm.}
+	\label{alg:smt-ccbs}
+\end{algorithm}
+
+
+
+
+% Original version
+\begin{comment}
+\begin{algorithm}[h!]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{GenerateMdd$_R$ ($\mathcal{G}=(V,E)$, $\source$, $\target$, $conflicts$, $\mu_{max}$, i)}{end} \NRICL{
+        $X^i \gets \emptyset$\\
+        $E^i \gets \emptyset$\\    
+        $\textsc{Open} \gets \emptyset$ \\   
+        insert $(\source(i),0)$ into $\textsc{Open}$\\
+        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
+        \While {$\textsc{Open} \neq \emptyset$} {
+                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
+                remove-Min$_{t}(\textsc{Open}$) \\
+                \If {$t \leq \mu_{max}$}{
+    	            \For {each $v$ such that $\{u,v\} \in E$}{
+          		             $\Delta t \gets dist(u,v) / \mathit{speed}(a)$ \\
+                 		insert $(v,t+\Delta t)$ into $\textsc{Open}$\\            
+                 		
+    				$X^i \gets X^i \cup \{  (v,t+\Delta t) \}$ \\             		 		
+    				$E^i \gets E^i \cup \{  [(u,t);(v,t+\Delta t)] \}$ \\             		 						
+                			\For {each $(i, (u, v), [t_i,t_i^u]) \in conflicts$}{
+                				\If {$t \geq t_i$ {\bf and} $t \leq t_i^u$}{
+                 				insert $(u,t_i^u)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t_i^u) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t_i^u)] \}$ \\
+                 	        }  }
+                 	        
+                			\For {each $(i, (v, v), [t_i,t_i^u]) \in conflicts$}{
+                				\If {$t \geq t_i$ {\bf and} $t \leq t_i^u$}{
+                 				insert $(u,t_i^u)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t_i^u) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t_i^u)] \}$ \\
+                 	        }  }                 	        
+                }
+            }
+        }
+    \Return $(X^i,E^i)$\\
+} 
+\caption{Generation of the $\mddr$ for agent $i$.} \label{alg-DEC-gen}
+\end{footnotesize}
+\end{algorithm} 
+\end{comment}
+
+
+
+% First alternative version
+\begin{comment}
+\begin{algorithm}[h!]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{GenerateMdd$_R$ ($\mathcal{G}=(V,E)$, $\source$, $\target$, $\const(\Psi)$, $\mu$, i)}{end} \NRICL{
+        $X^i \gets \emptyset$\\
+        $E^i \gets \emptyset$\\    
+        $\textsc{Open} \gets \emptyset$ \\   
+        insert $(\source(i),0)$ into $\textsc{Open}$\\
+        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
+        \While {$\textsc{Open} \neq \emptyset$} {
+                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
+                remove-Min$_{t}(\textsc{Open}$) \\
+                \If {$t \leq \mu$}{
+    	            \For {each $a\in \mathcal{A}$ such that $\fromv(a)=u$}{
+                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$\\        
+    				$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \\             		 		
+    				$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \\             		 						
+                			\For {each $(i, (u, \tov(a)), [t',t'^u]) \in \const(\Psi)$}{
+                				\If {$t\in [t', t'^u]$}{
+                 				insert $(u,t'^u)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t'^u) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u)] \}$ \\
+                 	        }  }
+                 	        
+                			\For {each $(i, (\tov(a), \tov(a)), [t',t'^u]) \in \const(\Psi)$}{
+                				\If {$t+a_D\in [t', t'^u]$}{
+                 				insert $(u,t'^u-a_D)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t'^u-a_D) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u-a_D)] \}$ \\
+                 	        }  }                 	        
+                }
+            }
+        }
+    \Return $(X^i,E^i)$\\
+} 
+\caption{Generation of the $\mddr$ for agent $i$.} \label{alg:alternative-mddr}
+\end{footnotesize}
+\end{algorithm}
+\end{comment}
+
+
+
+% Alternative version 2
+\begin{comment}
+\begin{algorithm}[h!]
+\begin{footnotesize}
+\SetKwBlock{NRICL}{GenerateMdd$_R$ ($\mathcal{G}=(V,E)$, $\source$, $\target$, $\const(\Psi)$, $\mu$, i)}{end} \NRICL{
+        $X^i \gets \emptyset$\\
+        $E^i \gets \emptyset$\\    
+        $\textsc{Open} \gets \emptyset$ \\   
+        insert $(\source(i),0)$ into $\textsc{Open}$\\
+        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
+        \While {$\textsc{Open} \neq \emptyset$} {
+                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
+                remove-Min$_{t}(\textsc{Open}$) \\
+                \If {$t \leq \mu$}{
+    	            \For {each $a\in \mathcal{A}$ such that $\fromv(a)=u$}{
+                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$\\        
+    				$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \\             		 		
+    				$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \\             		 						
+                			\For {each $(i, (u, \tov(a)), [t',t'^u]) \in \const(\Psi)$}{
+                				%\If {$t\in [t', t'^u]$}{
+                 				insert $(u,t'^u)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t'^u) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u)] \}$ \\
+                 	        }
+                 	        %}
+                 	        
+                			\For {each $(i, (\tov(a), \tov(a)), [t',t'^u]) \in \const(\Psi)$}{
+                				%\If {$t+a_D\in [t', t'^u]$}{
+                 				insert $(u,t'^u-a_D)$ into $\textsc{Open}$\\
+    						$X^i \gets X^i \cup \{  (u,t'^u-a_D) \}$ \\
+    						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u-a_D)] \}$ \\
+                 	        }
+                 	        %}                 	        
+                }
+            }
+        }
+    \Return $(X^i,E^i)$\\
+} 
+\caption{Generation of the $\mddr$ for agent $i$.} \label{alg:alternative-mddr}
+\end{footnotesize}
+\end{algorithm} 
+\end{comment}

@@ -1,0 +1,51 @@
+
+
+\subsection{Background: SAT modulo Theory (SMT)}
+\label{sec:background-smt}
+%A Boolean Satifiability (SAT) problem is defined by a set of Boolean variables $v_1,\ldots v_n$ and a Boolean formula $\Phi$ defined over these variables. A solution to a SAT problem is an assignment to these variables such that $\Phi$ is satisfied, or UNSAT if there is no assignment of these variables that satisfies $\Phi$. 
+%While the SAT problem is famously known to be NP-Complete, modern SAT solvers are extremely efficient, solving formulaes with millions of variables in reasonable time. Nevertheless, 
+
+While modern SAT solvers are extremely powerful, the set of problems one can solve with SAT is inherently limited to decision problems that can be translated to Boolean formulaes. 
+SAT modulo Theory (SMT)~\cite{DBLP:journals/jacm/NieuwenhuisOT06,DBLP:journals/constraints/BofillPSV12,DBLP:conf/cp/Nieuwenhuis10} is an approach designed to leverage the power of modern SAT solvers while applying them to a larger set of problems, as follows. 
+
+
+% Define SMT
+%\pavel{Suggest to use $DECIDE_{MAPF_R}$ instead of \decidet because $T=MAPF_R$.}
+Let $\Gamma$ be a decision problem in some complex logic theory $T$. 
+The basic use of SMT divides $\Gamma$ into two parts. The first, called the \ps, is an abstraction of $\Gamma$ that keeps only its Boolean structure. The second, called \decidet, is a decision procedure that accepts an assignment that satisfies the \ps and outputs \true if this assignment 
+corresponds to a solution of the original problem $\Gamma$ that is valid with respect to axioms of the underlying theory $T$. 
+If \decidet returns \false, i.e., if it is given a solution to the \ps that cannot be mapped to a solution for $\Gamma$, then \decidet returns also a \emph{conflict}  (often called a {\em lemma}) that explains why the solution to the \ps is not valid. 
+
+
+%hope it is Ok I changed to conflict, to be consistent
+% How to solve SMT
+The standard \smt solving procedure is iterative. First, find a satisfying assignment of the \ps. 
+Then, call \decidet with this assignment. If \decidet returns \true, the satisfying assignment is returned and the \smt solving procedure is finished. 
+Otherwise, the \ps is extended with new constraints designed to resolve the conflict returned by \decidet. 
+In more general cases, not only new constraints are added to resolve a conflict but also new propositional variables.
+
+%\roni{Pavel: I tried to re-write some of this text so that it is easier for a SMT-dumb reader like me. Please verify that this makes sense, and, of course, feel free to edit or revert back to your text.} \pavel{Makes sense, I also understand SMT better now :-) }
+
+%The standard SAT-solving procedure then decides what variables should be assigned $\mathit{TRUE}$ in order to satisfy the skeleton - these variables tells what atoms hold in $\Gamma$. $\mathit{DECIDE_T}$ then checks if the conjunction of atoms assigned $\mathit{TRUE}$ is valid with respect to axioms of $T$. If so then satisfying assignment is returned and we are finished. Otherwise a conflict from $\mathit{DECIDE_T}$ (often called a {\em lemma}) is reported back to the SAT solver and the skeleton is extended with new constraints resolving the conflict. In more general cases, not only new constraints are added to resolve a conflict but also new variables i.e. atoms can be added to $\Gamma$.
+
+
+%fragment of $T$ restricted on {\em conjunctive formulae}. \roni{I don't understand: what does it mean to decide a fragment of $T$?} 
+%A general $T$-formula $\Gamma$ being decided for satisfiability is transformed to a {\em propositional skeleton} by replacing its atoms with propositional variables. The standard SAT-solving procedure then decides what variables should be assigned $\mathit{TRUE}$ in order to satisfy the skeleton - these variables tells what atoms hold in $\Gamma$. $\mathit{DECIDE_T}$ then checks if the conjunction of atoms assigned $\mathit{TRUE}$ is valid with respect to axioms of $T$. If so then satisfying assignment is returned and we are finished. Otherwise a conflict from $\mathit{DECIDE_T}$ (often called a {\em lemma}) is reported back to the SAT solver and the skeleton is extended with new constraints resolving the conflict. In more general cases, not only new constraints are added to resolve a conflict but also new variables i.e. atoms can be added to $\Gamma$.
+
+
+To demonstrate SMT and the standard SMT solving procedure described above, consider a simple example, defined for the following formula:
+\begin{equation}
+\Gamma := ((a = b) \wedge (a=c)) \vee (\neg(b = c) \wedge \neg(a=d))
+\end{equation}
+The problem is which non-Boolean values to assign to $a,b,c,d$ such that the formula is true. 
+Note that in any solution to $\Gamma$, the common axioms of equality, such as transitivity, must hold. 
+Consider the \ps  
+\begin{equation}
+ (X_{ab} \wedge X_{ac}) \vee (\neg X_{bc} \wedge \neg X_{ad})   
+\end{equation}
+where $X_{ab}$, $X_{ac}$, $X_{bc}$, and $X_{ad}$ are propositional variables such that $x_{ij}$ represents that $i=j$ for $i,j=\{a,b,c\}$. 
+That is, the propositional variables in this \ps correspond to the different clauses in $\Gamma$. 
+The SAT solver can set $X_{ab}=true$, $X_{ac}=true$, $X_{bc}=false$, and $X_{ad}=false$ to satisfy this \ps. % which in original $\Gamma$ is interpreted as satisfying individual atoms according to the truth value assignment. 
+The corresponding solution is inconsistent with the semantic of equality (EQ) theory, due to transitivity of equality. Namely, if $x_{ab}$ and $x_{ac}$ are both true, then $x_{ac}$ must also be true. Note that the SAT solver does not know this, as it is not represented in the \ps. A suitable DECIDE$_{EQ}$ is needed to check that equality theory holds and suggest a conflict otherwise. In our case, DECIDE$_{EQ}$ can suggest the conflict $X_{ab} \wedge X_{ac} \rightarrow X_{bc}$. This conflict is added as to \ps, so the SAT solver can give a new assignment. %}. 
+In this way, knowledge from the underlying theory is propagated by the conflict to the \ps level.
+
