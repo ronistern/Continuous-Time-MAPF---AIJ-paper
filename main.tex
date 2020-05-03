@@ -1400,7 +1400,7 @@ and in the second step, CreatePS computes all single-agent plans that \csipp wou
 
 
 %\textbf{Step \#1. Compute the set of relevant \ccbs constraints.}
-\textbf{Step \#1. Compute the set of \ccbs constraints for $\Psi$.}
+\textbf{Step 1. Compute the set of \ccbs constraints for $\Psi$.}
 %\konstantin{In the following text I changed $C$ to $Con$ as we used $Con$ in pseudocode.}Good
 For every \ccbs conflict $Con$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $Con$. 
 This pair of \ccbs constraints is specified in Lemma~\ref{lem:sound}. 
@@ -1421,7 +1421,7 @@ Cnst(\Psi) = \{ Cnst(Con)~|~Con\in \Psi\}
 %\konstantin{Resultant set, $Cnst$, is the 'set of pairs of CCBS constraints', so is it right to name this algorithmic step as 'compute the set of relevant CCBS constraints' and not the 'compute the set of relevant CCBS constraint pairs'?}
 
 
-\textbf{Step \#2. Compute the set of relevant single-agent plans.}
+\textbf{Step 2. Compute the set of relevant single-agent plans.}
 For each agent, we compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Cnst(\Psi)$ that involve that agent. 
 To compute and store this set of single-agent plans efficiently, we create for each agent a 
 specific \emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms} that we refer to as \mddr. 
@@ -1429,7 +1429,7 @@ An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Techni
 MDDs have been used in the context of \mapf before, e.g., in the ICTS and E-ICTS algorithms~\cite{sharon2013increasing,walker2018extended}. 
 Every node in our \mddr is a pair $(u,t)$ where $u$ is a vertex in $\mathcal{G}$ 
 and $t$ is a point in time. 
-An edge $((u,t)(v,t'))$ corresponds to a timed action from $u$ to $v$ that starts at $t$ and ends in $t'$. We generate our \mddr by performing a variant of Dijkstra's algorithm that considers all possible wait actions \csipp may include to avoid some constraint in $\const(\Psi)$. 
+An edge $((u,t)(v,t'))$ corresponds to a timed action from $u$ to $v$ that starts at $t$ and ends in $t'$. We generate our \mddr by performing a variant of Dijkstra's algorithm that considers all possible wait actions \csipp may include to avoid any constraint in $\const(\Psi)$. 
 Algorithm~\ref{alg:generate-mddr} describes in details how this is done. 
 
 %Alternative version 3, from the appendinx, now set as final version, other versions commented out
@@ -1437,18 +1437,19 @@ Algorithm~\ref{alg:generate-mddr} describes in details how this is done.
 \begin{footnotesize}
 \SetKwBlock{NRICL}{GenerateMdd$_R$ ($\Pi$, $\const(\Psi)$, $\mu$, i)}{end} \NRICL{
         $X^i \gets \{ (\source(i),0) \}$; $E^i \gets \emptyset$; $\OPEN \gets \emptyset$ \\   
-        insert $(\source(i),0)$ into \OPEN\\
+        insert $(\source(i),0)$ into \OPEN \\
         \While {$\OPEN \neq \emptyset$} {
                 $(u,t) \gets$ pop $(u,t)$ from \OPEN where $t=\min_t(\OPEN)$\\ % We use this notation of pop throughout the paper
                 \If {$t \leq \mu$}{
     	            \ForEach{$a\in \mathcal{A}$ such that $\fromv(a)=u$ and $t+a_D\leq \mu$}{
-                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$\\        
-    				$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \nllabel{line:generate-mddr:start:move} \\             		 		
-    				$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \nllabel{line:generate-mddr:end:move} \\             		 						
+                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$ \nllabel{bla}\\    
+             		    
+$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \nllabel{line:generate-mddr:start:move} \\             		 		
+$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \nllabel{line:generate-mddr:end:move} \\             		 						
                 			%\ForEach{$\tuple{i, (u, \tov(a)), [t',t'^u)} \in \const(\Psi)$ [[Roni: constraints are on actions, not on location pairs]
                 			\ForEach{$\tuple{i, a, [t',t'^u)} \in \const(\Psi)$ 
                 			        \nllabel{line:generate-mddr:start:wait1}}{
-                				\If {$t\in [t', t'^u]$}{
+                				\If {$t\in [t', t'^u]$ and $t'^u+a_D\leq\mu$}{
                      				insert $(u,t'^u)$ into $\textsc{Open}$\\
         						$X^i \gets X^i \cup \{  (u,t'^u) \}$ \\
         						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u)] \}$ \nllabel{line:generate-mddr:end:wait1}\\
@@ -1459,7 +1460,7 @@ Algorithm~\ref{alg:generate-mddr} describes in details how this is done.
                 			\ForEach{$\tuple{i, a', [t',t'^u)} \in \const(\Psi)$ 
                 			    where $a'$ is wait at $\tov(a)$
                 			        \nllabel{line:generate-mddr:start:wait2}}{
-                    				\If {$t<t'^u-a_D$}{
+                    				\If {$t<t'^u-a_D$ and $t'^u\leq\mu$}{
                      				insert $(u,t'^u-a_D)$ into $\textsc{Open}$\\
         						$X^i \gets X^i \cup \{  (u,t'^u-a_D) \}$ \\
         						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u-a_D)] \}$ 
@@ -1472,11 +1473,11 @@ Algorithm~\ref{alg:generate-mddr} describes in details how this is done.
         }
     \Return $(X^i,E^i)$\\
 } 
-\caption{Generate \mddr for single agent $i$.} \label{alg:generate-mddr}
+\caption{Generate \mddr for agent $i$.} \label{alg:generate-mddr}
 \end{footnotesize}
 \end{algorithm} 
 
-
+%\ref{line:generate-mddr:start:move}
 % The \mddr generation algorithm (Algorithm~\ref{alg:generate-mddr}) 
 % accepts a makespan bound $\mu$ and  
 % a set of \ccbs constraints $\const(\Psi)$ for some agent $i$ 
@@ -1496,426 +1497,51 @@ which is initialized with the \mddr root node.
 In every iteration, the best (minimal time) node $(u,t)$ in \OPEN is removed from \OPEN and expanded. 
 The children of $(u,t)$ are generated as follows. 
 For every move action $a\in \mathcal{A}$ that starts with $u$ and ends before the makespan bound (i.e., $t+a_D\leq \mu$) 
-we generate a child node $(\to(a),t+a_D)$, which represents performing action $a$ at time $t$ (line~\ref{}). 
+we generate a child node $(\tov(a),t+a_D)$, which represents performing action $a$ at time $t$ (line~\ref{line:generate-mddr:start:move}-\ref{line:generate-mddr:end:move}). 
 Note that this node is created even if there exists a \ccbs constraint that prohibit agent $i$ from performing $a$ at time $t$. 
-If such a \ccbs constraint exists, we create an \emph{additional} node in the \mddr that represents the option of waiting at $u$ until $a$ can be performed without conflicting with this constraint (line~\ref{}). 
-If there is a \ccbs constraint that prohibits waiting at $\tov(a)$ then we create additional node in the \mddr that represents the option of waiting at $\fromv(a)$ the amount of time needed so that  performing $a$ will reaches $\tov(a)$ immediately afa location for which there are constraints over waiting there, 
-we 
-
-Note that this node is created even if there exists a different \ccbs constraint that prohibit agent $i$ from waiting at $u$ during this time. 
+If such a \ccbs constraint exists, we create an \emph{additional} node in the \mddr that represents the option of waiting at $u$ until $a$ can be performed without conflicting with this constraint (line~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}). 
+If there is a \ccbs constraint that prohibits waiting at $\tov(a)$ then we create an additional node in the \mddr to allow the agent to stay at $\fromv(a)$ until it can apply $a$ to reach $\tov(a)$ immediately after the constraint on waiting at $\tov(a)$ ends (line~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}). 
 
 
-%$\tuple{i, (v,v'), [t_i, t_i^u)}$ in $Const(\Psi)$ 
-%$\tuple{i, (v',v'), [t, t')}$ in $Const(\Psi)$ 
-%\roni{Pavel, in this case, do we add some new node or none is needed?} \pavel{Yes, the node is created but constraints may forbid its usage.}
-% This is original paragraph replace by the alternative description below
-% More formally, for an \mddr node $(v,t)$ and a move action $a$ from $v$ to $v'$, if $t\in [t_i, t_i^u)$ then we add a child node $(v,t_i^u)$ to $(v,t)$. Importantly, this child node is not added to $(v,t)$ instead of $(v', t+a_D)$, but in addition to it. 
-%That is, for every constraint in $Cons(\Psi)$, our \mddr represents single-agent plans that satisfy it as well as single-agent plans that do not. 
-
-
-%For a pseudo-code of this \mddr generation process, see~\ref{sec:code-mddr}. 
-
-%\pavel{The next makespan to try $\mu_{next}$ is calculated as the minimum of end times of move actions $a \in A$ that starts before the makespan bound but ends after (i.e., $\mu_{next} = \min_{(a,t) \in A}\{t + a_D, t \leq \mu \wedge t + a_D > \mu$\}). }\konstantin{I think, I'm starting to get what Pavel is trying to say, but the formula is wrong, I believe. Btw, do I understand right that the move actions that span beyond the current makespan bound are nod added to \mddr (we said this in the beginning of the above paragraph?} \pavel{What is wrong in the formula? Changed $a \in A$ to $(a,t) \in A$, maybe this was wrong.} \pavel{Answer: actions going beyond makespan bound are not added to \mddr.}
-%\konstantin{In the paragraph above we did not specify how do we handle constraints imposed over the wait-actions. Suppose, the wait action $a$ is constrained via the $\tuple{i, (v,v), [t_i, t_i^u)}$. How is it reflected in \mddr?}\roni{Good call. I think that we need to add at the end of the paragraph above the following: ``Every child $(v,t')$ of a node $(v,t)$ represents a wait action. We consider wait actions in a similar way that were described above for move actions. If there is a constraint that forbids this wait action, we add additional nodes to the \mddr that satisfy this constraints.''  Pavel - can you verify/edit/add to above an answer to Konstantin?} \pavel{I think this is correct explanation. The wait action is treated much like move action, that is, degenerate version of move action. Maybe we need to define how to compute unsafe interval for the wait action if we want to give more details. } \konstantin{Guys, I realize now that the right question to ask is the following: to create a \mddr for an agent $i$ does SMT-CBS actually run CSIPP for this agent with every subset of $i$th constraints and then just represents the obtained solutions in the form of \mddr? If the answer is YES, than no special handling of the constraints imposed over the wait actions is needed at the \mddr level (they are handled by CSIPP).}
-%\roni{I don't think this is what happens, because that would mean running \csipp for every subset of constraints, and then aggregating all possible paths. So, the process of generating the \mddr is more efficient. }
-%\roni{I added text to discuss this wait action issue. There's also a question there for Pavel}
-%\pavel{Today I understood the issue with the wait action differently, still not sure if my understanding is correct. But if there is a constraint over the wait action we cannot resolve it by more waiting. This is rather a dead end (assume waiting in v from 2.0 to 3.0 but constraint say we cannot wait in v from 2.5 to 4.0, this is dead end or not? Resolving here is only not to use the first wait action which is already covered in different branches of \mddr). I would hence not add the sentence at the end of the paragraph ''Every child node ...''}
-%\pavel{\mddr generation code back here. The code is from early version, uses different notation. The idea is breadth-first search (Dijkstra), having node (u,t) u - vertex, t - time, we do everything possible in that node: (i) make an action ignoring constraints (lines 13-16), (ii) for that action, check constraints across the edge used by the action and generate wait action to overcome the constraint (lines 17-21). Each new action generates a state that is further expanded.}
-
-
-%\roni{I have some issues with the pseudo code in Alg.~\ref{alg-DEC-gen}.  Assume the initial location is A,  and it has an neighbor B, and the distance between them is 10.  Now assume that there are two constraints: (1) on the action "move from A to B" for which $[t_i,t_i^u]$ is $[0,5]$, and (2) on the action "wait at A" for which $[t_i,t_i^u]=[2,3]$.  From the code above, I think it would ignore the second constraint.}
-
-
-
-%\pavel{I changed the alternative version a bit - now it is alternative version 2. (1) I think there was a typo in waiting time w.r.t. wait action in the target of a move: wait time  + duration should give $t'^u$. (2) We can make the algorithm more stupid by removing time interval checks before introducing wait action. Now we enumerate across all safe/unsafe intervals given by constraints over action $a$ and generate waits for all end-times of unsafe intervals. Now I think that this corresponds to "doing everything possible in the node". Note: I think we do not need any type of backpropagating waits in the algorithm. Single-path finding algorithms are polynomial by nature which backtracking would contradict. }
-%\roni{Fixed typo, need to think about the other stuff}
-
-
-
-
-% This seems to be old attempt
-\begin{comment}
-Next, we establish the correctness of $\mu$\smtccbs. 
-A single-agent plan for agent $i$ is called an \emph{optimal constrained single-agent plan} w.r.t. a set of constraints $Const$ iff there is no other single-agent plan that satisfies $Const$ and has a smaller cost. 
-The first step to establish the correctness of $\mu$\smtccbs is the following Lemma. 
-\begin{lemma}
-The \mddr created by Algorithm~\ref{alg:alternative-mddr} contains at least one optimal-constrained single-agent plan for any given subset of constraints in $Const$. 
-\label{lem:mddr-correct}
-\end{lemma}
-\begin{proof}
-Let $\mddr^i=(X^i,E^i)$ be an \mddr generated by
-Algorithm~\ref{alg:alternative-mddr} and let $Const'$ be a subset of $Const$, i.e., $Const' \subseteq Const$. 
-We prove Lemma~\ref{lem:mddr-correct} by induction over the size of $Const'$. 
-
-Consider first $Const'$ that contains a single constraint. 
-If the constrain is over a wait action, then the 
-
-$\mddr^i$ 
-
-By construction, \mddr contains all single-agent plans 
-that consists of only move actions and have a duration less than or equal to $\mu$. 
-
-[[TODO: Now we need to prove that this covers all options]]
-\end{proof}
-\end{comment}
-
-
-
-%------ beginning of correctness from the appendix
-
-The \mddr generation algorithm (Algorithm~\ref{alg:generate-mddr}) 
-accepts a makespan bound $\mu$ and  
-a set of \ccbs constraints $\const(\Psi)$ for some agent $i$ 
-and outputs an \mddr that represents a set of single-agent plans with makespan equal to or smaller than $\mu$. 
-For \musmtccbs to be correct, we require that this set of single-agent plans contains every single-agent plan that \csipp would return given every subset of $\const(\Psi)$. 
-To state this more formally, let $\mddr(\mu, \const(\Psi))$ be the set of single-agent plans represented by the \mddr created for $\mu$ and $\const(\Psi)$, and let $\csipp(Const')$ be the single-agent plan created by \csipp given the set of constraints $Const'$. 
-
-%\konstantin{Some notation remarks. (1) \ccbs constraints are open from the right side, i.e. $(i, (u, \tov(a)), [t',t'^u))$ not $(i, (u, \tov(a)), [t',t'^u])$. (2) Before in text we denoted \ccbs constraints using $\tuple{}$ not $()$, i.e. $\tuple{i, (u, \tov(a)), [t',t'^u)}$. (3) In text we use $Const$ do denote a set of constraints, but in pseudoce we use $constraints$.}
-%\konstantin{I think the algorithm's name should be 'Generate \mddr for a single agent.}  \pavel{Done.}
-
-% \begin{definition}[Complete \mddr]
-% We say that an \mddr is complete w.r.t a makespan bound $\mu$ and set of \ccbs constraints $Const$ iff
-% \begin{multline}
-%  \forall Const'\subseteq Const: 
-% \text{Makespan}(\csipp(Const'))>\mu \\
-% \vee \csipp(Const')\in \mddr(\mu, Const)     
-% \end{multline}
-% \end{definition}
-
-
-
-% \begin{lemma}
-% Let $\pi=(a_1, \ldots , a_n)$ be a single-agent plan for agent $i$ 
-% returned by \csipp given a set of \ccbs constraints $Const$, 
-% and let $t_j$ be the time the $j^{th}$ action in $\pi$ is planned to start. For any wait action $a_j\in\pi$ at location $v$ (i.e., $\fromv(a_j)=\tov(a_j)=v$)
-% there exists a \ccbs constraint $\tuple{i, a_C, (t,t^u)}$ such that
-% either \\
-% (case \#1) $a_C$ is a move action, $\fromv(a_j)=v$, and the duration of $a_j$ is $t^u-t_j$, \\
-% or (case \#2) $a_C$ is a wait action at some vertex $v'$, and there exists a move action $a'$ such that $\fromv(a')=v$ and $\tov(a')=v'$, and the duration of $a_j$ is $(t^u-a'_D)-t_j$.
-% \end{lemma}
-
-
-
-\begin{theorem}
-For every set of \ccbs constraints $Const'\subseteq Const$ it holds that $\csipp(Const')\in \mddr(\mu,Const)$. 
-\label{the:mddr-ok}
-\end{theorem}
-\begin{proof}
-Let $\pi=(a_1,\ldots,a_n))$ be the the single-agent plan returned by \csipp given a set of constraints $Const'\subseteq Const$. 
-Let $\{(a_1,t_1),\ldots,(a_n,t_n)\}$ be the corresponding set of timed-actions, i.e., $t_j=([\pi[:(j-1)])_D$. 
-To prove Theorem~\ref{the:mddr-ok}, we proof by induction over $j$ that for every timed action $(t_j,a_j)$ in this set there exists an edge $((\fromv(a_j),t_j), (\tov(a_j),t_j+(a_j)_D))$ in our \mddr. 
-
-\textbf{Base case.}
-For $j=0$, we need to show that $((\fromv(a_1),0),(\tov(a_1),{a_1}_D))$ is in our \mddr. 
-There are two cases: either $a_1$ is a wait action or a move action. 
-In case $a_1$ is a move action, the $((\fromv(a_1),0), (\tov(a_1),(a_1)_D))$ trivially exists in our \mddr by construction (lines~\ref{line:generate-mddr:start:move}-\ref{line:generate-mddr:end:move} in Algorithm~\ref{alg:generate-mddr}). 
-Now consider the case where $a_1$ is a wait action. 
-There are only two cases in which the plan returned by \csipp 
-starts with a wait action:
-\begin{enumerate}
-    \item There is a move action $a'$ that starts at $S(i)$, 
-    and there is \ccbs constraint $\tuple{i,a', [0,t^u)}$. %\konstantin{should be: $\tuple{i, a', [0,t^u)}$, I believe.}\roni{I added some text much earlier to allow removing the agnet index when clear. What do you think?}
-    \item There is a move action $a'$ that starts at $S(i)$ and ends in some vertex $v$ which has safe interval that starts at some time $t$ where $t>a'_D$. In this case, \csipp may choose to wait at $S(i)$ until it can arrive at $v$ at time $t$.
-\end{enumerate}
-In the first case, $(a_1)_D=t^u$. 
-In the second case, $(a_1)_D=t-a'_D$. 
-Our \mddr covers both cases. The first case is explicitly mentioned in lines~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}. 
-To see why second case is also covered in our \mddr, 
-recall that \csipp only creates a new safe interval in a vertex $v$ only when there is constraint  over a wait action at that vertex. 
-Let $\tuple{i, a',[t, t^u)}$ be this constraint. 
-The new safe interval for \csipp is designed such that it starts exactly when the unsafe interval of this constraint ends, i.e., at $t^u$. 
-Therefore, to reach $v$ at time $t^u$ with some action $a_{vu}$ 
-we need to wait at $v$ exactly $t^u-a_{vu}$. 
-An edge corresponding to such a wait action exists in our \mddr, as specified in 
-lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2} \konstantin{I think that the explanation of the second case is too detailed. We can just say that the second case is covered in lines 19-22.}\roni{Maybe you're right, but as it was not easy to me to understand, and it's an appendix in a journal, I let myself go wild. Ok by me if you want to shrink it}. \pavel{I always prefer detailed explanation, even if it is repetitive which is not this case.}
-
-
-\textbf{Induction step.}
-Now, assume the induction statement holds for $j<m$, and consider the $m^{th}$ timed action $(a_m, t_m)$ in the plan \csipp returned. 
-Let $(v,t)$ be the location and time reached after performing the first $m-1$ actions in $\pi$. 
-By the induction assumption, the node $(v,t)$ exists in our \mddr. 
-The same argument used in the base step hold here as well. 
-If $a_m$ is a move action, the edge $((\fromv(a_m), t),(\tov(a_m),t+(a_m)_D))$ exists in our \mddr (lines~\ref{line:generate-mddr:start:move}-\ref{line:generate-mddr:end:move}). 
-If $a_m$ is a wait action, it was created either to avoid a conflict with a subsequent move action or to allow a subsequent move action to reach the start of some safe interval.  
-Both options are covered in our \mddr generation algorithm in 
-lines~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}
-lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}
-\end{proof}
-
-%------ end of correctness from the appendix
 
 \begin{figure}
-    \centering
-    \includegraphics[trim={3.0cm 14.0cm 1.0cm 4.3cm},clip,width=\columnwidth]{fig-running_makespan.pdf}
-    \caption{An illustration of \mddr s. 
-    The upper part shows an initial \mddr for the \mapfr problem in Figure \ref{fig:example}. The lower part shows the \mddr for the same problem after resolving a conflict between the red and blue agents traversing $(F,I)$ and $(H,C)$ respectively.}
-    \label{fig:mddr}
+	\centering
+	\includegraphics[trim={3.0cm 14.0cm 1.0cm 4.3cm},clip,width=\columnwidth]{fig-running_makespan.pdf}
+	\caption{An illustration of \mddr s. 
+		The upper part shows an initial \mddr for the \mapfr problem in Figure \ref{fig:example}. The lower part shows the \mddr for the same problem after resolving a conflict between the red and blue agents traversing $(F,I)$ and $(H,C)$ respectively.}
+	\label{fig:mddr}
 \end{figure}
 
 \begin{example}
-Figure \ref{fig:mddr} shows the \mddr for the agents in our running example (Figure~\ref{fig:example}). The upper part shows the \mddr created for each agent w.r.t. an empty set of constraints. 
-In our example, each agent has a single shortest single-agent plan, and so the \mddr 
-created for an empty set of constraints is a line. 
-The red and blue agents' plans have a conflict between the timed actions $(F\rightarrow I, 2.000)$ and $(H \rightarrow C, 2.000)$. 
-The unsafe intervals for these actions are $[2.000,3.310)$ and $[2.000,3.743)$, respectively. 
-So, the \ccbs constraints generated for this conflict are
-\begin{equation}
-    \{ \tuple{red, (F\rightarrow I, 2.000), [2.000,3.310)}, 
-    \tuple{blue, (H\rightarrow C, 2.000), [2.000,3.743)} \}
-    \label{eq:example-constraints}
-\end{equation}
-The lower part of Figure~\ref{fig:mddr} shows the \mddr generated for each agent when considering the pair of \cbs constraints in Equation (\ref{eq:example-constraints}).
+	Figure \ref{fig:mddr} shows the \mddrs for the agents in our running example (Figure~\ref{fig:example}). 
+	The upper part shows the \mddrs created for each agent w.r.t. an empty set of constraints. 
+	In our example, each agent has a single shortest single-agent plan, and so the \mddr 
+	created for an empty set of constraints is a line. 
+	The red and blue agents' plans have a conflict between the timed actions $(F\rightarrow I, 2.000)$ and $(H \rightarrow C, 2.000)$. 
+	The unsafe intervals for these actions are $[2.000,3.310)$ and $[2.000,3.743)$, respectively. 
+	So, the \ccbs constraints generated for this conflict are
+	\begin{equation}
+	\{ \tuple{red, (F\rightarrow I, 2.000), [2.000,3.310)}, 
+	\tuple{blue, (H\rightarrow C, 2.000), [2.000,3.743)} \}
+	\label{eq:example-constraints}
+	\end{equation}
+	The lower part of Figure~\ref{fig:mddr} shows the \mddr generated for each agent when considering the pair of \cbs constraints in Equation (\ref{eq:example-constraints}).
 \end{example}
 
 
 
 
-%%%%%%%%%%%%%%%%%%
-
-
-
-%Alternative version 3, from the appendinx, now set as final version, other versions commented out
-\begin{algorithm}[h!]
-\begin{footnotesize}
-\SetKwBlock{NRICL}{GenerateMdd$_R$ ($\mathcal{G}=(V,E)$, $\source$, $\target$, $\const(\Psi)$, $\mu$, i)}{end} \NRICL{
-        $X^i \gets \emptyset$\\
-        $E^i \gets \emptyset$\\    
-        $\textsc{Open} \gets \emptyset$ \\   
-        insert $(\source(i),0)$ into $\textsc{Open}$\\
-        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
-        \While {$\textsc{Open} \neq \emptyset$} {
-                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
-                remove-Min$_{t}(\textsc{Open}$) \\
-                \If {$t \leq \mu$}{
-    	            \For {each $a\in \mathcal{A}$ such that $\fromv(a)=u$}{
-                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$\\        
-    				$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \nllabel{line:generate-mddr:start:move} \\             		 		
-    				$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \nllabel{line:generate-mddr:end:move} \\             		 						
-                			\For {each $\tuple{i, (u, \tov(a)), [t',t'^u)} \in \const(\Psi)$
-                			        \nllabel{line:generate-mddr:start:wait1}}{
-                				\If {$t\in [t', t'^u]$}{
-                     				insert $(u,t'^u)$ into $\textsc{Open}$\\
-        						$X^i \gets X^i \cup \{  (u,t'^u) \}$ \\
-        						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u)] \}$ \nllabel{line:generate-mddr:end:wait1}\\
-                     	        }
-                 	        }
-                 	        
-                			\For {each $\tuple{i, (\tov(a), \tov(a)), [t',t'^u)} \in \const(\Psi)$
-                			        \nllabel{line:generate-mddr:start:wait2}}{
-                    				\If {$t<t'^u-a_D$}{
-                     				insert $(u,t'^u-a_D)$ into $\textsc{Open}$\\
-        						$X^i \gets X^i \cup \{  (u,t'^u-a_D) \}$ \\
-        						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u-a_D)] \}$ 
-        						\nllabel{line:generate-mddr:end:wait2}\\
-        						}
-                 	        }
-                 	        %}                 	        
-                }
-            }
-        }
-    \Return $(X^i,E^i)$\\
-} 
-\caption{Generate \mddr for single agent $i$.} \label{alg:generate-mddr}
-\end{footnotesize}
-\end{algorithm} 
-
-
-The children of a node $(a,t)$ are created as follows. 
-For a node $(a,t)$, we create single child node $(a',t+a_D)$ for every action $a'\in\mathcal{A}$ that starts where $a$ ends, i.e., where $\tov(a)=\fromv(a')$. 
-If there is a constraint $(i, a', [t_i,t_i^u])\in Consts$ 
-where $t\in [t_i,t_i^u]$ then an additional child node $(a'', t+a_D)$ is created, where $a''$ is a wait action whose duration is set to allow performing $a'$ immediately afterward, i.e., the duration of $a''$ is $t_i^u-t$. 
-If such a wait-action child node was added to $(a,t)$ 
-and there is a constraint 
-$(i, a'', [t'_i,{t'}^u_i])\in Consts$ 
-that restricts performing such wait action, i.e., $t+a_D\in [t'_i, {t'}_i^u]$, 
-
-Every node in our \mddr is a pair $(v,t)$ where $v$ is a vertex in $\mathcal{G}$ and $t$ is a point in time. 
-The children of a node $(v,t)$ are generated as follows. 
-For every move action $a\in \mathcal{A}$ % in the graph \konstantin{in what graph?}
-that starts with $v$ and ends before the makespan bound (i.e., $t+a_D\leq \mu$)
-we create a child node $(v',t')$ where 
-$v'$ is the location of the agent after applying $a$ (i.e., $v'=a_\varphi(a_D)$) and 
-$t'$ is the time reached after performing $a$ at time $t$ (i.e., $t'=t+a_D$). 
-If there exists a \ccbs constraint $\tuple{i, (v,v'), [t_i, t_i^u)}$ in $Const(\Psi)$ 
-that prohibits an agent $i$ to perform the considered move action $a$ at time $t \in [t_i, t_i^u)$, 
-then we create an additional node in the \mddr to represent the option of waiting at $v$ until $a$ can be performed without conflicting with this constraint. 
-Note that this node is created even if there exists a \ccbs constraint $\tuple{i, (v',v'), [t, t')}$ in $Const(\Psi)$ that prohibit agent $i$ from waiting at target node $v'$ at this time.
-
-%\roni{Pavel, in this case, do we add some new node or none is needed?} \pavel{Yes, the node is created but constraints may forbid its usage.}
-
-% This is original paragraph replace by the alternative description below
-More formally, for an \mddr node $(v,t)$ and a move action $a$ from $v$ to $v'$, if $t\in [t_i, t_i^u)$ then we add a child node $(v,t_i^u)$ to $(v,t)$. Importantly, this child node is not added to $(v,t)$ instead of $(v', t+a_D)$, but in addition to it. 
-That is, for every constraint in $Cons(\Psi)$, our \mddr represents single-agent plans that satisfy it as well as single-agent plans that do not. 
-
-
-%For a pseudo-code of this \mddr generation process, see~\ref{sec:code-mddr}. 
-
-%\pavel{The next makespan to try $\mu_{next}$ is calculated as the minimum of end times of move actions $a \in A$ that starts before the makespan bound but ends after (i.e., $\mu_{next} = \min_{(a,t) \in A}\{t + a_D, t \leq \mu \wedge t + a_D > \mu$\}). }\konstantin{I think, I'm starting to get what Pavel is trying to say, but the formula is wrong, I believe. Btw, do I understand right that the move actions that span beyond the current makespan bound are nod added to \mddr (we said this in the beginning of the above paragraph?} \pavel{What is wrong in the formula? Changed $a \in A$ to $(a,t) \in A$, maybe this was wrong.} \pavel{Answer: actions going beyond makespan bound are not added to \mddr.}
-%\konstantin{In the paragraph above we did not specify how do we handle constraints imposed over the wait-actions. Suppose, the wait action $a$ is constrained via the $\tuple{i, (v,v), [t_i, t_i^u)}$. How is it reflected in \mddr?}\roni{Good call. I think that we need to add at the end of the paragraph above the following: ``Every child $(v,t')$ of a node $(v,t)$ represents a wait action. We consider wait actions in a similar way that were described above for move actions. If there is a constraint that forbids this wait action, we add additional nodes to the \mddr that satisfy this constraints.''  Pavel - can you verify/edit/add to above an answer to Konstantin?} \pavel{I think this is correct explanation. The wait action is treated much like move action, that is, degenerate version of move action. Maybe we need to define how to compute unsafe interval for the wait action if we want to give more details. } \konstantin{Guys, I realize now that the right question to ask is the following: to create a \mddr for an agent $i$ does SMT-CBS actually run CSIPP for this agent with every subset of $i$th constraints and then just represents the obtained solutions in the form of \mddr? If the answer is YES, than no special handling of the constraints imposed over the wait actions is needed at the \mddr level (they are handled by CSIPP).}
-%\roni{I don't think this is what happens, because that would mean running \csipp for every subset of constraints, and then aggregating all possible paths. So, the process of generating the \mddr is more efficient. }
-%\roni{I added text to discuss this wait action issue. There's also a question there for Pavel}
-%\pavel{Today I understood the issue with the wait action differently, still not sure if my understanding is correct. But if there is a constraint over the wait action we cannot resolve it by more waiting. This is rather a dead end (assume waiting in v from 2.0 to 3.0 but constraint say we cannot wait in v from 2.5 to 4.0, this is dead end or not? Resolving here is only not to use the first wait action which is already covered in different branches of \mddr). I would hence not add the sentence at the end of the paragraph ''Every child node ...''}
-%\pavel{\mddr generation code back here. The code is from early version, uses different notation. The idea is breadth-first search (Dijkstra), having node (u,t) u - vertex, t - time, we do everything possible in that node: (i) make an action ignoring constraints (lines 13-16), (ii) for that action, check constraints across the edge used by the action and generate wait action to overcome the constraint (lines 17-21). Each new action generates a state that is further expanded.}
-
-
-%\roni{I have some issues with the pseudo code in Alg.~\ref{alg-DEC-gen}.  Assume the initial location is A,  and it has an neighbor B, and the distance between them is 10.  Now assume that there are two constraints: (1) on the action "move from A to B" for which $[t_i,t_i^u]$ is $[0,5]$, and (2) on the action "wait at A" for which $[t_i,t_i^u]=[2,3]$.  From the code above, I think it would ignore the second constraint.}
-
-
-
-%\pavel{I changed the alternative version a bit - now it is alternative version 2. (1) I think there was a typo in waiting time w.r.t. wait action in the target of a move: wait time  + duration should give $t'^u$. (2) We can make the algorithm more stupid by removing time interval checks before introducing wait action. Now we enumerate across all safe/unsafe intervals given by constraints over action $a$ and generate waits for all end-times of unsafe intervals. Now I think that this corresponds to "doing everything possible in the node". Note: I think we do not need any type of backpropagating waits in the algorithm. Single-path finding algorithms are polynomial by nature which backtracking would contradict. }
-%\roni{Fixed typo, need to think about the other stuff}
-
-
-
-
-% This seems to be old attempt
-\begin{comment}
-Next, we establish the correctness of $\mu$\smtccbs. 
-A single-agent plan for agent $i$ is called an \emph{optimal constrained single-agent plan} w.r.t. a set of constraints $Const$ iff there is no other single-agent plan that satisfies $Const$ and has a smaller cost. 
-The first step to establish the correctness of $\mu$\smtccbs is the following Lemma. 
-\begin{lemma}
-The \mddr created by Algorithm~\ref{alg:alternative-mddr} contains at least one optimal-constrained single-agent plan for any given subset of constraints in $Const$. 
-\label{lem:mddr-correct}
-\end{lemma}
-\begin{proof}
-Let $\mddr^i=(X^i,E^i)$ be an \mddr generated by
-Algorithm~\ref{alg:alternative-mddr} and let $Const'$ be a subset of $Const$, i.e., $Const' \subseteq Const$. 
-We prove Lemma~\ref{lem:mddr-correct} by induction over the size of $Const'$. 
-
-Consider first $Const'$ that contains a single constraint. 
-If the constrain is over a wait action, then the 
-
-$\mddr^i$ 
-
-By construction, \mddr contains all single-agent plans 
-that consists of only move actions and have a duration less than or equal to $\mu$. 
-
-[[TODO: Now we need to prove that this covers all options]]
-\end{proof}
-\end{comment}
-
-
-
-%------ beginning of correctness from the appendix
-
-The \mddr generation algorithm (Algorithm~\ref{alg:generate-mddr}) 
-accepts a makespan bound $\mu$ and  
-a set of \ccbs constraints $\const(\Psi)$ for some agent $i$ 
-and outputs an \mddr that represents a set of single-agent plans with makespan equal to or smaller than $\mu$. 
-For \musmtccbs to be correct, we require that this set of single-agent plans contains every single-agent plan that \csipp would return given every subset of $\const(\Psi)$. 
-To state this more formally, let $\mddr(\mu, \const(\Psi))$ be the set of single-agent plans represented by the \mddr created for $\mu$ and $\const(\Psi)$, and let $\csipp(Const')$ be the single-agent plan created by \csipp given the set of constraints $Const'$. 
-
-%\konstantin{Some notation remarks. (1) \ccbs constraints are open from the right side, i.e. $(i, (u, \tov(a)), [t',t'^u))$ not $(i, (u, \tov(a)), [t',t'^u])$. (2) Before in text we denoted \ccbs constraints using $\tuple{}$ not $()$, i.e. $\tuple{i, (u, \tov(a)), [t',t'^u)}$. (3) In text we use $Const$ do denote a set of constraints, but in pseudoce we use $constraints$.}
-%\konstantin{I think the algorithm's name should be 'Generate \mddr for a single agent.}  \pavel{Done.}
-
-% \begin{definition}[Complete \mddr]
-% We say that an \mddr is complete w.r.t a makespan bound $\mu$ and set of \ccbs constraints $Const$ iff
-% \begin{multline}
-%  \forall Const'\subseteq Const: 
-% \text{Makespan}(\csipp(Const'))>\mu \\
-% \vee \csipp(Const')\in \mddr(\mu, Const)     
-% \end{multline}
-% \end{definition}
-
-
-
-% \begin{lemma}
-% Let $\pi=(a_1, \ldots , a_n)$ be a single-agent plan for agent $i$ 
-% returned by \csipp given a set of \ccbs constraints $Const$, 
-% and let $t_j$ be the time the $j^{th}$ action in $\pi$ is planned to start. For any wait action $a_j\in\pi$ at location $v$ (i.e., $\fromv(a_j)=\tov(a_j)=v$)
-% there exists a \ccbs constraint $\tuple{i, a_C, (t,t^u)}$ such that
-% either \\
-% (case \#1) $a_C$ is a move action, $\fromv(a_j)=v$, and the duration of $a_j$ is $t^u-t_j$, \\
-% or (case \#2) $a_C$ is a wait action at some vertex $v'$, and there exists a move action $a'$ such that $\fromv(a')=v$ and $\tov(a')=v'$, and the duration of $a_j$ is $(t^u-a'_D)-t_j$.
-% \end{lemma}
-
-
-
-\begin{theorem}
-For every set of \ccbs constraints $Const'\subseteq Const$ it holds that $\csipp(Const')\in \mddr(\mu,Const)$. 
-\label{the:mddr-ok}
-\end{theorem}
-\begin{proof}
-Let $\pi=(a_1,\ldots,a_n))$ be the the single-agent plan returned by \csipp given a set of constraints $Const'\subseteq Const$. 
-Let $\{(a_1,t_1),\ldots,(a_n,t_n)\}$ be the corresponding set of timed-actions, i.e., $t_j=([\pi[:(j-1)])_D$. 
-To prove Theorem~\ref{the:mddr-ok}, we proof by induction over $j$ that for every timed action $(t_j,a_j)$ in this set there exists an edge $((\fromv(a_j),t_j), (\tov(a_j),t_j+(a_j)_D))$ in our \mddr. 
-
-\textbf{Base case.}
-For $j=0$, we need to show that $((\fromv(a_1),0),(\tov(a_1),{a_1}_D))$ is in our \mddr. 
-There are two cases: either $a_1$ is a wait action or a move action. 
-In case $a_1$ is a move action, the $((\fromv(a_1),0), (\tov(a_1),(a_1)_D))$ trivially exists in our \mddr by construction (lines~\ref{line:generate-mddr:start:move}-\ref{line:generate-mddr:end:move} in Algorithm~\ref{alg:generate-mddr}). 
-Now consider the case where $a_1$ is a wait action. 
-There are only two cases in which the plan returned by \csipp 
-starts with a wait action:
-\begin{enumerate}
-    \item There is a move action $a'$ that starts at $S(i)$, 
-    and there is \ccbs constraint $\tuple{i,a', [0,t^u)}$. %\konstantin{should be: $\tuple{i, a', [0,t^u)}$, I believe.}\roni{I added some text much earlier to allow removing the agnet index when clear. What do you think?}
-    \item There is a move action $a'$ that starts at $S(i)$ and ends in some vertex $v$ which has safe interval that starts at some time $t$ where $t>a'_D$. In this case, \csipp may choose to wait at $S(i)$ until it can arrive at $v$ at time $t$.
-\end{enumerate}
-In the first case, $(a_1)_D=t^u$. 
-In the second case, $(a_1)_D=t-a'_D$. 
-Our \mddr covers both cases. The first case is explicitly mentioned in lines~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}. 
-To see why second case is also covered in our \mddr, 
-recall that \csipp only creates a new safe interval in a vertex $v$ only when there is constraint  over a wait action at that vertex. 
-Let $\tuple{i, a',[t, t^u)}$ be this constraint. 
-The new safe interval for \csipp is designed such that it starts exactly when the unsafe interval of this constraint ends, i.e., at $t^u$. 
-Therefore, to reach $v$ at time $t^u$ with some action $a_{vu}$ 
-we need to wait at $v$ exactly $t^u-a_{vu}$. 
-An edge corresponding to such a wait action exists in our \mddr, as specified in 
-lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2} \konstantin{I think that the explanation of the second case is too detailed. We can just say that the second case is covered in lines 19-22.}\roni{Maybe you're right, but as it was not easy to me to understand, and it's an appendix in a journal, I let myself go wild. Ok by me if you want to shrink it}. \pavel{I always prefer detailed explanation, even if it is repetitive which is not this case.}
-
-
-\textbf{Induction step.}
-Now, assume the induction statement holds for $j<m$, and consider the $m^{th}$ timed action $(a_m, t_m)$ in the plan \csipp returned. 
-Let $(v,t)$ be the location and time reached after performing the first $m-1$ actions in $\pi$. 
-By the induction assumption, the node $(v,t)$ exists in our \mddr. 
-The same argument used in the base step hold here as well. 
-If $a_m$ is a move action, the edge $((\fromv(a_m), t),(\tov(a_m),t+(a_m)_D))$ exists in our \mddr (lines~\ref{line:generate-mddr:start:move}-\ref{line:generate-mddr:end:move}). 
-If $a_m$ is a wait action, it was created either to avoid a conflict with a subsequent move action or to allow a subsequent move action to reach the start of some safe interval.  
-Both options are covered in our \mddr generation algorithm in 
-lines~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}
-lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}
-\end{proof}
-
-%------ end of correctness from the appendix
-
-\begin{figure}
-    \centering
-    \includegraphics[trim={3.0cm 14.0cm 1.0cm 4.3cm},clip,width=\columnwidth]{fig-running_makespan.pdf}
-    \caption{An illustration of \mddr s. 
-    The upper part shows an initial \mddr for the \mapfr problem in Figure \ref{fig:example}. The lower part shows the \mddr for the same problem after resolving a conflict between the red and blue agents traversing $(F,I)$ and $(H,C)$ respectively.}
-    \label{fig:mddr}
-\end{figure}
-
-\begin{example}
-Figure \ref{fig:mddr} shows the \mddr for the agents in our running example (Figure~\ref{fig:example}). The upper part shows the \mddr created for each agent w.r.t. an empty set of constraints. 
-In our example, each agent has a single shortest single-agent plan, and so the \mddr 
-created for an empty set of constraints is a line. 
-The red and blue agents' plans have a conflict between the timed actions $(F\rightarrow I, 2.000)$ and $(H \rightarrow C, 2.000)$. 
-The unsafe intervals for these actions are $[2.000,3.310)$ and $[2.000,3.743)$, respectively. 
-So, the \ccbs constraints generated for this conflict are
-\begin{equation}
-    \{ \tuple{red, (F\rightarrow I, 2.000), [2.000,3.310)}, 
-    \tuple{blue, (H\rightarrow C, 2.000), [2.000,3.743)} \}
-    \label{eq:example-constraints}
-\end{equation}
-The lower part of Figure~\ref{fig:mddr} shows the \mddr generated for each agent when considering the pair of \cbs constraints in Equation (\ref{eq:example-constraints}).
-\end{example}
-
-
-
-
-
-\textbf{Step \#3. Create a propositional formula.}
+\textbf{Step 3. Create a \ps for choosing solutions.}
 %\konstantin{An inconsistent notations were used in this paragraph, i.e. $a_i$ was used to denote an agent not an action etc. I corrected this. Pls, double check.}\roni{Done, looks good}
-Let $E^i$ and $X^i$ denote the set of edges and nodes, respectively, in the \mddr of agent $i$.
-We create the Boolean variables $\mathcal{E}_{v,v'}^{t,t'}(i)$ and $\mathcal{X}_{v}^{t}(i)$ 
+%Let $E^i$ and $X^i$ denote the set of edges and nodes, respectively, in the \mddr of agent $i$.
+We create in this step a \ps such that every satisfying assignment to it corresponds to a \mapfr solution in which each agent follows a single-agent plan from its \mddr. 
+To create such a \ps, we create Boolean variables $\mathcal{E}_{v,v'}^{t,t'}(i)$ and $\mathcal{X}_{v}^{t}(i)$ 
 for every edge and node in $E^i$ and $X^i$ respectively. 
 Setting $\mathcal{X}_v^t(i)$ to true represents that agent $i$ plans to occupy location $v$ in time $t$. 
 Setting $\mathcal{E}_{v,v'}^{t,t'}(i)$ to true represents that agent $i$ plans performs an action that start at time $t$, ends at time $t'$, and moves the agent from $v$ to $v'$. 
 Note that wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(i)$ variables with $v=v'$. 
 To ensure that an assignment to all these variables constitutes a solution to the given \mapfr problem, 
-we create a propositional formula with the following constraints over these Boolean variables. 
+we add the following constraints over these Boolean variables. 
 \begin{equation}
 {  \mathcal{X}_v^t(i) \Rightarrow \bigvee_{(v',t')\;|\;[(v,t);(v',t')] \in E^i}{\mathcal{E}^{t,t'}_{v,v'}(i)},
 }
@@ -1932,15 +1558,15 @@ we create a propositional formula with the following constraints over these Bool
 }
 \label{eq-3}
 \end{equation}
-The constraints in Equations~\ref{eq-1} and~\ref{eq-2} state that if agent $i$ appears in vertex $v$ at time $t$ then it has to leave through exactly one edge connected to $v$.\footnote{Wait actions are also considered by assuming there each vertex has also an edge to itself.} 
+The constraints in Equations~\ref{eq-1} and~\ref{eq-2} state that if agent $i$ appears in vertex $v$ at time $t$ then it has to leave through exactly one edge connected to $v$. 
 The constraint in equation~\ref{eq-3} establishes that once an agent enters an edge in the \mddr it has to leave it at its endpoint. 
 We also add constraints that verify every agent starts in its start location and ends in its goal.
 Thus, a satisfying assignment to this formula represents a solution to the given \mapfr problem. 
 
 
-\textbf{Step \#4. Add constraints to verify all conflicts are avoided.}
+\textbf{Step 4. Add constraints to verify all conflicts are avoided.}
 To avoid all the \ccbs conflicts in $\Psi$, we verify that for every conflict $Con\in\Psi$ one of the \ccbs constraints in $Cnst(Con)$ is satisfied. 
-This is done by adding to the propositional formula created in step \#3 
+This is done by adding to the propositional formula created in step 3 
 an appropriate disjunction. 
 That is, for a conflict $\tuple{(a_i,t_i), (a_j, t_j)}$ 
 %where $a_i$ is the action that moves the agent $i$ from $v$ to $v'$ 
@@ -1954,7 +1580,9 @@ we add following clause:
 \label{eq-mutex}
 \end{equation}
 
-This clause represents mutual exclusion between the two conflicting actions. Thus having this clause in the formula to be satisfied, the latter cannot be executed together. The resulting propositional formula is used in our algorithm as the \ps.
+This clause represents mutual exclusion between the two conflicting actions. 
+Thus having this clause in the \ps ensures at most one of these timed actions will be applied in any satisfying solution. 
+%they will not be appliedcannot be executed together.  The resulting propositional formula is used in our algorithm as the \ps.
 
 %PS Example
 \begin{example}
@@ -2008,19 +1636,15 @@ In addition, the following clause it added as specified in Equation~\ref{eq-mute
 to verify that the conflict identified in the previous solution will be avoided.
 \end{example}
 
-
 \begin{theorem}
-$\mu$\smtccbs is a sound and complete algorithm for bounded-cost \mapfr. 
-\label{the:bounded-cost-makespan}
+	\musmtccbs is a sound and complete algorithm for bounded-cost \mapfr, 
+	i.e., every solution returned by \musmtccbs is indeed a solution with makespan equal to or smaller than the makespan bound, 
+	and if such a solution exists then it will be found. 
+	\label{the:bounded-cost-makespan}
 \end{theorem}
-\begin{proof}
-Soundness follows trivially from the construction of the \ps in $\mu$\smtccbs and the fact that \decidemapfr verifies that the returned solution is valid. 
+Soundness is established by the fact that \decidemapfr verifies that the returned solution is valid. Establishing completeness, however, is less trivial. 
+A formal proof is given in\ref{app:completeness}. 
 
-%\roni{TODO: Completeness?}
-%\pavel{Relying on CCBS. I am afraid of infinite convergence like adding constraints for smaller and smaller waitings. And the algorithm will run forever. The same issue is faced in CCBS but seems to be resolved somehow there. Thinking how to avoid this. We need to say that given \mapfr instance can give raise to finite number of wait actions then we eventually try all of them.}
-\end{proof}
-
-We first need to observe that a given \mapfr instance can give raise to finitely many sound pairs of constraints under the given makespan limit $\mu$. Hence the $\mu$\smtccbs algorithm terminates as only finitely many sound pairs of constraints can be found and resolved while pairs of constraints being resolved remain resolved in all future steps of the algorithm. Therefore after finitely many steps the algorithm either succeed or fails. In case of the failure, the set of sound constraints cannot be satisfied for the current makespan limit $\mu$ which means there is no solution of the input \mapfr instance for this makespan limit $\mu$.
 
 \subsection{\smtccbs}
 \label{sec:musmtcbs}
@@ -2052,9 +1676,9 @@ This was done by keeping track of the minimum of end times of move actions $a \i
 \label{the:optimal-makespan}
 \end{theorem}
 \begin{proof}
-Soundness and completeness follows from the soundness and completeness of $\mu$\smtccbs, established in Theorem~\ref{the:bounded-cost-makespan}. 
+Soundness and completeness follows from the soundness and completeness of \musmtccbs, established in Theorem~\ref{the:bounded-cost-makespan}. 
 %\roni{TODO: Establish optimality} \pavel{Done.}
-$\mu$\smtccbs returns a solution then it is a valid solution of given \mapfr problem $P$ satisfying given makespan $\mu$. This claim relies on the soundness of encoding where possible satisfying assignments of the formula correspond to paths of length at most $\mu$ connecting starting and goal positions of agents. In addition to this \decidemapfr verifies that individual paths are non-conflicting.
+\musmtccbs returns a solution then it is a valid solution of given \mapfr problem $P$ satisfying given makespan $\mu$. This claim relies on the soundness of encoding where possible satisfying assignments of the formula correspond to paths of length at most $\mu$ connecting starting and goal positions of agents. In addition to this \decidemapfr verifies that individual paths are non-conflicting.
 The iterative scheme for trying larger makespans follows the idea from \mddsat~\cite{DBLP:conf/ecai/SurynekFSB16}. To find an optimal makespan we need to ensure that the iterative process does not skip any relevant makespan. Having a set of constraints $Cons(\Psi)$ in the course of the \smtccbs algorithm including sound pairs of constraints (Definition \ref{def:sound}) then any solution to given \mapfr problem $P$ must satisfy this set of constraints. After the compete failure for given makespan $\mu$ in $\mu$\smtccbs we know due to completeness of $\mu$\smtccbs that there is no solution of makespan $\mu$. Then we proceed to the next makespan $\mu_{next}$ which is set according to current set of constraints $Cons(\Psi)$.
 The sufficient condition to have the makespan increasing scheme sound and optimal is that we should have a chance to obtain a new feasible solution w.r.t. $Cons(\Psi)$ at the next $\mu_{next}$ while for makespans between $\mu$ and $\mu_{next}$ no feasible solution w.r.t. $Cons(\Psi)$ should exist to ensure that we do not skip any relevant makespan. This is done by computing all-single agents plans CSIPP would generate for $Cons(\Psi)$ but we allow it going beyond the makespan bound $\mu$ by making one extra action. The smallest action finish time beyond $\mu$ over all such plans is taken as the next makespan bound $\mu_{next}$. Existence of a solution satisfying $Cons(\Psi)$ of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the definition of $\mu_{next}$. Hence no such solution exists and the makespan increasing scheme guarantees finding optimal solution. %Existence of a solution of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the fact that $Cons(\Psi)$ must be satisfied by any solution.
 Note that \smtccbs, like \ccbs, is complete in a weak way. That is, if a valid solution exists, \smtccbs will find it. Unsolvability cannot be detected by \smtccbs.
@@ -2814,97 +2438,34 @@ In this way, knowledge from the underlying theory is propagated by the conflict 
 
 %\roni{Frankly, I think this example is too detailed, and I'd rather have it in an appendix.} \konstantin{Agree.} \pavel{Agree too.}
 
+\section{Correctness of \musmtccbs}
+\label{app:completeness}
 
-\section{Correctness of the \mddr Generation}
+In this section, we provide a formal proof for Theorem~\ref{the:bounded-cost-makespan}, which states that \musmtccbs is sound and complete. 
+This means (\textbf{soundness}) every solution returned by \musmtccbs is indeed a solution with makespan equal to or smaller than the makespan bound, 
+and (\textbf{completeness}) if such a solution exists then it will be found. 
+Soundness is established by the fact that \decidemapfr verifies that the returned solution is valid. 
+Establishing completeness, however, is less trivial and is done below. 
 
-\begin{algorithm}[h!]
-\begin{footnotesize}
-\SetKwBlock{NRICL}{GenerateMdd$_R$ ($\mathcal{G}=(V,E)$, $\source$, $\target$, $\const(\Psi)$, $\mu$, i)}{end} \NRICL{
-        $X^i \gets \emptyset$\\
-        $E^i \gets \emptyset$\\    
-        $\textsc{Open} \gets \emptyset$ \\   
-        insert $(\source(i),0)$ into $\textsc{Open}$\\
-        $X^i \gets X^i \cup \{ (\source(i),0) \}$\\
-        \While {$\textsc{Open} \neq \emptyset$} {
-                $(u,t) \gets$ min$_{t}(\textsc{Open}$)\\
-                remove-Min$_{t}(\textsc{Open}$) \\
-                \If {$t \leq \mu$}{
-    	            \For {each $a\in \mathcal{A}$ such that $\fromv(a)=u$}{
-                 		insert $(\tov(a),t+a_D)$ into $\textsc{Open}$\\        
-    				$X^i \gets X^i \cup \{  (\tov(a),t+a_D) \}$ \nllabel{line:generate-mddr:start:move} \\             		 		
-    				$E^i \gets E^i \cup \{  [(u,t);(\tov(a),t+a_D)] \}$ \nllabel{line:generate-mddr:end:move} \\             		 						
-                			\For {each $\tuple{i, (u, \tov(a)), [t',t'^u)} \in \const(\Psi)$
-                			        \nllabel{line:generate-mddr:start:wait1}}{
-                				\If {$t\in [t', t'^u]$}{
-                     				insert $(u,t'^u)$ into $\textsc{Open}$\\
-        						$X^i \gets X^i \cup \{  (u,t'^u) \}$ \\
-        						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u)] \}$ \nllabel{line:generate-mddr:end:wait1}\\
-                     	        }
-                 	        }
-                 	        
-                			\For {each $\tuple{i, (\tov(a), \tov(a)), [t',t'^u)} \in \const(\Psi)$
-                			        \nllabel{line:generate-mddr:start:wait2}}{
-                    				\If {$t<t'^u-a_D$}{
-                     				insert $(u,t'^u-a_D)$ into $\textsc{Open}$\\
-        						$X^i \gets X^i \cup \{  (u,t'^u-a_D) \}$ \\
-        						$E^i \gets E^i \cup \{  [(u,t);(u,t'^u-a_D)] \}$ 
-        						\nllabel{line:generate-mddr:end:wait2}\\
-        						}
-                 	        }
-                 	        %}                 	        
-                }
-            }
-        }
-    \Return $(X^i,E^i)$\\
-} 
-\caption{Generate \mddr} \label{alg:generate-mddr}
-\end{footnotesize}
-\end{algorithm} 
 
-The \mddr generation algorithm (Algorithm~\ref{alg:generate-mddr}) 
-accepts a makespan bound $\mu$ and  
-a set of \ccbs constraints $\const(\Psi)$ for some agent $i$ 
-and outputs an \mddr that represents a set of single-agent plans with makespan equal to or smaller than $\mu$. 
+
 For \musmtccbs to be correct, we require that this set of single-agent plans contains every single-agent plan that \csipp would return given every subset of $\const(\Psi)$. 
 To state this more formally, let $\mddr(\mu, \const(\Psi))$ be the set of single-agent plans represented by the \mddr created for $\mu$ and $\const(\Psi)$, and let $\csipp(Const')$ be the single-agent plan created by \csipp given the set of constraints $Const'$. 
 
 \konstantin{Some notation remarks. (1) \ccbs constraints are open from the right side, i.e. $(i, (u, \tov(a)), [t',t'^u))$ not $(i, (u, \tov(a)), [t',t'^u])$. 
 (2) Before in text we denoted \ccbs constraints using $\tuple{}$ not $()$, i.e. $\tuple{i, (u, \tov(a)), [t',t'^u)}$. 
 (3) In text we use $Const$ do denote a set of constraints, but in pseudoce we use $constraints$.}
-
-\konstantin{I think the algorithm's name should be 'Generate \mddr for a single agent.} \pavel{Done.}
-
-% \begin{definition}[Complete \mddr]
-% We say that an \mddr is complete w.r.t a makespan bound $\mu$ and set of \ccbs constraints $Const$ iff
-% \begin{multline}
-%  \forall Const'\subseteq Const: 
-% \text{Makespan}(\csipp(Const'))>\mu \\
-% \vee \csipp(Const')\in \mddr(\mu, Const)     
-% \end{multline}
-% \end{definition}
+\roni{I think this is done, if I missed, just fix it.}
 
 
-
-% \begin{lemma}
-% Let $\pi=(a_1, \ldots , a_n)$ be a single-agent plan for agent $i$ 
-% returned by \csipp given a set of \ccbs constraints $Const$, 
-% and let $t_j$ be the time the $j^{th}$ action in $\pi$ is planned to start. For any wait action $a_j\in\pi$ at location $v$ (i.e., $\fromv(a_j)=\tov(a_j)=v$)
-% there exists a \ccbs constraint $\tuple{i, a_C, (t,t^u)}$ such that
-% either \\
-% (case \#1) $a_C$ is a move action, $\fromv(a_j)=v$, and the duration of $a_j$ is $t^u-t_j$, \\
-% or (case \#2) $a_C$ is a wait action at some vertex $v'$, and there exists a move action $a'$ such that $\fromv(a')=v$ and $\tov(a')=v'$, and the duration of $a_j$ is $(t^u-a'_D)-t_j$.
-% \end{lemma}
-
-
-
-\begin{theorem}
+\begin{lemma}
 For every set of \ccbs constraints $Const'\subseteq Const$ it holds that $\csipp(Const')\in \mddr(\mu,Const)$. 
-\label{the:mddr-ok}
-\end{theorem}
+\label{lem:mddr-ok}
+\end{lemma}
 \begin{proof}
 Let $\pi=(a_1,\ldots,a_n))$ be the the single-agent plan returned by \csipp given a set of constraints $Const'\subseteq Const$. 
 Let $\{(a_1,t_1),\ldots,(a_n,t_n)\}$ be the corresponding set of timed-actions, i.e., $t_j=([\pi[:(j-1)])_D$. 
-To prove Theorem~\ref{the:mddr-ok}, we proof by induction over $j$ that for every timed action $(t_j,a_j)$ in this set there exists an edge $((\fromv(a_j),t_j), (\tov(a_j),t_j+(a_j)_D))$ in our \mddr. 
+To prove Lemma~\ref{lem:mddr-ok}, we proof by induction over $j$ that for every timed action $(t_j,a_j)$ in this set there exists an edge $((\fromv(a_j),t_j), (\tov(a_j),t_j+(a_j)_D))$ in our \mddr. 
 
 \textbf{Base case.}
 For $j=0$, we need to show that $((\fromv(a_1),0),(\tov(a_1),{a_1}_D))$ is in our \mddr. 
@@ -2943,6 +2504,24 @@ lines~\ref{line:generate-mddr:start:wait1}-\ref{line:generate-mddr:end:wait1}
 lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}
 \end{proof}
 
+
+\begin{theorem}
+	\musmtccbs is a complete algorithm for bounded-cost \mapfr. 
+	\label{the:bounded-cost-makespan}
+\end{theorem}
+\begin{proof}
+	There are three outcomes for every iteration of \musmtccbs: (1) the current \ps is not solvable, (2) the solution returned for the current \ps has a conflict, 
+	and (3) the solution returned for the current \ps has no conflict. 
+	If the first outcome occurs, then due to Lemma~\ref{lem:mddr-ok} we can conclude that no solution indeed exists. 
+	If the second outcome occurs, the added conflict 
+	will be avoided in future iteration by adding its corresponding pair of \ccbs constraints. 
+	No potential solution is lost by this since the \ccbs constraints are a sound pair of constraints. 
+	If the third outcome occurs, the solution is returned, as required. 
+	Thus, in every iteration of \musmtccbs we do not lose any possible solutions. 
+	
+	
+	Observe that a given \mapfr problem  can give raise to finitely many sound pairs of constraints under the given makespan limit $\mu$. Hence the \musmtccbs terminates as only finitely many sound pairs of constraints can be found and resolved while pairs of constraints being resolved remain resolved in all future steps of the algorithm. Therefore after finitely many steps the algorithm either succeed or fails. In case of the failure, the set of sound constraints cannot be satisfied for the current makespan limit $\mu$ which means there is no solution of the input \mapfr instance for this makespan limit $\mu$.
+\end{proof}
 
 
 %\bibliographystyle{theapa}
