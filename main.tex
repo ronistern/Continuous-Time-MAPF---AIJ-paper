@@ -256,18 +256,21 @@ However, most \mapf algorithms assume that
 (1) time is discretized into time steps and
 (2) the duration of every action is one time step. 
 %,  and (3) in every time step each agent occupies exactly a single location.
-These simplifying assumptions limit the applicability of \mapf algorithms in real-world application and raise non-trivial questions such as how to discretize time in an effective manner.
-We propose two novel \mapf algorithms, \ccbs and \smtccbs, that do not discretize time and allow arbitrary action duration. \ccbs draws on ideas from \sipp, a single-agent pathfinding algorithm designed to cope with dynamic obstacles, and \cbs, a state-of-the-art search-based \mapf algorithm. 
-\smtccbs builds on similar ideas, but it based on different state-of-the-art \mapf algorithm called \smtcbsO. 
+These simplifying assumptions limit the applicability of \mapf algorithms in real-world application and raise non-trivial questions such as how to discretize time in an effective manner. 
+We propose two novel \mapf algorithms, \ccbs and \smtccbs, that do not discretize time and allow arbitrary action duration. 
+\ccbs draws on ideas from \sipp, a single-agent pathfinding algorithm designed to cope with dynamic obstacles, and \cbs, a state-of-the-art search-based \mapf algorithm. 
+\smtccbs builds on similar ideas, but is based on a different state-of-the-art \mapf algorithm called \smtcbsO, which applied a SAT Modulu Theory (SMT) problem-solving procedure. 
 \ccbs guarantees to return solutions that have  minimal sum-of-costs, while \smtccbs guarantees to return solutions that have minimal makespan. 
 We implemented \ccbs and \smtccbs and evaluated them on grid-based \mapf problems and general graphs (roadmaps). 
-The results show that both algorithms can solve optimally non-trivial \mapf problems.
+The results show that both algorithms can efficiently solve optimally non-trivial \mapf problems.
 \end{abstract}
 
 \begin{keyword}
 %\texttt{elsarticle.cls}\sep \LaTeX\sep Elsevier \sep template
-Artificial Intelligence\sep Model-based diagnosis\sep Troubleshooting
+Multi-Agent Pathfinding\sep Conflict-Based Search\sep Safe-Interval Path Planning\sep SAT modulo Theory\sep Heuristic Search
 %\MSC[2010] 00-01\sep  99-00
+\pavel{Why not to add abbreviations Conflict-Based Search (CBS), (SIPP), (SMT), MAPF, \mapfr, ...(add not replace)}
+\roni{I think it makes more sense to leave it as is, and not use the abbreviation.}
 \end{keyword}
 
 \end{frontmatter}
@@ -298,7 +301,7 @@ Nevertheless, AI researchers in the past years have made substantial progress in
 However, most prior work assumed that 
 (1) time is discretized into time steps and
 (2) the duration of every action is one time step. 
-These simplifying assumptions limit the applicability of \mapf algorithm in real-world applications. Discretizing time raises the challenge of how to choose the granularity of the discretization. Assuming the duration of all actions is the identical ignores kinematics and variable speeds. 
+These simplifying assumptions limit the applicability of \mapf algorithm in real-world applications. Discretizing time raises the challenge of how to choose the granularity of the discretization. Assuming the duration of all actions is identical ignores kinematics and variable speeds. 
 Therefore, in this work we do not make any of these simplifying assumptions and address a more general \mapf problem in which time is not discretized, actions can have arbitrary duration, and agents occupy an defined area in a metric space. This problem is called \mapfr~\cite{walker2018extended}.\footnote{We discuss later the relation between Walker et al.'s~\cite{walker2018extended} definition of \mapfr and ours.}
 
 
@@ -323,7 +326,8 @@ However, it does so in the \smt problem solving framework used by the \smtcbsO a
 % Experimental results
 We implemented \ccbs and \smtccbs, and evaluated them on standard grid-based \mapf benchmarks as well as generated roadmaps. 
 The results show that both algorithms can solve \mapf problems with dozens of agents optimally. 
-While we are not not the first to study \mapf beyond its basic setting~\cite[inter alia]{walker2018extended,li2019multi}, to the best of our knowledge we are the first to propose \mapf algorithms that can handle agents with volumes and non-uniform action durations while avoiding any form of time discretization. 
+While we are not not the first to study \mapf beyond its basic setting~\cite{walker2018extended,li2019multi,cohen2019optimal}, to the best of our knowledge we are the first to propose \mapf algorithms that can handle agents with volumes and non-uniform action durations while avoiding any form of time discretization (see Section~\ref{sec:related-work} for a more detailed discussion).  
+%\konstantin{may be we better put the cross-reference to the Related Work section here?}Roni: fixed
 %~\cite{walker2018extended,li2019multi}.  However, to the best of our knowledge, the algorithms we propose are the first \mapf algorithms that can handle arbitrary directly consider handle non-discretized, i.e. continuous, time, non-grid domains, non-unit actions duration, agents with a volume, and are still optimal and complete. A more detailed discussion is given later in Section~\ref{sec:related-work}. 
 All our implementations are publicly available, so future researchers can reproduce our results and build on them. 
 
@@ -353,7 +357,7 @@ The main contribution of this journal paper is to present these works in a unifi
 This paper is structured as follows. 
 Section~\ref{sec:background} provides relevant \mapf definitions and relevant background. 
 Section~\ref{sec:problem-statement} formally defines the \mapfr problem we address. 
-Section~\ref{sec:ccbs} presents the \ccbs algorithm and Section~\ref{sec:smtccbs} presents \smtccbs. 
+Section~\ref{sec:ccbs} presents the \ccbs algorithm and Section~\ref{sec:smtccbs} presents \smtccbs. Results of the empirical evaluation of both algorithms are described in Section~\ref{sec:experiments}. 
 A detailed discussion of related work is given in Section~\ref{sec:related-work}, 
 and Section~\ref{sec:conclusion} concludes with a list of directions for future work. 
 
@@ -495,6 +499,7 @@ Thus, a successful approach for solving many combinatorial search problems is to
 The SAT-based approach for finding makespan-optimal solutions works by solving a sequence of SAT problems. 
 Each of these SAT problem represents the decision problem: ``is there a valid solution to the given classical \mapf problem within a makespan of at most $\mu$?'' where $\mu$ is a parameter. 
 We call this decision problem the \emph{bounded-cost \mapf problem}.
+\pavel{We speak about makespan-optimal and then switch to bounded-cost. Okay if cost = makespan. Bounded-makespan sounds worse but maybe we should consider it.}
 %$\mu$ is initially set to one, and afterwards incremented one by one until the minimal $\mu$ for which the answer to the corresponding bounded-cost \mapf problem is ``yes'', is found.\foornote{It is also possible to initialize $\mu$ with any other lower bound on the optimal solution cost.}[roni: you repeat this later]
 
 %\pavel{$T$ here looks like a theory, let us change it to some $t^+$ or something.}\roni{Let's choose today the notation for max time}\roni{Changing to tmax}
@@ -552,7 +557,8 @@ In more general cases, not only new constraints are added to resolve a conflict 
 
 \smtcbsO follows the same \smt solving procedure for solving bounded-cost \mapf. The \ps initially created in \smtcbsO is the same as the SAT problem created by SAT-based \mapf algorithms, except that it does not encode constraints to avoid conflicts between the agents' plans. 
 Instead, these conflicts are detected after a solution to this \ps is found, in a \mapf-specific \decidet procedure that we denote by \decidemapf. 
-That is, whenever the SAT solver outputs a solution, this solution is checked for conflicts. If no conflicts exists, the solution is returned. Otherwise, additional constraints are added to all subsequent \ps to ensure that every previously detected conflict will not occur again. These constraints are exactly the constraints \cbs would impose to resolve the found conflicts. 
+That is, whenever the SAT solver outputs a solution, this solution is checked for conflicts. If no conflicts exists, the solution is returned. Otherwise, additional constraints are added to all subsequent \ps to ensure that every previously detected conflict will not occur again. These constraints are exactly the constraints \cbs would impose to resolve the found conflicts.
+\pavel{Theoretically SMT-CBS can converge to the same formula as MDD-SAT but it often finishes with a smaller formula due to the iterative/lazy construction.}
 A similar approach has been used in the Lazy CBS algorithm~\cite{gange2019lazy}. 
 \smtcbsO showed impressive performance on standard \mapf benchmark. 
 %\roni{Added this subsection, to better connect to \smtcbsO. Please read}
@@ -636,7 +642,7 @@ Each cell in this multiset is associated with a time interval indicating the tim
 
 % Limitation of MAMP
 Cohen et al.~\cite{cohen2019optimal} proposed an optimal and a bounded-suboptimal algorithm for solving MAMP problems, based on Conflict-Based Search (CBS)~\cite{sharon2015conflict}. Their algorithm, called CBS-CT, is designed to lift the second classical \mapf assumption (AS2), allowing arbitrary duration for wait actions. 
-However, it relies on the discretized representation of the environment into a set of cells ($\mathcal{C}$). Thus, while it allows move actions with non-unit duration (addressing AS1), its efficiency and relation to the real-world depend on this discretization of the environment. Every such discretization introduces inaccuracy and potential for incompleteness: an optimal solution for one discretization may not be optimal for another, and a problem may be solvable under one discretization and unsolvable under other discretization.  
+However, it relies on the discretized representation of the environment into a set of cells ($\mathcal{C}$). Thus, while it allows move actions with non-unit duration (addressing AS1), its efficiency and relation to the real-world depend on this discretization of the environment. \pavel{Here starts a claim based on previous. I would start here a separate paragraph.} Every such discretization introduces inaccuracy and potential for incompleteness: an optimal solution for one discretization may not be optimal for another, and a problem may be solvable under one discretization and unsolvable under other discretization.  
 The algorithms we propose are fundamentally different in that they do not require a discretization of the environment into grid cells.  Thus, they require a different problem definition than MAMP. 
 
 
@@ -802,7 +808,7 @@ consider both problems and propose algorithms for solving them.
 \end{figure}
 
 \subsection{\mapfr Example}
-Figure \ref{fig:example} shows an example \mapfr problem. 
+Figure \ref{fig:example} shows an example of \mapfr problem. 
 Small circles with the letters inside them denote graph vertices, e.g. vertex $A$ corresponds to a point with the coordinates $(1, 5)$, straight line segments between vertices depict edges. %, e.g. vertex $C$ is reachable from $H$ by following the segment that starts at $(3, 1)$ and ends at $(6,5)$. 
 Agents are shown as colored circles. Each agent is a disk with a radius of 0.5. Initially the green agent occupies vertex $A$, the red agent -- vertex $E$, and the blue agent -- vertex $G$. Their respective goals are $I$ (green agent), $J$ (red agent), and $D$ (blue agent).
 
@@ -867,6 +873,8 @@ Sub-optimal and anytime variations of the algorithm are also known \cite{narayan
 
 
 \subsection{From \cbs to \ccbs}
+
+\pavel{Why we do not have original CBS pseudo-code to see the difference of CCBS and CBS? I know that I often go back to this question. Not extremely important. We can see difference of CBS and CCBS then.}
 
 \ccbs follows the \cbs framework. %: it has a low-level search algorithm that finds plans for individual agents, and a high-level search algorithm that imposes constraints on the low-level search.
 The main differences between \ccbs and \cbs are:
@@ -938,7 +946,7 @@ have a conflict, as defined in Definition~\ref{def:conflict-mapfr},
 if they have a \ccbs conflict.
 
 
-In our running from Figure~\ref{fig:example}, consider the following single-agent plans for the green, red, and blue agents, represented as sequences of timed actions:  $\pi_{green}=\{(A \rightarrow B, 0), (B \rightarrow F, 2), (F \rightarrow I, 4)\}$, $\pi_{red}=\{(E \rightarrow F, 0), (F \rightarrow I, 2), (I \rightarrow J, 2+2\sqrt{2})\}$, $\pi_{blue}=\{(G \rightarrow H, 0), (H \rightarrow C, 2), (C \rightarrow D, 7\}$. The plans of the red and blue agents do, indeed, conflict (as was shown of Figure \ref{fig:example-at-timeX}. \ccbs conflict here is: $\tuple{red, blue, (F \rightarrow I, 2), (H \rightarrow C, 2)}$.  
+In our running from Figure~\ref{fig:example}, consider the following single-agent plans for the green, red, and blue agents, represented as sequences of timed actions:  $\pi_{green}=\{(A \rightarrow B, 0), (B \rightarrow F, 2), (F \rightarrow I, 4)\}$, $\pi_{red}=\{(E \rightarrow F, 0), (F \rightarrow I, 2), (I \rightarrow J, 2+2\sqrt{2})\}$, $\pi_{blue}=\{(G \rightarrow H, 0), (H \rightarrow C, 2), (C \rightarrow D, 7\}$. The plans of the red and blue agents do, indeed, conflict (as was shown on Figure~\ref{fig:example-t-2-8}. \ccbs conflict here is: $\tuple{red, blue, (F \rightarrow I, 2), (H \rightarrow C, 2)}$.  
 
 
 %\begin{lemma} A pair of single-agent plans $\pi_i$ and $\pi_j$ for agents $i$ and $j$ have a conflict (as defined in Definition~\ref{def:conflict-mapfr}) iff there exists a pair of timed actions $(a_i,t_i)\in \pi_i$ and $(a_j,t_j)\in \pi_j$ such that $\inconflict \Big(i,j, (a_i,t_i), (a_j,t_j)\Big)$ is true.  \label{lem:timedConflicts} \end{lemma}
@@ -1108,6 +1116,7 @@ Third, SCIPP is designed to consider soft-constraints so as to allow bounded-sub
 	\Input{$\mathcal{G}=(V,E)$, \source, \target)}
 	\ForEach{agent $i$}{
         $\pi_i\gets$\astar$\big(\mathcal{G},\source(i),\target(i)\big)$ \nllabel{line:sipp} \\
+        \pavel{Big seems to be something wrong.}
     }
     $N\gets \Big(\emptyset,(\pi_1,\ldots,\pi_k)\Big)$\\
     Create \OPEN; Add $N$ to \OPEN\\
@@ -1158,7 +1167,7 @@ Next, we prove that \ccbs is sound, complete, and optimal. Our analysis is based
 For a given \mapfr problem, a pair of constraints is sound iff in every optimal valid solution it holds that at least one of these constraints hold. 
 \label{def:sound}
 \end{definition}
-
+ 
 \begin{lemma}
 For any \ccbs conflict $\tuple{(a_i, t_i), (a_j, t_j)}$ 
 and corresponding unsafe intervals $[t_i,t^u_i)$
@@ -1310,7 +1319,7 @@ and Section~\ref{sec:musmtcbs} provides a complete pseudo-code for \smtccbs.
 
 We refer to the \smt-based bounded-cost \mapfr algorithm we propose as $\mu$\smtccbs. 
 Some aspects of $\mu$\smtccbs are similar to the \smt-based bounded-cost \mapf algorithm used by \smtcbsO. 
-The \ps in $\mu$\smtccbs is constructed such that a 
+The propositional skeleton (\ps) in $\mu$\smtccbs is constructed such that a 
 satisfying assignment to this \ps defines a solution to $P$ with makespan at most $\mu$, 
 where $P$ is the \mapfr problem we are solving. 
 The \decidet procedure in $\mu$\smtccbs checks if this solution is valid, i.e., if it contains any \ccbs conflicts. 
@@ -1386,17 +1395,14 @@ The process of generating our \ps for a given set of \ccbs conflicts, \mapfr pro
 \noindent CreatePS consists of the following steps. 
 \begin{enumerate}
 	\item Compute a set of \ccbs constraints for the set of conflicts in $\Psi$. 
-	\item Compute a set of single-agent plans that satisfy some of these constraints.
-%	\item Compute the set of \ccbs constraints that \ccbs would impose to resolve the conflicts in $\Psi$. 
-%	\item Compute the single-agent plans \csipp would generate to satisfy every subset of these constraints and determine the next makespan $\mu_{next}$ defining the next fixed-objective decision problem to answer.
-	%\item Compute the single-agent plans \csipp would generate to satisfy every subset of these constraints.
-	\item Create a \ps for choosing solutions from this set of single-agent plans. 
-	\item Add constraints to verify the chosen solution avoids all conflicts in $\Psi$. 
+	\item Compute for each agent a set of single-agent plans that satisfy these constraints. %\konstantin{Why do we have 'some' here? It introduces some vagueness to the phrase. May be we just cut out 'some'?}\roni{Fixed. Also, now explaining there is a set per agent. I did not want to make this high-level sentence too long, so I did not add ``constraints that are relevant to that agent''. This is also not needed from a correctness perspective: the single-agent plan of one agent always satisfies all constraints of the other agents.}
+	\item Create a \ps for choosing a solution from these sets of single-agent plans. %\konstantin{My variant: Create a \ps out of this set of single-agent plans.} \roni{I modified my version a bit and think it is better, as it is more accurate: the \ps allows choosing a solution from the set of solutions specified in the single agent plans we created. Your version says it creates the \ps out of this set, but what does it mean to creat a \ps out of a set? Anyhow, this is not important in my opion, change to however you prefer}
+	\item Add constraints to verify the chosen solution avoids all conflicts in $\Psi$. %\konstantin{My variant: extend the \ps with the formulas that correspond to the \ccbs constraints.} \roni{Again, choose what you prefer, but I like my version better because it says what these constraints says, while in your version it seems like this is the only place where the \ccbs constraints are considered, while they are very much considered when generating the \mddr. But, I don't feel strongly about this, choose the option you prefer.}
 \end{enumerate}
 Next, we describe the details of each step of CreatePS. 
 As you will see, these steps are designed to obtain a behavior similar to \ccbs. 
 In particular, in the first step, CreatePS computes all the constraints \ccbs would impose to resolve the conflicts in $\Psi$, 
-and in the second step, CreatePS computes all single-agent plans that \csipp would generate to satisfy every subset of these constraints. 
+and in the second step, CreatePS computes efficiently all single-agent plans that \csipp would generate to satisfy every subset of these constraints.\footnote{Note that CreatePS does so without explicitly running \csipp an exponential number of times.}
 
 
 %\textbf{Step \#1. Compute the set of relevant \ccbs constraints.}
@@ -1405,13 +1411,13 @@ and in the second step, CreatePS computes all single-agent plans that \csipp wou
 For every \ccbs conflict $Con$ in $\Psi$, we generate the pair of \ccbs constraints \ccbs would create to resolve $Con$. 
 This pair of \ccbs constraints is specified in Lemma~\ref{lem:sound}. 
 Note that to compute such a pair of constraints, we need to compute the unsafe intervals for the respective conflict. 
-By $Cnst(Con)$ we denote the pair of \ccbs constraints for a conflict $Con\in \Psi$, 
-and by $Cnst(\Psi)$ -- the set of all pairs of \ccbs constraints were generated this way, i.e., 
+By $\const(Con)$ we denote the pair of \ccbs constraints for a conflict $Con\in \Psi$, 
+and by $\const(\Psi)$ -- the set of all pairs of \ccbs constraints were generated this way, i.e., 
 \begin{equation}
-Cnst(Con) = Cnst(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
+\const(Con) = \const(\tuple{ (a_i, t_i), (a_j,t_j) }) = \{ \tuple{i, a_i, [t_i, t_i^u)}, \tuple{j, a_j, [t_j, t_j^u)} \}
 \end{equation}
 \begin{equation}
-Cnst(\Psi) = \{ Cnst(Con)~|~Con\in \Psi\} 
+\const(\Psi) = \{ \const(Con)~|~Con\in \Psi\} 
 \end{equation}
 %\begin{equation}
 %Cnst_i(\Psi) = \{ \tuple{i, a_i, [t_i, t_i^u)} | 
@@ -1422,7 +1428,7 @@ Cnst(\Psi) = \{ Cnst(Con)~|~Con\in \Psi\}
 
 
 \textbf{Step 2. Compute the set of relevant single-agent plans.}
-For each agent, we compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $Cnst(\Psi)$ that involve that agent. 
+For each agent, we compute all single-agent plans \csipp would generate for that agent given any subset of constraints in $\const(\Psi)$ that involve that agent. 
 To compute and store this set of single-agent plans efficiently, we create for each agent a 
 specific \emph{Multi-Value Decision Diagram} (MDD)~\cite{srinivasan1990algorithms} that we refer to as \mddr. 
 An MDD is a direct a-cyclic graph with a single source and sink.\footnote{Technically, an MDD can have multiple sinks, where each sink is labeled as either true or false. This is equivalent to having a single sink that gathers all sinks labeled as true, and removing all branches that only end up in sinks labeled as false.}
@@ -1492,7 +1498,9 @@ and an agent $i$.
 $X^i$ and $E^i$ in Algorithm~\ref{alg:generate-mddr} are the nodes and edges of the \mddr it generates for agent $i$. 
 The root node of this \mddr is $(\source(i),t)$. 
 Initially, $X^i$ contains only the root node and $E^i$ is empty. 
-\OPEN is a binary heap of \mddr nodes ordered by their time points, 
+\OPEN is a collection % binary heap 
+%\konstantin{Do we need 'binary heap' here? I think we better say smth. more implementation independent, e.g. 'collection' or 'container'.}\roni{Right, changed to collection.}
+of \mddr nodes ordered by their time points, 
 which is initialized with the \mddr root node. 
 In every iteration, the best (minimal time) node $(u,t)$ in \OPEN is removed from \OPEN and expanded. 
 The children of $(u,t)$ are generated as follows. 
@@ -1512,6 +1520,7 @@ If there is a \ccbs constraint that prohibits waiting at $\tov(a)$ then we creat
 	\label{fig:mddr}
 \end{figure}
 
+
 \begin{example}
 	Figure \ref{fig:mddr} shows the \mddrs for the agents in our running example (Figure~\ref{fig:example}). 
 	The upper part shows the \mddrs created for each agent w.r.t. an empty set of constraints. 
@@ -1525,23 +1534,20 @@ If there is a \ccbs constraint that prohibits waiting at $\tov(a)$ then we creat
 	\tuple{blue, (H\rightarrow C, 2.000), [2.000,3.743)} \}
 	\label{eq:example-constraints}
 	\end{equation}
-	The lower part of Figure~\ref{fig:mddr} shows the \mddr generated for each agent when considering the pair of \cbs constraints in Equation (\ref{eq:example-constraints}).
+	The lower part of Figure~\ref{fig:mddr} shows the \mddr generated for each agent when considering the pair of \ccbs constraints in Equation (\ref{eq:example-constraints}).
 \end{example}
 
 
 
 
-\textbf{Step 3. Create a \ps for choosing solutions.}
-%\konstantin{An inconsistent notations were used in this paragraph, i.e. $a_i$ was used to denote an agent not an action etc. I corrected this. Pls, double check.}\roni{Done, looks good}
-%Let $E^i$ and $X^i$ denote the set of edges and nodes, respectively, in the \mddr of agent $i$.
-We create in this step a \ps such that every satisfying assignment to it corresponds to a \mapfr solution in which each agent follows a single-agent plan from its \mddr. 
+\textbf{Step 3. Create a \ps.} We create in this step a \ps such that every satisfying assignment to it corresponds to a \mapfr solution in which each agent follows a single-agent plan from its \mddr. 
 To create such a \ps, we create Boolean variables $\mathcal{E}_{v,v'}^{t,t'}(i)$ and $\mathcal{X}_{v}^{t}(i)$ 
 for every edge and node in $E^i$ and $X^i$ respectively. 
 Setting $\mathcal{X}_v^t(i)$ to true represents that agent $i$ plans to occupy location $v$ in time $t$. 
 Setting $\mathcal{E}_{v,v'}^{t,t'}(i)$ to true represents that agent $i$ plans performs an action that start at time $t$, ends at time $t'$, and moves the agent from $v$ to $v'$. 
 Note that wait actions are represented by $\mathcal{E}_{v,v'}^{t,t'}(i)$ variables with $v=v'$. 
 To ensure that an assignment to all these variables constitutes a solution to the given \mapfr problem, 
-we add the following constraints over these Boolean variables. 
+we add the following restrictions over these Boolean variables to the \ps. %\konstantin{May be remove/substitute the word 'constraints' in this sentence and in the below paragraph (to avoid confusion with \ccbs constraints).}\roni{Changed to ``restrictions''. Not sure if this works.} 
 \begin{equation}
 {  \mathcal{X}_v^t(i) \Rightarrow \bigvee_{(v',t')\;|\;[(v,t);(v',t')] \in E^i}{\mathcal{E}^{t,t'}_{v,v'}(i)},
 }
@@ -1558,27 +1564,28 @@ we add the following constraints over these Boolean variables.
 }
 \label{eq-3}
 \end{equation}
-The constraints in Equations~\ref{eq-1} and~\ref{eq-2} state that if agent $i$ appears in vertex $v$ at time $t$ then it has to leave through exactly one edge connected to $v$. 
-The constraint in equation~\ref{eq-3} establishes that once an agent enters an edge in the \mddr it has to leave it at its endpoint. 
-We also add constraints that verify every agent starts in its start location and ends in its goal.
+Equations~\ref{eq-1} and~\ref{eq-2} state that if agent $i$ appears in vertex $v$ at time $t$ then it has to leave through exactly one edge connected to $v$. 
+Equation~\ref{eq-3} establishes that once an agent enters an edge in the \mddr it has to leave it at its endpoint. 
+We also add to the \ps clauses that verify every agent starts in its start location and ends in its goal.
 Thus, a satisfying assignment to this formula represents a solution to the given \mapfr problem. 
 
 
 \textbf{Step 4. Add constraints to verify all conflicts are avoided.}
-To avoid all the \ccbs conflicts in $\Psi$, we verify that for every conflict $Con\in\Psi$ one of the \ccbs constraints in $Cnst(Con)$ is satisfied. 
-This is done by adding to the propositional formula created in step 3 
+To avoid all the \ccbs conflicts in $\Psi$, we verify that for every conflict $Con\in\Psi$ one of the \ccbs constraints in $\const(Con)$ is satisfied. 
+This is done by adding to the \ps created in step 3 
 an appropriate disjunction. 
-That is, for a conflict $\tuple{(a_i,t_i), (a_j, t_j)}$ 
-%where $a_i$ is the action that moves the agent $i$ from $v$ to $v'$ 
-%and $a_j$ -- moves agent $j$ from $u$ to $u'$, 
+That is, for a conflict $\tuple{(a_i,t_i), (a_j, t_j)}$, where $a_i$ is the action that moves the agent $i$ from $v$ to $v'$ and $a_j$ -- moves agent $j$ from $u$ to $u'$, 
 we add following clause:
-
 \begin{equation}
 	\neg \mathcal{E}^{t_i, t_i+{a_i}_D}_{v,v'}(i)
 \vee
 	\neg \mathcal{E}^{t_j, t_j+{a_j}_D}_{u,u'}(j)
 \label{eq-mutex}
 \end{equation}
+
+\konstantin{Hmm. It seems to me now that having '$t_i, t_i+{a_i}_D$' in the superscript is not right. We should prohibit an agent to perform an action for a time interval that equals the imposed interval-constraint (not necessarily the duration of an action).}
+\roni{Good question. After some thought, I think that it is correct as is. The reason is that the Boolean variables $\mathcal{E}^{t_i, t_i+{a_i}_D}_{v,v'}$ are created by analyzing the \mddr. So, we will not have any other superscript that is not of the form $(t, t+a_D)$. Only in the \mddr generation part do we enjoy the fact that the constraints forbid the timed action for an entire time range.}
+\pavel{I was also tempted to use conflict interval only. But MDDr records actions with their original durations and this is only what forbid by this mutex constraint. In other words, we forbid pair of actions that led to the conflict.}
 
 This clause represents mutual exclusion between the two conflicting actions. 
 Thus having this clause in the \ps ensures at most one of these timed actions will be applied in any satisfying solution. 
@@ -1642,8 +1649,7 @@ to verify that the conflict identified in the previous solution will be avoided.
 	and if such a solution exists then it will be found. 
 	\label{the:bounded-cost-makespan}
 \end{theorem}
-Soundness is established by the fact that \decidemapfr verifies that the returned solution is valid. Establishing completeness, however, is less trivial. 
-A formal proof is given in\ref{app:completeness}. 
+Soundness is established by the fact that \decidemapfr verifies that the returned solution is valid. Establishing completeness, however, is less trivial. A formal proof is given in~\ref{app:completeness}. 
 
 
 \subsection{\smtccbs}
@@ -1668,7 +1674,6 @@ Finally, we can present our \smtccbs algorithm. Pseudo code is listed in Algorit
 It starts by setting the makespan-bound $\mu$ to the single-agent plan with the longest duration. Then, it runs $\mu$\smtccbs to try to find a valid solution whose makespan is $\mu$. If it succeeded, it returns that solution. Otherwise, $\mu$ is increased to the next relevant makespan (line~\ref{line:smtccbs:nextmu}). 
 The next relevant makespan is set by adding to $\mu$ the minimal amount that enables at least one more action by at least one agent. In our implementation we computed the next relevant makespan while $\mu\smtccbs$ computes the \mddr for each agent. 
 This was done by keeping track of the minimum of end times of move actions $a \in A$ that starts before the makespan bound but ends after. 
-%\roni{I added the text above. I think it is sufficient} \pavel{Yes, sufficient}.
 
 
 \begin{theorem}
@@ -1676,17 +1681,20 @@ This was done by keeping track of the minimum of end times of move actions $a \i
 \label{the:optimal-makespan}
 \end{theorem}
 \begin{proof}
-Soundness and completeness follows from the soundness and completeness of \musmtccbs, established in Theorem~\ref{the:bounded-cost-makespan}. 
-%\roni{TODO: Establish optimality} \pavel{Done.}
+Every solution returned by \smtccbs is also a solution to \
+Soundness and completeness follows from the soundness and completeness of \musmtccbs, established in Theorem~\ref{the:bounded-cost-makespan}.
+
 \musmtccbs returns a solution then it is a valid solution of given \mapfr problem $P$ satisfying given makespan $\mu$. This claim relies on the soundness of encoding where possible satisfying assignments of the formula correspond to paths of length at most $\mu$ connecting starting and goal positions of agents. In addition to this \decidemapfr verifies that individual paths are non-conflicting.
-The iterative scheme for trying larger makespans follows the idea from \mddsat~\cite{DBLP:conf/ecai/SurynekFSB16}. To find an optimal makespan we need to ensure that the iterative process does not skip any relevant makespan. Having a set of constraints $Cons(\Psi)$ in the course of the \smtccbs algorithm including sound pairs of constraints (Definition \ref{def:sound}) then any solution to given \mapfr problem $P$ must satisfy this set of constraints. After the compete failure for given makespan $\mu$ in $\mu$\smtccbs we know due to completeness of $\mu$\smtccbs that there is no solution of makespan $\mu$. Then we proceed to the next makespan $\mu_{next}$ which is set according to current set of constraints $Cons(\Psi)$.
-The sufficient condition to have the makespan increasing scheme sound and optimal is that we should have a chance to obtain a new feasible solution w.r.t. $Cons(\Psi)$ at the next $\mu_{next}$ while for makespans between $\mu$ and $\mu_{next}$ no feasible solution w.r.t. $Cons(\Psi)$ should exist to ensure that we do not skip any relevant makespan. This is done by computing all-single agents plans CSIPP would generate for $Cons(\Psi)$ but we allow it going beyond the makespan bound $\mu$ by making one extra action. The smallest action finish time beyond $\mu$ over all such plans is taken as the next makespan bound $\mu_{next}$. Existence of a solution satisfying $Cons(\Psi)$ of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the definition of $\mu_{next}$. Hence no such solution exists and the makespan increasing scheme guarantees finding optimal solution. %Existence of a solution of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the fact that $Cons(\Psi)$ must be satisfied by any solution.
-Note that \smtccbs, like \ccbs, is complete in a weak way. That is, if a valid solution exists, \smtccbs will find it. Unsolvability cannot be detected by \smtccbs.
+The iterative scheme for trying larger makespans follows the idea from \mddsat~\cite{DBLP:conf/ecai/SurynekFSB16}. To find an optimal makespan we need to ensure that the iterative process does not skip any relevant makespan. Having a set of constraints $\const(\Psi)$ in the course of the \smtccbs algorithm including sound pairs of constraints (Definition \ref{def:sound}) then any solution to given \mapfr problem $P$ must satisfy this set of constraints. After the compete failure for given makespan $\mu$ in $\mu$\smtccbs we know due to the completeness of \musmtccbs that there is no solution of makespan $\mu$. Then we proceed to the next makespan $\mu_{next}$ which is set according to current set of constraints $\const(\Psi)$.
+The sufficient condition to have the makespan increasing scheme sound and optimal is that we should have a chance to obtain a new feasible solution w.r.t. $\const(\Psi)$ at the next $\mu_{next}$ while for makespans between $\mu$ and $\mu_{next}$ no feasible solution w.r.t. $\const(\Psi)$ should exist to ensure that we do not skip any relevant makespan. This is done by computing all-single agents plans CSIPP would generate for $\const(\Psi)$ but we allow it going beyond the makespan bound $\mu$ by making one extra action. The smallest action finish time beyond $\mu$ over all such plans is taken as the next makespan bound $\mu_{next}$. Existence of a solution satisfying $\const(\Psi)$ of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the definition of $\mu_{next}$. Hence no such solution exists and the makespan increasing scheme guarantees finding optimal solution. %Existence of a solution of makespan $\mu'$ such that $\mu' > \mu \wedge \mu' < \mu_{next}$ would contradict the fact that $Cons(\Psi)$ must be satisfied by any solution.
+\pavel{Suggesting separate paragraph here. Content seems okay.} Note that \smtccbs, like \ccbs, is \emph{solution complete}~\cite{walker2020bipartite}. 
+%complete in a weak way. \konstantin{I saw in a recent paper that this might be attributed as being 'solution complete'. May be we also adopt it, i.e. substitute 'weak way' for 'solution complete'?}\roni{I like this a lot. Do you mean this paper:https://goldberg.berkeley.edu/pubs/completeness.pdfFrom a quick read, it seems that they use ``solution complete'' as a property of a problem, to say that it always has a solution. Did you see it used in the context of algorithms?}\konstantin{That's the paper I was talking about: https://www.aaai.org/Papers/AAAI/2020GB/AAAI-WalkerT.2901.pdf. They explicitly attribute CBS as being solution complete (see p.2 on the left).}\roni{This is perfect, it is also from our domain. Changing the text above accordingly}
+That is, if a valid solution exists, \smtccbs will find it. Unsolvability cannot be detected by \smtccbs.
 \end{proof}
 
-%\pavel{As I said in the email this scheme for increasing makespan is too timid too small steps. We can compute $\mu_{next}$ as makespan of the smallest feasible plan w.r.t. $Cons(\Psi)$ not just adding smallest action.}
 
 \section{Experimental Evaluation}
+\label{sec:experiments}
 
 \begin{figure*}[t]
 \centering
@@ -1786,7 +1794,7 @@ We chose these specific grids from the grid-based \mapf benchmark as they repres
 
 For each grid, the connectivity was set to $2^k$ where $k$ varied from $2$ to $5$ (see Fig.\ref{fig:2k-grids-and-invalid-move}). We ignored inertial effects and assumed the moving speed of each agent to be one grid cell per one time unit. That is, in one time unit an agent covers the segment whose length is equal to the distance between two adjacent grid cells. 
 This does not mean the duration of all move actions is unit. 
-For example, the duration of a move action from grid cell (x,y) to (x+1,y+1) is $\sqrt{2}$. 
+For example, the duration of a move action from grid cell (x,y) to (x+1,y+1) is $\sqrt{2}$. \pavel{Why coordinates are not in the math style?}
 Agents' shapes were disks of radius $\sqrt{2}/{4}$. %This specific size was chosen as this is the maximal size when disk agents with volume can both simultaneously perform a manoeuvre, shown in Fig.~\ref{fig:classical-MAPF-common-manoeuvre}, that is somewhat common in classical \mapf. \konstantin{Not sure how to explain this in elegant way}.
 
 The shape of an agent was considered when checking collisions with static obstacles as well as other agents. Thus, if the segment representing a move action starts and ends in empty grid cells but the disk that moves along this segment intersects any of the blocked cells, then this action is prohibited. See Fig.~\ref{fig:2k-grids-and-invalid-move}(right) for example.
@@ -1868,10 +1876,7 @@ Our implementation of \ccbs is in C++ and is available at \url{github.com/PathPl
 
 For our implementation of \smtccbs we used  Glucose 3.0 as the underlying SAT solver \cite{DBLP:journals/ijait/AudemardS18}. Glucose 3.0, as well as other modern SAT solvers, can be run in an \emph{incremental} manner~\cite{DBLP:conf/sat/AudemardLS13}. This means that the SAT solver re-uses information from its previous call to speedup its next call, namely learnt clauses. This is particularly useful in \smtccbs, because it calls the SAT solver multiple times when solving a given \mapfr problem, adding more clauses.
 
-%\roni{Pavel, this is a bit vague and I believe should be elaborated. Maybe something like this instead of the line above ``Glucose 3.0, as well as other modern SAT solvers, can be run in an \emph{incremental} manner~\cite{someReferenceOnIncremental}. This means that the SAT solver re-uses information from its previous call to speedup its next call. This is particularly useful in \smtcbs, because it calls the SAT solver multiple times when solving a given \mapfr problem, adding more clauses and constraints.''} \pavel{Added the sentence.}
-%\pavel{Mention preliminary experiments on transfering constraints between iterations, refer to \cite{surynek2019lazy}}.
-
-Preliminary experiments with \smtcbsO, the previous SMT-based solver for the discete variant of \mapf, it is better to collect and reflect all conflicts discovered after each plan validation step rather than choosing a subset of them according to any preference \cite{surynek2019lazy}. It also turned out to be good to transfer set of conflicts to the next value of the objective in the iterative scheme. We follow the analogous design choice in \smtccbs too. That is, we collect and maintain the set of conflicts discovered by \decidemapfr throughout the entire course of the \smtccbs algorithm. Our implementation of \smtccbs is written in C++ and available at \url{https://github.com/surynek/boOX}.
+Preliminary experiments with \smtcbsO, the previous SMT-based solver for the discete variant of \mapf, showed that it is better to collect and reflect all conflicts discovered after each plan validation step rather than choosing a subset of them according to any preference \cite{surynek2019lazy}. It also turned out to be good to transfer set of conflicts to the next value of the objective in the iterative scheme. We follow the analogous design choice in \smtccbs too. That is, we collect and maintain the set of conflicts discovered by \decidemapfr throughout the entire course of the \smtccbs algorithm. Our implementation of \smtccbs is written in C++ and available at \url{https://github.com/surynek/boOX}.
 
 
 \subsubsection{Evaluation Metrics}
@@ -1949,7 +1954,7 @@ Both metrics are common in the \mapf literature. Solution quality values were av
         %\label{}
     \end{subfigure}%\hspace{0.025\linewidth}%
     
-\caption{The SOC ratio between $k=3,4,5$ and $k=2$ for \ccbs on grid maps.}
+\caption{The SOC gain ratio between $k=3,4,5$ and $k=2$ for \ccbs on grid maps.}
 \label{fig:results-ccbs-SOC-grids}
 \end{figure*}
 
@@ -1961,16 +1966,13 @@ Figure \ref{fig:results-ccbs-SR-grids} depicts the success rate of \ccbs on our 
 
 % It is working! 
 The results show that our implementation of \ccbs can find SOC-optimal solutions under the 30 second time limit for \mapfr problems with several dozens of agents in some grids. 
-For example, \ccbs solved 80\% of problems for 24 agents on the \texttt{warehouse} grid for all evaluated values of $k$ (2, 3, 4, and 5). %\konstantin{Not true. It's only for k=3. Shall I make a correction in text?}\roni{The figure shows otherwise. What am I missing? it's the upper right plot} \konstantin{Dumb me. I was looking at another plot :)}
+For example, \ccbs solved 80\% of problems for 24 agents on the \texttt{warehouse} grid for all evaluated values of $k$ (2, 3, 4, and 5).
 
 
 % Slower than classical 
 Note that state-of-the-art \cbs variants 
 %\konstantin{should not it be 'state-of-the-art'?} \roni{Fixed}
 can find SOC-optimal solutions to classical \mapf problems on similar grids with many more agents. This is expected, since finding SOC-optimal solutions to classical \mapf problems is an easier task than finding SOC-optimal solutions to \mapfr problems, especially when imposing 30 seconds time limit. 
-
-%tough computational constraints, i.e., the 30 seconds time limit, is a much harder task than solving the corresponding classical \mapf problem. hard task. Empirically one can claim that the solution is likely be found by \ccbs only when the number of agents is limited to a magnitude of a dozen. However for certain settings large number of problems with higher number of agents is still solvable. E.g. \ccbs solved 80\% of tasks for 32 agents on \texttt{warehouse} map (for $k=3, 4, 5$).
-
 
 % Increasing k means slower
 Consider now the impact of increasing the neighborhood size, i.e., increasing $k$. 
@@ -1982,24 +1984,14 @@ A possible explanation is that increasing $k$ also allows the agents to find sho
 \subsubsection{The Impact of Grid Connectivity on SOC}
 % SOC
 Increasing $k$ has an additional, desirable effect: it decreases the SOC of the returned solution since increasing $k$ means additional possible move actions per location, which may allow agents to reach their goals earlier. To measure this effect, we computed for every solved \mapfr problem the ratio between the SOC of the returned solution and the SOC for $k=2$. 
-%\roni{Too bad we explain it as a ratio, but display results in percentage. I'd prefer everything as ratios, but this is not important.}\konstantin{I've started re-doing the plots. For \smtccbs they are ready. Will handle \ccbs soon}
 We call this the \emph{SOC gain ratio}. 
 If the SOC gain ratio is, for example, $0.75$, it means that the SOC of the returned solution is smaller that the one for $k=2$ by $25\%$. 
 Figure~\ref{fig:results-ccbs-SOC-grids} shows the SOC gain ratio as box-and-whisker plots, for different values of $k$. Each plot shows the following statistics: minimum, maximum, median (horizontal line inside the box), mean (cross sign inside the box), and first and third quartiles. 
 
-%Figure~\ref{fig:results-ccbs-SOC-grids} plots the average of these ratios for different values of $k$. 
-%shows the average SOC
-%We were also interested in how setting $k$ to different values affects resultant SOC. Indeed, \ccbs is guaranteed to find SOC-optimal solutions for any value of $k$. However, setting the latter to higher values leads to enlarging a set of possible move actions and using these actions one can reach the same individual goal from the same start in less time (compared to $k=2$), which in turn contributes to lowering down the sum-of-costs. Thus, for each task successfully solved by \ccbs for all values of $k$ we computed SOC and then the ratio $SOC_{k=3,4,5}/SOC_{k=2}$. If this ratio is, for example, $0.75$ it means that the resultant solution is better (smaller) that the one for $k=2$ by $25\%$. Figure \ref{fig:results-ccbs-SR-grids} shows these ratios as the box-and-whisker plots. Each plot shows the minimum, the maximum, the median, and the first and third quartiles. 
-
 % Adding $k$ helpful, but only for small k
 As one can see, increasing $k$ indeed decreases SOC. 
-%\roni{Some numeric example - I don't know how to see the average in these plots: help!} \konstantin{We have the numbers in the next paragraph. Won't this be a repetition?}\roni{Below we should show numbers that compare grid types, while here we want numbers that compare SOC for k values. See in the next sentence what I had in mind} 
-For example, in the grid \texttt{room-64-64-8}, the average SOC gain for $k=3, 4$ and 5 is 82.12\%, 79.23\%, and 78.62\%, respectively. %\roni{Maybe add here a decimal point to get a difference between k=4 and k=5? not critical}\konstantin{done}
-%\roni{Can you plug here the X,Y,Z,W values? or a similar statistic?}\konstantin{$X=100\%$ (as we considered $k=2$ case to be $100\%$ by default), $Y=82\%$, $Z=79\%$, $W=79\%$}
+For example, in the grid \texttt{room-64-64-8}, the average SOC gain for $k=3, 4$ and 5 is 82.12\%, 79.23\%, and 78.62\%, respectively.
 Note that the gain, in terms of SOC, exhibits a diminishing return effect. That is, going from $k=3$ to $k=4$ and from $k=4$ to $k=5$ provides less effect on SOC. In fact, in all our experiments going from $k=4$ to $k=5$ yielded a marginal improvement of approximately 1\% in SOC. %\roni{Marginal improvement in which statistics? i.e., is it 1\% improvement in the average? median? quartiles?}\konstantin{In all statistics, as I see from the plots.}
-
-%For example, 
-%in the grid \texttt{room-64-64-8}, the average SOC for $k=2, 3, 4,$ and 5 is X, Y, Z, AND W, respectively. 
 
 
 % Different grids
@@ -2041,17 +2033,13 @@ Figure~\ref{fig:anton-example} illustrates an example of such scenario. An anima
 \end{figure}
 
 
-We compared the performance of \ccbs and E-ICTS~\cite{walker2018extended}, a \mapfr algorithm based on the Increasing Cost Tree Search (ICTS) framework~\cite{sharon2013increasing}. We thank the E-ICTS authors who made their implementation publicly available (\url{https://github.com/thaynewalker/hog2/}\footnote{E-ICTS code used in the experiments was downloaded from the authors' repository at January 2019.}).
+We compared the performance of \ccbs and E-ICTS~\cite{walker2018extended}, a \mapfr algorithm based on the Increasing Cost Tree Search (ICTS) framework~\cite{sharon2013increasing}. We thank the E-ICTS authors who made their implementation publicly available (\url{https://github.com/thaynewalker/hog2}.\footnote{E-ICTS code used in the experiments was downloaded from the authors' repository at January 2019.})
 
 Like \ccbs, E-ICTS  can also handle non-unit edge cost. As for the time dimenstion, E-ICTS handles continuous time by discretizing it according to a minimal wait time parameter $\Delta$ (we set it to be 1/1000 in our experiments). Note that given an accurate unsafe interval detection mechanism, \ccbs handles continuous time directly, and thus can return better solutions than E-ICTS. However, the unsafe interval detection mechanism we implemented for this experiment did, in fact, discretize time with the same level of granularity, and so the comparison to E-ICTS is valid. 
 
-Figure~\ref{fig:ccbs-vs-eicts} shows the success rate of the two algorithms on \texttt{empty} grid with different number of agents and $k=2, 3, 4,$ and 5. The results show that in most cases E-ICTS is outperformed by \ccbs. However for some combinations of $k$ and number of agents E-ICTS solved more instances, e.g. $k=2$ for 10-12 agents or $k=5$ for 6 agents. Note that in our previous work~\cite{andreychuk2019multi} \ccbs was outperformed by E-ICTS on a similar empty map for higher values of $k$. We hypothesize, that the main reason why now it does not hold, is that we used a different \ccbs implementation that is faster than the one used before. Moreover the time limit imposed in the current test (30 seconds) is more strict than before (60 seconds).
-
-%$k=2$ and $k=3$, \ccbs works better in most cases, while E-ICTS outperforms \ccbs for $k=4$ and $k=5$. The reason for this is that as $k$ increases, more actions conflict with each other, resulting in a significantly larger \ct. Developing pruning techniques for such \ct is a topic for future work. We also compared \ccbs to ICTS over larger dragon age maps. The results where that in most cases E-ICTS solved more instances. 
-
-%In all cases, \ccbs founds a solution that is either the same or slightly better than E-ICTS. This is because  \ccbs handles continuous time directly while E-ICTS discretizes it. 
-
-That being said, we note that the conducted evaluation considered different implementations and different algorithmic families, and we do not presume to infer from this set of experiments when each algorithm is better. This is an open question even for classical \mapf.
+Figure~\ref{fig:ccbs-vs-eicts} shows the success rate of the two algorithms on \texttt{empty} grid with different number of agents and $k=2, 3, 4,$ and 5. The results show that in most cases E-ICTS is outperformed by \ccbs. However for some combinations of $k$ and number of agents E-ICTS solved more instances, e.g. $k=2$ for 10-12 agents or $k=5$ for 6 agents.\footnote{Note that in our conference paper on \ccbs~\cite{andreychuk2019multi} we reported that \ccbs was outperformed by E-ICTS on a similar empty map for higher values of $k$. We hypothesize that the better performance of \ccbs now is because we improved our implementation of \ccbs. 
+Moreover the time limit imposed in the experiments reported here was 30 seconds while it was 60 seconds for the conference paper.}
+That being said, we note that the conducted evaluation considered different implementations of E-ICTS and \ccbs, and we do not presume to infer from this set of experiments when each algorithm is better. Identifying which \mapf algorithm to use in which domain is an open question even for classical \mapf.
 
 
 \subsubsection{Roadmap Results}
@@ -2088,10 +2076,9 @@ Observe that the behavior of \ccbs in terms of success rate is similar for the \
 The right-hand side of Figure~\ref{fig:results-ccbs-SR-SOC-roadmaps} shows the average SOC obtained for different number of agents and types of graphs. Here we observe a monotonic impact of graph density on the SOC of the returned solution. The average SOC for \texttt{sparse} is larger than for \texttt{dense} which is larger than the average SOC for \texttt{mega-dense}. 
 This difference in SOC is because %when agents have fewer edges to follow, they have more opportunity to conflict. 
 when the number of edges increases, agents are likely to have more options to reach their goals without substantial spatial detours, which yields lower SOC. 
-Here too we observe diminishing return effect, where increasing the number of edges in the graph yields a smaller advantage as the graph becomes more dense. This can be seen when comparing the SOC of \texttt{dense} and \texttt{mega-dense}. %\roni{Good to give a numeric example.}\konstantin{done. See below.} 
+Here too we observe diminishing return effect, where increasing the number of edges in the graph yields a smaller advantage as the graph becomes more dense. This can be seen when comparing the SOC of \texttt{dense} and \texttt{mega-dense}.
 The SOC for the \texttt{sparse} roadmap is on average $48\%$ larger than for the \texttt{dense} roadmap, and the latter is on average $18\%$ larger than for the \texttt{mega-dense}.
 This suggests that moderately dense roadmap representations of the environment are beneficial when solving \mapfr with \ccbs, as they positively influence the success rate and the advantage in terms of SOC of denser roadmaps is limited.
-%\roni{Modified a bit the last sentence, to address Dor's concern}
 
 \subsection{\smtccbs results}
 
@@ -2162,7 +2149,8 @@ This suggests that moderately dense roadmap representations of the environment a
         %\label{}
     \end{subfigure}%\hspace{0.025\linewidth}%
     
-\caption{The makespan gain for $k=3,4,5$ w.r.t. $k=2$ for \smtccbs on grid maps.\roni{Please make sure the y-axis is the same in all 4 plots, to allow comparison}}
+\caption{The makespan gain for $k=3,4,5$ w.r.t. $k=2$ for \smtccbs on grid maps.}
+%\roni{Please make sure the y-axis is the same in all 4 plots, to allow comparison}} Thanks!
 \label{fig:results-smtcbs-makespan-grids}
 \end{figure*}
 
@@ -2171,30 +2159,11 @@ This suggests that moderately dense roadmap representations of the environment a
 Next, we present our experimental results for \smtccbs. While we evaluated \smtccbs using the same experimental setup as in the \ccbs experiments described above, we intentionally avoid directly comparing \smtccbs and \ccbs. 
 This is because \smtccbs and \ccbs are based on very different implementations, and more importantly are aimed to optimizie different objectives: \ccbs finds SOC-optimal solutions, while \smtccbs finds makespan-optimal solutions. 
 
-%\roni{The above paragraph is interesting, but I'd put it later, after showing the actual results}\pavel{Tried to move, but what ever I did figure stands in place. }
-
 Figure \ref{fig:results-success-rate-smtcbs-grids} depicts the success rate of \smtccbs for grid graphs \texttt{empty}, \texttt{room}, \texttt{warehouse}, and \texttt{den520d}. 
-%The same set of problems as for testing \ccbs has been used ($2^k$ neighborhoods for different $k$, 25 scenarios per number of agents, and timeout of 30 seconds). \roni{This was already said above}
-Plots of different colors correspond to different values of grid connectivity ($k$). Interestingly, the impact of $k$ on success rate depends largely on the map. E.g. setting $k=2$ leads to the best results on the \texttt{empty} grid, but not for the \texttt{room} and \texttt{warehouse} maps. On the latter maps \smtccbs with $k=2$ performed very poorly, while the best results were provided with $k=3$. Moreover on the \texttt{warehouse} map $k=2$ was outperformed by $k=5$ when the number of agents was up to 30, and on the \texttt{room} map -- by $k=4$ for up to 74 agents. Observing this we hypothesize that higher connectivity helps in situations when agents must go through multiple way-points such as 'doors' (for \texttt{room} map) or 'corridors' (for \texttt{warehouse} map), surrounded by large portions of open space. This might be explained by a combination of two factors. First, having highly connected neighborhood could help agents to traverse open spaces using plans with fewer longer actions that is might be easier to find. Second, higher connectivity might help agents to coordinate their passing through the way-point due to better maneuverability before and after the way-point. This role of way points is further supported by the fact that we do not observe better success rate for higher $k$ in the \texttt{empty} map consisting of large single open space without any need to go through any way-point.
-
-%In general, increasing $k$ leads to lower success rate. Problems with $k=5$ are harder to solve than problems with $k=2$ in almost all cases. This is an expected effect illustrating the notable difference in branching factor ($4$ for $k=2$ vs. $32$ for $k=5$). However for some settings, higher values of $k$ may be beneficial. E.g. in \texttt{warehouse} and \texttt{room} setting \smtccbs performance was the best for $k=3$ not $k=2$. Same holds for \ccbs on \texttt{den520d} map for up to 30 agents. For \texttt{room} and \texttt{warehouse} maps \ccbs shows similar performance for $k=2$ and $k=3$. \roni{There is a confusion here. Are we summarizing the results for both planners or for \smtccbs. I think we should do the latter, and relate, where needed, to the trends we observed in \ccbs. E.g., something like ''The results show that \smtccbs is ....... A similar trend was also observed in \ccbs (Figure X).}
-%One explanation of why transition from $k=2$ to $k=3$ increases the success rate for \ccbs in certain cases might be that when $k=3$ the search space for the low-level planner might be shallower, which helps to speedup the search. %\konstantin{Pavel, how to explain this effect for \smtcbs?}.
-%Similarly in \smtccbs, increasing $k$ represents possibility of finding paths consisting of fewer nodes and at the same time for $k=3$ the size of the search space does not increase too much which altogether results in finding a solution more easily than for $k=2$.
+Plots of different colors correspond to different values of grid connectivity ($k$). Interestingly, the impact of $k$ on success rate depends largely on the map. Setting $k=2$ leads to the best results for \texttt{empty} and \texttt{den520d}, but not for \texttt{room} and \texttt{warehouse}. On the latter maps \smtccbs with $k=2$ performed very poorly, while the best results were provided with $k=3$. Moreover, on the \texttt{warehouse} map $k=2$ was outperformed by $k=5$ when the number of agents was up to 30, and on the \texttt{room} map -- by $k=4$ for up to 74 agents. Observing this, we hypothesize that higher connectivity helps in situations when agents must go through multiple way-points such as doors (for \texttt{room} map) or corridors (for \texttt{warehouse} map), surrounded by large portions of open space. This might be explained by a combination of two factors. First, having a highly connected neighborhood could help agents traverse open spaces using plans with fewer longer actions (which exists in higher $k$ values), which might be easier to find. Second, higher connectivity might help agents to coordinate their passing through the way-point due to better maneuverability before and after the way-point. This role of way points is further supported by the fact that we do not observe better success rate for higher $k$ in the \texttt{empty} map consisting of large single open space without any need to go through any way-point.
 
 Relating the \smtccbs results to \ccbs results one can note the following. First, it appears that the performance of \smtccbs is apparently better for \texttt{empty} and \texttt{room} settings, while \ccbs shows better results for \texttt{warehouse} and \texttt{den520d}. One possible explanation for this is that SAT solvers are often good in solving formulae containing certain symmetries or being structured. Such structure could be inherited in the formula from the symmetric structure of the map (\texttt{room}) or from large empty spaces on the map (\texttt{empty}). Apparently, With increasing size of the map (\texttt{den520d}) the performance of \smtccbs decreases proportionally despite the helpful structure.
 Second, \smtccbs was able in numerous cases to solve an instance with $n$ agents while not solving the same instance with $n-1$ agents. Thus, adding extra agents might be beneficial for \smtccbs, while this never happened to \ccbs. We hypothesize that the main reason for \smtccbs to exhibit such behaviour is that adding an agent does not necessarily increase the optimal makespan compared to the instance without the added agent. In such case, \mddrs for the same makespan bound will be of similar size and hence also the resulting formula will not be significantly larger for the instance with the added agent. Therefore underlying formulae for few consecutive numbers of agents could be of similar difficulty eventually enabling the observed fluctuations as it is known that SAT solvers  might intrinsically guess the solution fast for some formulas (corresponding to the instances with more agents in our case) while spend more time on solving other formulas of the similar size (corresponding to the instances with fewer agents in our case).
-
-%in some cases the SAT solver can be faster for a formula resulting from the higher number of agents. 
-
-%This is more likely to happen when the input formula is satisfiable where heuristics and restarts of the SAT solver play a significant role in terms of helping the solver to guess the solution. Moreover the satisfiable formula occur more frequently than the unsatisfiable one in the course of \smtccbs which further supports this hypothesis. 
-
-%Moreover adding an agent does not necessarily increase the optimal makespan compared to the instance without the added agent. In such case, \mddrs for the same makespan bound will be of similar size and hence also the resulting formula will not be significantly larger for the instance with the added agent (\mddr for the added agent will increase the size of the formula). Therefore underlying formulae for few consecutive numbers of agents could be of similar difficulty eventually enabling the observed fluctuations.  
-
-
-%In contrast to the \ccbs success-rate results, \smtccbs success-rate results sometimes show a zig-zag behaviour \roni{Not clear what you mean by zig-zag}. This is caused by the underlying SAT solver whose runtime is not always monotonic w.r.t. the increasing number of agents. In some cases, the SAT solver can be faster for a formula resulting from the higher number of agents. This is more likely to happen in the satisfiable case where heuristics and restarts of the SAT solver play a significant role. The satisfiable case occur more frequently than the unsatisfiable case in the course of \smtccbs.
-
-%Overall the obtained results show that solving \mapfr problems optimally under tough computational constraints, i.e. limited time available for the planner (30 seconds), is a hard task. Empirically one can claim that the solution is likely be found only when the number of agents is limited to a magnitude of a dozen. However for certain settings large number of problems are still solvable. E.g. \smtccbs is able to solve 80\% of tasks for 40 agents on \texttt{room} map (when $k=3$). \ccbs can solve 80\% of tasks for 32 agents on \texttt{warehouse} map (for $k=3, 4, 5$).
-
 
 
 
@@ -2202,21 +2171,13 @@ Second, \smtccbs was able in numerous cases to solve an instance with $n$ agents
 \subsubsection{The Impact of Grid Connectivity on Makespan with \smtccbs}
 Figure \ref{fig:results-smtcbs-makespan-grids} shows the makespan gains of solutions generated by \smtccbs on grid maps.
 
-As we can see, makespan monotonically decreases for increasing $k$ across all types of grid maps as enlarging the neighborhood gives the algorithm opportunity for finding shorter individual plans for agents, i.e. shorter overall makespan.
+As we can see, on average makespan monotonically decreases for increasing $k$ across all types of grid maps as enlarging the neighborhood gives the algorithm opportunity for finding shorter individual plans for agents, i.e. shorter overall makespan.
 The resulting makespan gain seems to be mostly affected by extent of developing the connectivity for higher $k$. Open space in the grid supports higher connectivity while obstacles on the other hand limits it. Results supports this hypothesis, we can observe high makespan gain on \texttt{empty}, \texttt{room}, and \texttt{den520d} maps all with large open spaces while the lowest makespan gain is observed on the \texttt{warehouse} map that can has large obstacles in the middle.
 
-\konstantin{I think this section might be enlarged. There is no relation to CCBS now, may be it's worth adding. Next, it would be nice to explain why in some cases increasing $k$ leads to the same makespan - this can been seen by looking at the upper whisker for \texttt{empty} and \texttt{warehouse} which is $1.0$ (= there is no gain, makespan is the same). This never happened for SOC/CCBS.} \pavel{Yes, true. Makespan is more likely to be the same after the change since it always concerns the longest path.}
-
-Since the makespan is defined as the length of longest temporal plan from temporal plans of individual agents, it is less likely to change than SOC after adding an agent or changing the connectivity of the environment due to higher $k$. This is actually observed in some scenarios for \texttt{empty} and \texttt{warehouse} maps with no makespan gain after increasing $k$ (upper whisker in respective plots in Figure~\ref{fig:results-smtcbs-makespan-grids}).
-
-%\roni{I'd rather have the same format of writing here as above. First, explain the results, i.e., Fig X shows bla bla. Then talk about trends, i.e., ``as can be seen X is better than Y'', and add to each trend a numeric example.}
-
-%\pavel{Bigger formula usually takes more time to solve but not always.}
+Since the makespan is defined as the length of longest temporal plan from temporal plans of individual agents, it is less likely to change than SOC after adding an agent or changing the connectivity of the environment due to higher $k$. This is actually observed in some scenarios for \texttt{empty} and \texttt{warehouse} maps with no makespan gain after increasing $k$ (see the upper whisker in respective plots in Figure~\ref{fig:results-smtcbs-makespan-grids}).
 
 \subsubsection{\smtccbs on Roadmaps}
 Figure \ref{fig:results-smtccbs-SR-Makespan-roadmaps} shows success rate and makespan  results of \smtccbs for roadmaps. The makespan is computed per each number of agents from solution of scenarios solved under the given timeout.
-
-%Roadmaps are especially interesting w.r.t. \smtccbs as here the symmetry of the neighborhood of a position is completely removed. Hence possible generating of a single node in \mddr by different paths is eliminated. Therefore it is expected \mddr will have limited effect in compressing the size of the underlying formulae resulting in higher runtimes of the solver. This expectation is supported by the obtained results.
 
 We can see in Figure \ref{fig:results-smtccbs-SR-Makespan-roadmaps} that success rate of \smtccbs monotonically decreases for all number of agents with increasing the density of the roadmap graph. It case of \smtccbs it is expected, as it is more time consuming to process significantly larger graphs and solving correspondingly larger formulae containing more variables and constraints. The effect of increasing density of edges in case of roadmaps is multiplied by the absence of compression at the level of \mddr as in the roadmaps the symmetry of the neighborhood of a position is completely removed and  a possibility of generating a single node in \mddr by different paths is eliminated.
 
@@ -2267,18 +2228,15 @@ Overall, one again can claim that moderately dense roadmap representations of th
 \toprule
 \multicolumn{1}{c}{}                                           & \multicolumn{3}{c}{Actions} & Agent     &      &   &    \\ \midrule
 \multicolumn{1}{c}{}                                           & N.U.         & Cont.         & Ang. & Vol. & Complete & Opt. & Dist. \\ \midrule
-CBS-CT~\cite{cohen2019optimal} & \cmark   & \xmark & \cmark & \cmark & \cmark & \cmark & \xmark\\
-E-ICTS~\cite{walker2018extended} & \cmark            & \xmark             & \cmark    & \cmark  & \cmark  & \cmark    & \xmark     \\
+CBS-CT~\cite{cohen2019optimal} & \cmark   & \cmark & \cmark & \cmark & \cmark & \cmark & \xmark\\
+E-ICTS~\cite{walker2018extended} & \cmark & \xmark             & \cmark    & \cmark  & \cmark  & \cmark    & \xmark     \\
 AA-SIPP($m$)~\cite{yakovlev2017anyAngle} & \cmark            & \cmark             & \cmark    & \cmark    & \xmark & \xmark    & \xmark     \\
 MCCBS~\cite{li2019multi} & \xmark            & \xmark             & \xmark    & \cmark  & \cmark  & \cmark    & \xmark     \\
 CBS-CL\cite{walker2017using}  & \cmark    & \xmark    & \xmark    & \xmark  & \cmark  & \xmark    & \xmark     \\
 %M*~\cite{wagner2015subdimensional} & \cmark            & \xmark             & \cmark    & \xmark  & \cmark  & \cmark    & \xmark     \\
 MAPF-POST~\cite{honig2016multi,honig2017summary} & \cmark            & \cmark             & \cmark    & \cmark  & \cmark  & \xmark    & \xmark     \\
-\begin{tabular}[c]{@{}r@{}} 
-ORCA~\cite{snape2011hybrid}, ALAN~\cite{godoy2018alan},\\ and dRRT*~\cite{dobson2017scalable}\end{tabular} 
-& \cmark            & \xmark             & \cmark    & \cmark & \xmark   & \xmark    & \cmark     \\
-%TP-SIPPwRT~\cite{LiuAAMAS19}    & \cmark            & \cmark             & \cmark    & \cmark & ?   & \xmark    & \xmark     \\  [[roni: not relevant: this is an algorithm for MAPD]
-\rowcolor{LightCyan}
+ORCA~\cite{snape2011hybrid}, ALAN~\cite{godoy2018alan} & \cmark            & \xmark             & \cmark    & \cmark & \xmark   & \xmark    & \cmark     \\
+dRRT*~\cite{shome2020drrt} & \cmark            & \cmark             & \cmark    & \cmark & \cmark   & \xmark    & \xmark     \\
 \ccbs~\cite{andreychuk2019multi} and \smtccbs~\cite{DBLP:conf/socs/Surynek19} & \cmark            & \cmark             & \cmark    & \cmark & \cmark    & \cmark    & \xmark     \\
  \bottomrule
 \end{tabular}
@@ -2287,14 +2245,13 @@ ORCA~\cite{snape2011hybrid}, ALAN~\cite{godoy2018alan},\\ and dRRT*~\cite{dobson
 \caption{Overview: \ac{MAPF} research beyond the basic setting.}
 \label{tab:related-work}
 \end{table}
-
 % START COPY AND PASTE FROM WORKSHOP PAPER
 
 
 % Some prior work
 %Several prior work considered \mapfrelax some of the simplifying assumptions made by most \ac{MAPF} research. 
- In Section~\ref{sec:limitations}, we discussed two algorithms, CBS-CT~\cite{cohen2019optimal} and E-ICTS~\cite{walker2018extended}, which are most closely related to our work.  
-  However, there exist a vast body of other works that study \mapf beyond its basic, classical, setting. 
+ In Section~\ref{sec:limitations}, we discussed two algorithms, CBS-CT~\cite{cohen2019optimal} and E-ICTS~\cite{walker2018extended}, which are most closely related to our work. Recall that while CBS-CT can allow arbitrary wait durations, they still need to discretize the continuous space the agents' may occupy into tiles.   
+  Beyond these two works, there exist a vast body of other works that study \mapf beyond its basic, classical, setting. 
 Yakovlev and Andreychuk~\shortcite{yakovlev2017anyAngle} proposed AA-SIPP($m$), an any-angle \ac{MAPF} algorithm. 
 %for agents  hat can move along in any angle they choose.  Their algorithm, called AA-SIPP($m$), 
 AA-SIPP($m$) is based on \sipp and adopts a prioritized planning approach. It does not guarantee completeness or optimality. 
@@ -2308,14 +2265,21 @@ Walker et al.~\shortcite{walker2017using} proposed \cbs-CL, a \cbs-based algorit
 \cbs-CL is complete, in the sense that if a solution exists \cbs-CL will find it. However, \cbs-CL does not allow reasoning about continuous time and does not return provably optimal solutions. 
 H{\"o}nig et al.~\shortcite{honig2016multi,honig2017summary} proposed MAPF-POST, which is a post-processing step that adapts a solution to a classical \ac{MAPF} such that it respects a given set of kinematic constraints over the agents' motions. They prove that MAPF-POST can always find a feasible schedule that satisfies the given kinematic constraints, and thus we view MAPF-POST as a complete algorithm. It does not, however, guarantee optimality. 
 
-dRRT* is a sample-based \ac{MAPF} algorithm designed for continuous spaces~\cite{dobson2017scalable}. dRRT* is asymptotically complete and optimal while \ccbs is optimal and complete, and is designed to run over a discrete graph. 
-\konstantin{I re-read a couple of papers on dRRT*. It appears that it samples from the discrete graph, hence the first letter in the algorithm's name is 'd' (discrete). It's hard for me, though, to classify the algorithm correctly using the criteria we use. E.g. I'm not sure that dRRT* handles continuous time.}\roni{FIXED}\konstantin{Not 100\% agree. The last phrase ends with '\ccbs is designed to run over a discrete graph'. Same holds for dRRT* (it is designed to run over a discrete graph), so there is no contrast here.}
-\roni{TODO: Re-visit the above }
+dRRT* is hybrid between a tree-search algorithm and a sampling-based  algorithm~\cite{shome2020drrt}. It runs a tree search over locations sampled in the configuration space. 
+dRRT* is asymptotically complete and optimal, i.e., given enough time it will find an optimal solution. Thus, dRRT* is complete but it is not optimal: a solution will eventually be found if one exists, but its cost might be far from optimal. 
+By contrast, \ccbs is optimal and complete. 
+Note that dRRT* works on a pre-computed probabilistic road maps (PRMs), and thus one may argue that it does not truly plan in continuous space. 
+%\konstantin{I re-read a couple of papers on dRRT*. It appears that it samples from the discrete graph, hence the first letter in the algorithm's name is 'd' (discrete). It's hard for me, though, to classify the algorithm correctly using the criteria we use. E.g. I'm not sure that dRRT* handles continuous time.}\roni{FIXED}\konstantin{Not 100\% agree. The last phrase ends with '\ccbs is designed to run over a discrete graph'. Same holds for dRRT* (it is designed to run over a discrete graph), so there is no contrast here.}
+%\roni{After reading dRRT* more deeply, they say explicitly that they sample the configuration space at some stages of the algorithm.}
 
-ORCA~\cite{van2005prioritized,snape2011hybrid} 
-and ALAN~\cite{godoy2018alan} are fast and distributed \ac{MAPF} algorithms for continuous space, but they do not provide optimality or completeness guarantees, and limit themselves to discrete points in space and time. \konstantin{Btw, ORCA is also meant to work in discrete time: it updates the velocity of an agent each timestep.}\roni{Changed}\konstantin{I will read the paper about ALAN but for ORCA it should be like this: ... and limit themselves to discrete time steps. The thing is that ORCA works in continuous space but in discrete time.}
 
-
+ORCA~\cite{van2005prioritized,snape2011hybrid} is a fast and distributed 
+collision avoidance mechanisms that have been used to navigate multiple agents in continuous space~\cite{snape2010smooth}. 
+It works by computing for each agent in every time step the direction and velocity it should use to avoid the other agents. While fast, using ORCA to navigate multiple agents does not provide any completeness or optimality guarantees. In addition, ORCA requires time to be discretized. 
+ALAN~\cite{godoy2018alan} is a multi-agent navigation algorithm that integrates multi-armed bandits with collision avoidance using ORCA that yields lower cost solutions. 
+Like ORCA, ALAN is not complete or optimal, and requires time to be discretized. 
+%\konstantin{I only now noticed that we call ORCA and ALAN to be MAPF algorithms. This is not 100\% correct, though. They do not PLAN, they just REACT. I.e. at each time step they choose where to move next based on the current observations. Maybe it's not important at the moment.}
+%\roni{I editted the above. (1) added a reference where ORCA is used for multi-agent navigation (2) added text on ALAN. These references are important because they can and have been used to solve exactly the problem of moving agents from their starts to their goals. So, important to keep them in.}
 
 
 Table~\ref{tab:related-work} provides an differential overview of related work on \ac{MAPF} beyond its basic setting. 
@@ -2360,14 +2324,13 @@ In particular, Ma et al.~\shortcite{ma2019lifelong} proposed a MAPD algorithm ca
 % START COPY AND PASTE FROM WORKSHOP PAPER
 
 We proposed two novel algorithms for solving \mapfr, which is a form of \mapf in which time is continuous, actions can have an non-uniform duration, and agents as well as objects have geometric shapes. 
-The first algorithm we presented is called \ccbs. It follows the Conflict Based Search (\cbs) framework~\cite{sharon2015conflict}, but uses an adapted version of \sipp for the low-level search, and a unique type of conflicts and constraints for the high-level search. 
+The first algorithm we presented is called \ccbs. It follows the Conflict Based Search (\cbs) framework~\cite{sharon2015conflict}, but uses an adapted version of Safe Interval Path Planning (\sipp)~\cite{phillips2011sipp} for the low-level search, and a unique type of conflicts and constraints for the high-level search. 
 %We prove that \ccbs is sound, complete, and optimal. 
 We prove that \ccbs is a sound, complete, and returns SOC-optimal solutions. 
 The second algorithm we presented is called \smtccbs. 
 It follows the same approach as \smtcbsO~\cite{DBLP:conf/ijcai/Surynek19} by breaking the given \mapfr problem to a sequence of bounded-cost \mapfr problems. Each of these bounded-cost problems is solved by 
-applying a SAT modulu Theory (\smt) problem solving framework. 
-A propositional skeleton (\ps) is generated and continuously updated until a solution to this \ps represents a valid solution to the given bounded-cost problem. 
-\smtccbs is also sound and complete, and guarantees a makespan-optimal solution is returned. 
+applying a SAT modulu Theory (\smt) problem-solving framework. That is, a propositional skeleton (\ps) is generated and continuously updated until a solution to this \ps represents a valid solution to the given bounded-cost problem. 
+We prove that \smtccbs is also sound and complete, and guarantees a makespan-optimal solution is returned. 
 %We prove that \ccbs is sound, complete, and optimal. 
 To the best of our knowledge, \ccbs and \smtccbs are the first algorithms to provide optimality guarantees for such a general version of \mapf. 
 
@@ -2438,9 +2401,10 @@ In this way, knowledge from the underlying theory is propagated by the conflict 
 
 %\roni{Frankly, I think this example is too detailed, and I'd rather have it in an appendix.} \konstantin{Agree.} \pavel{Agree too.}
 
-\section{Correctness of \musmtccbs}
+\section{Completeness of \musmtccbs}
 \label{app:completeness}
 
+%\konstantin{Why the name of the section says 'correctness'? Shouldn't it be 'Completeness'?} \roni{Fixed}
 In this section, we provide a formal proof for Theorem~\ref{the:bounded-cost-makespan}, which states that \musmtccbs is sound and complete. 
 This means (\textbf{soundness}) every solution returned by \musmtccbs is indeed a solution with makespan equal to or smaller than the makespan bound, 
 and (\textbf{completeness}) if such a solution exists then it will be found. 
@@ -2449,13 +2413,10 @@ Establishing completeness, however, is less trivial and is done below.
 
 
 
-For \musmtccbs to be correct, we require that this set of single-agent plans contains every single-agent plan that \csipp would return given every subset of $\const(\Psi)$. 
+For \musmtccbs to be complete,
+%\konstantin{complete?}, Fixed
+we require that the set of single-agent plans it considers contains every single-agent plan that \csipp would return given every subset of $\const(\Psi)$. 
 To state this more formally, let $\mddr(\mu, \const(\Psi))$ be the set of single-agent plans represented by the \mddr created for $\mu$ and $\const(\Psi)$, and let $\csipp(Const')$ be the single-agent plan created by \csipp given the set of constraints $Const'$. 
-
-\konstantin{Some notation remarks. (1) \ccbs constraints are open from the right side, i.e. $(i, (u, \tov(a)), [t',t'^u))$ not $(i, (u, \tov(a)), [t',t'^u])$. 
-(2) Before in text we denoted \ccbs constraints using $\tuple{}$ not $()$, i.e. $\tuple{i, (u, \tov(a)), [t',t'^u)}$. 
-(3) In text we use $Const$ do denote a set of constraints, but in pseudoce we use $constraints$.}
-\roni{I think this is done, if I missed, just fix it.}
 
 
 \begin{lemma}
@@ -2489,7 +2450,7 @@ The new safe interval for \csipp is designed such that it starts exactly when th
 Therefore, to reach $v$ at time $t^u$ with some action $a_{vu}$ 
 we need to wait at $v$ exactly $t^u-a_{vu}$. 
 An edge corresponding to such a wait action exists in our \mddr, as specified in 
-lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2} \konstantin{I think that the explanation of the second case is too detailed. We can just say that the second case is covered in lines 19-22.}\roni{Maybe you're right, but as it was not easy to me to understand, and it's an appendix in a journal, I let myself go wild. Ok by me if you want to shrink it}. \pavel{I always prefer detailed explanation, even if it is repetitive which is not this case.}
+lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}.
 
 
 \textbf{Induction step.}
@@ -2507,7 +2468,7 @@ lines~\ref{line:generate-mddr:start:wait2}-\ref{line:generate-mddr:end:wait2}
 
 \begin{theorem}
 	\musmtccbs is a complete algorithm for bounded-cost \mapfr. 
-	\label{the:bounded-cost-makespan}
+	\label{the:bounded-cost-makespan-apppendix}
 \end{theorem}
 \begin{proof}
 	There are three outcomes for every iteration of \musmtccbs: (1) the current \ps is not solvable, (2) the solution returned for the current \ps has a conflict, 
